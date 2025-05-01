@@ -1,0 +1,208 @@
+const { generateToken } = require("../middleware/authValidation")
+const User = require("../model/User")
+const { uploadToCloudinary } = require("../service/uploadImage")
+const bcrypt = require('bcryptjs');
+let salt = 10;
+
+
+exports.userProfile = async (req, res) => {
+    const id = req.payload?._id
+    try {
+
+        const result = await User.findById(id).select('-password -__v -role');
+        if (result) {
+            return res.status(200).json({ success: true, msg: "User details", result })
+        }
+        return res.status(404).json({ msg: "User not found", success: false })
+    } catch (error) {
+        console.log("error on userProfile: ", error);
+        return res.status(500).json({ error: error, success: false, msg: error.message })
+    }
+}
+
+
+exports.registorUser = async (req, res) => {
+
+    const name = req.body?.name
+    const email = req.body?.email
+    const mobile = req.body?.mobile
+    const password = req.body?.password
+    const role = req.body?.role
+    const address = req.body?.address
+    const image = req.files?.image
+
+    try {
+        const checkUser = await User.findOne({ $or: [{ email }, { mobile }] });
+        if (checkUser) {
+            return res.status(400).json({ success: false, msg: "Email or Mobile Number already exists" })
+        }
+        const hashedPass = await bcrypt.hash(password, parseInt(salt));
+        if (!hashedPass) {
+            return res.status(400).json({ success: false, msg: "Failed to register!" });
+        }
+
+        /* if (role) {
+            if (role === "admin") {
+                return res.status(400).json({ success: false, msg: "Admin role is not allowed" });
+            }
+        } */
+
+        const user = new User({ name, email, mobile, password: hashedPass, role, address })
+
+        if (image) {
+            let imageUrl = await uploadToCloudinary(image.tempFilePath)
+            user.image = imageUrl
+        }
+        const result = await user.save()
+        // let result = "ok"
+        if (result) {
+            const token = await generateToken(result)
+            return res.status(200).json({ success: true, msg: `User registered successfully`, result, token })
+        }
+        return res.status(400).json({ error: "Failed to register user", success: false, msg: "Failed to register user" })
+    } catch (error) {
+        console.log("error on registorUser: ", error);
+        return res.status(500).json({ error: error, success: false, msg: error.message })
+    }
+}
+
+
+exports.loginEmail = async (req, res) => {
+    const email = req.body?.email
+    const password = req.body?.password
+    try {
+        const checkUser = await User.findOne({ email: email })
+        if (!checkUser) {
+            return res.status(401).json({ error: "Invalid credentials", success: false, msg: "User not found" })
+        }
+        const matchedPass = await bcrypt.compare(password, checkUser.password);
+        if (!matchedPass) {
+            return res.status(401).json({ success: false, msg: "Invalid credentials" })
+        }
+        const token = await generateToken(checkUser)
+        return res.status(200).json({ success: true, msg: "User logged in successfully", token })
+    } catch (error) {
+        console.log("error on loginUser: ", error);
+        return res.status(500).json({ error: error, success: false, msg: error.message })
+    }
+}
+exports.loginMobile = async (req, res) => {
+    const mobile = req.body?.mobile
+    const password = req.body?.password
+    try {
+        const checkUser = await User.findOne({ mobile: mobile })
+        if (!checkUser) {
+            return res.status(401).json({ error: "Invalid credentials", success: false, msg: "User not found" })
+        }
+        const matchedPass = await bcrypt.compare(password, checkUser.password);
+        if (!matchedPass) {
+            return res.status(401).json({ success: false, msg: "Invalid credentials" })
+        }
+        const token = await generateToken(checkUser)
+        return res.status(200).json({ success: true, msg: "User logged in successfully", token })
+    } catch (error) {
+        console.log("error on loginUser: ", error);
+        return res.status(500).json({ error: error, success: false, msg: error.message })
+    }
+}
+
+
+exports.requistOtp = async (req, res) => {
+    const mobile = req.body?.mobile
+    try {
+        const checkUser = await User.findOne({ mobile })
+        if (!checkUser) {
+            return res.status(400).json({ success: false, msg: 'User not found!' })
+        }
+
+        // let result = await urlSendTestOtp(mobile)
+        // console.log("result: ", result);
+
+        if (result) {
+            return res.status(200).json({ success: true, result: "1234", msg: "Otp send successfully 1234" })
+        }
+    } catch (error) {
+        console.log("error on requistOtp: ", error);
+        return res.status(500).json({ error: error, success: false, msg: error.message })
+    }
+}
+
+
+exports.verifyOtp = async (req, res) => {
+    const sessionId = req.body.sessionId
+    const otp = req.body.otp
+    const mobile = req.body?.mobile
+    const fcmToken = req.body?.fcmToken
+    try {
+        const checkUser = await User.findOne({ mobile })
+        if (!checkUser) {
+            return res.status(400).json({ success: false, msg: 'User not found!' })
+        }
+        // let result = await urlVerifyOtp(sessionId, otp)
+        checkUser.fcmToken = fcmToken
+
+        if (otp == '1234') {
+            const token = await generateToken(checkUser)
+            await checkUser.save()
+            return res.status(200).json({ success: true, msg: 'Verification successful', data: "result 1234", token })
+        }
+
+        // checkUser.fcmToken = fcmToken
+        // await checkUser.save()
+        // return res.status(200).json({ success: true, msg: 'Verification successful', data: "result 1234", token })
+        /*  if (result?.Status == 'Success') {
+             const token = await generateToken(checkUser)
+             return res.status(200).json({ success: true, msg: 'Verification successful', data: result, token })
+         } */
+        return res.status(400).json({ success: false, msg: 'Invalid OTP' })
+    } catch (error) {
+        console.log("error on verifyOtp: ", error);
+        return res.status(500).json({ error: error, success: false, msg: error.message })
+    }
+}
+
+
+
+exports.login = async (req, res) => {
+    const mobile = req.body?.mobile
+    try {
+        let checkUser = await User.findOne({ mobile })
+        let isFirst = false
+        if (!checkUser) {
+            isFirst = true
+            checkUser = new User({ mobile })
+            // return res.status(401).json({ error: "Invalid credentials", success: false, msg: "User not found" })
+        }
+        // checkUser.fcmToken = req.body?.fcmToken
+        await checkUser.save()
+        // const token = await generateToken(checkUser)
+        return res.status(200).json({ success: true, msg: "User logged in successfully", isFirst, otp: "1234" })
+    } catch (error) {
+        console.log("error on login: ", error);
+        return res.status(500).json({ error: error, success: false, msg: error.message })
+    }
+}
+
+
+exports.userProfileComplete = async (req, res) => {
+    const id = req.payload?._id
+    const name = req.body?.name
+    const email = req.body?.email
+    const address = req.body?.address
+
+    try {
+        const checkUser = await User.findById(id)
+        if (!checkUser) {
+            return res.status(400).json({ success: false, msg: 'User not found!' })
+        }
+        if (name) checkUser.name = name
+        if (email) checkUser.email = email
+        if (address) checkUser.address = address
+
+        await checkUser.save()
+        return res.status(200).json({ success: true, msg: 'Profile updated successfully', result: checkUser })
+    } catch (error) {
+        console.log("error on userProfileComplete: ", error);
+        return res.status(500).json({ error: error, success: false, msg: error.message })
+    }
+}
