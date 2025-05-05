@@ -13,12 +13,11 @@ const UserSchema = new mongoose.Schema({
     password: {
         type: String
     },
-    coordinates: {
-        lat: Number,
-        lng: Number
-    },
     address: {
         type: String,
+    },
+    dob: {
+        type: String
     },
     role: {
         type: String,
@@ -39,6 +38,73 @@ const UserSchema = new mongoose.Schema({
     },
     fcmToken: {
         type: String
+    },
+    referCode: {
+        type: String,
+        unique: true
+    },
+    applyReferalCode: {
+        type: String,
+    },
+    following: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    follwer: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    blockUser: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    likes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    instagram: {
+        isLinked: {
+            type: Boolean,
+            default: false
+        },
+        authToken: {
+            type: String
+        }
+    },
+    facebook: {
+        isLinked: {
+            type: Boolean,
+            default: false
+        },
+        authToken: {
+            type: String
+        }
+    },
+    twitter: {
+        isLinked: {
+            type: Boolean,
+            default: false
+        },
+        authToken: {
+            type: String
+        }
+    },
+    linkedIn: {
+        isLinked: {
+            type: Boolean,
+            default: false
+        },
+        authToken: {
+            type: String
+        }
+    },
+    location: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Location'
+    },
+    bankAccount: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'BankAccount'
     }
 }, { timestamps: true })
 const User = mongoose.model('User', UserSchema)

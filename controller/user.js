@@ -2,14 +2,15 @@ const { generateToken } = require("../middleware/authValidation")
 const User = require("../model/User")
 const { uploadToCloudinary } = require("../service/uploadImage")
 const bcrypt = require('bcryptjs');
+const { generateReferralCode } = require("../utils/referCode");
+const Location = require("../model/Location");
 let salt = 10;
 
 
 exports.userProfile = async (req, res) => {
     const id = req.payload?._id
     try {
-
-        const result = await User.findById(id).select('-password -__v -role');
+        const result = await User.findById(id).select('-password -__v -role').populate("location").populate("bankAccount")
         if (result) {
             return res.status(200).json({ success: true, msg: "User details", result })
         }
@@ -170,13 +171,14 @@ exports.login = async (req, res) => {
         let isFirst = false
         if (!checkUser) {
             isFirst = true
-            checkUser = new User({ mobile })
+            const referCode = generateReferralCode(6)
+            checkUser = new User({ mobile, referCode })
             // return res.status(401).json({ error: "Invalid credentials", success: false, msg: "User not found" })
         }
         // checkUser.fcmToken = req.body?.fcmToken
         await checkUser.save()
         // const token = await generateToken(checkUser)
-        return res.status(200).json({ success: true, msg: "User logged in successfully", isFirst, otp: "1234" })
+        return res.status(200).json({ success: true, msg: "OTP sent to your mobile number successfully.", isFirst, otp: "1234" })
     } catch (error) {
         console.log("error on login: ", error);
         return res.status(500).json({ error: error, success: false, msg: error.message })
@@ -185,19 +187,57 @@ exports.login = async (req, res) => {
 
 
 exports.userProfileComplete = async (req, res) => {
+    console.log("req.boydy: ", req.body);
+
     const id = req.payload?._id
     const name = req.body?.name
     const email = req.body?.email
     const address = req.body?.address
+    const dob = req.body?.dob
+    const applyReferalCode = req.body?.referCode
+    const lat = req.body?.lat
+    const lng = req.body?.lng
 
     try {
         const checkUser = await User.findById(id)
         if (!checkUser) {
             return res.status(400).json({ success: false, msg: 'User not found!' })
         }
+        const checkLocation = await Location.findOne({ user: id })
+        if (!checkLocation) {
+            const location = new Location({
+                user: id,
+                name,
+                address,
+                location: {
+                    type: 'Point',
+                    coordinates: [lng, lat] // Order: [longitude, latitude]
+                }
+            });
+            checkUser.location = location._id
+            await location.save()
+        }
+
         if (name) checkUser.name = name
         if (email) checkUser.email = email
         if (address) checkUser.address = address
+        if (dob) checkUser.dob = dob
+        if (req.body?.isFirst) {
+            if (applyReferalCode) checkUser.applyReferalCode = applyReferalCode
+        }
+
+        const updatedData = {
+            name,
+            address,
+            location: {
+                type: 'Point',
+                coordinates: [lng, lat] // Always [longitude, latitude]
+            }
+        };
+
+        await Location.findByIdAndUpdate(id, updatedData, { new: true });
+
+
 
         await checkUser.save()
         return res.status(200).json({ success: true, msg: 'Profile updated successfully', result: checkUser })
