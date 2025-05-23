@@ -21,7 +21,7 @@ const UserSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['admin', 'user', 'vendor'],
+        enum: ['admin', 'user', 'vendor'], //vendor means brand
         default: 'user'
     },
     lastActivity: {
@@ -42,6 +42,10 @@ const UserSchema = new mongoose.Schema({
     referCode: {
         type: String,
         unique: true
+    },
+    brand: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Brand'
     },
     applyReferalCode: {
         type: String,
@@ -105,6 +109,14 @@ const UserSchema = new mongoose.Schema({
     bankAccount: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'BankAccount'
+    },
+    gst: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Gst'
+    },
+    workHour: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'WorkHours'
     }
 }, { timestamps: true })
 const User = mongoose.model('User', UserSchema)

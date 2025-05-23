@@ -5,22 +5,35 @@ const LocationSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
+    brand: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Brand'
+    },
     name: {
         type: String
     },
     address: {
         type: String
     },
+    state: {
+        type: String
+    },
+    city: {
+        type: String
+    },
+    pinCode: {
+        type: String
+    },
     location: {
         type: {
             type: String,
             enum: ['Point'],
-            required: true,
+            // required: true,
             default: 'Point'
         },
         coordinates: {
             type: [Number], // [longitude, latitude]
-            required: true
+            // required: true
         }
     }
 }, { timestamps: true });

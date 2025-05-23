@@ -50,3 +50,18 @@ exports.verifyToken = async (req, res, next) => {
         return res.status(500).json({ err: error.message, error, success: false })
     }
 }
+
+// middleware/checkRole.js
+exports.checkRole = (...allowedRoles) => {
+    // console.log("allowedRoles: ", allowedRoles);
+    
+    return (req, res, next) => {
+        const user = req.payload; // this is set in verifyToken
+
+        if (!user || !allowedRoles.includes(user.role)) {
+            return res.status(403).json({ success: false, message: 'Forbidden: You do not have permission to perform this action.' });
+        }
+
+        next();
+    };
+};
