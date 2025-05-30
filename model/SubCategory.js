@@ -13,6 +13,10 @@ const SubCategorySchema = new mongoose.Schema({
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category'
+    },
+    type: {
+        type: String,
+        enum: ['web', 'android', 'ios']
     }
 }, { timestamps: true })
 const SubCategory = mongoose.model('SubCategory', SubCategorySchema)

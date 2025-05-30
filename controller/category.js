@@ -46,14 +46,15 @@ exports.addCategory = async (req, res) => {
     const firstName = req.body?.firstName
     const lastName = req.body?.lastName
     const image = req.files?.image
+    const type = req.files?.type
     try {
         // const checkCategory = await Category.findOne({ $or: [{ firstName }, { lastName }] });
         // const checkCategory = await Category.findOne({ firstName }, { lastName });
-        const checkCategory = await Category.findOne({ $and: [{ firstName }, { lastName }] });
+        const checkCategory = await Category.findOne({ $and: [{ firstName }, { lastName }, { type }] });
         if (checkCategory) {
             return res.status(400).json({ success: false, msg: "Category already exists" })
         }
-        const category = new Category({ firstName, lastName })
+        const category = new Category({ firstName, lastName, type })
         if (image) {
             let imageUrl = await uploadToCloudinary(image.tempFilePath)
             user.image = imageUrl
@@ -71,6 +72,7 @@ exports.updateCategory = async (req, res) => {
     const firstName = req.body?.firstName
     const lastName = req.body?.lastName
     const image = req.files?.image
+    const type = req.files?.type
     try {
         const checkCategory = await Category.findById(id)
         if (!checkCategory) {
@@ -78,6 +80,7 @@ exports.updateCategory = async (req, res) => {
         }
         if (firstName) checkCategory.firstName = firstName
         if (lastName) checkCategory.lastName = lastName
+        if (type) checkCategory.type = type
         if (image) {
             let imageUrl = await uploadToCloudinary(image.tempFilePath)
             if (checkCategory?.image) {

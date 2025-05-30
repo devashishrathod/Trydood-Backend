@@ -9,6 +9,10 @@ const CategorySchema = new mongoose.Schema({
     },
     image: {
         type: String
+    },
+    type: {
+        type: String,
+        enum: ['web', 'android', 'ios']
     }
 }, { timestamps: true })
 const Category = mongoose.model('Category', CategorySchema)

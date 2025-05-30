@@ -83,12 +83,13 @@ exports.addSubCategory = async (req, res) => {
     const lastName = req.body?.lastName
     const image = req.files?.image
     const category = req.body?.category
+    const type = req.body?.type
     try {
-        const checkCategory = await SubCategory.findOne({ $and: [{ firstName }, { lastName }] });
+        const checkCategory = await SubCategory.findOne({ $and: [{ firstName }, { lastName }, { type }] });
         if (checkCategory) {
             return res.status(400).json({ success: false, msg: "Sub Category already exists" })
         }
-        const subCategory = new SubCategory({ firstName, lastName })
+        const subCategory = new SubCategory({ firstName, lastName, type })
         if (image) {
             let imageUrl = await uploadToCloudinary(image.tempFilePath)
             subCategory.image = imageUrl
@@ -108,6 +109,7 @@ exports.updateSubCategory = async (req, res) => {
     const lastName = req.body?.lastName
     const image = req.files?.image
     const category = req.body?.category
+    const type = req.body?.type
     try {
         const checkCategory = await SubCategory.findById(id)
         if (!checkCategory) {
@@ -116,6 +118,7 @@ exports.updateSubCategory = async (req, res) => {
         if (firstName) checkCategory.firstName = firstName
         if (lastName) checkCategory.lastName = lastName
         if (category) checkCategory.category = category
+        if (type) checkCategory.type = type
         if (image) {
             let imageUrl = await uploadToCloudinary(image.tempFilePath)
             if (checkCategory?.image) {
