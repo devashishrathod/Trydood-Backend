@@ -118,7 +118,7 @@ exports.requistOtp = async (req, res) => {
 
         // let result = await urlSendTestOtp(mobile)
         // console.log("result: ", result);
-
+        let result
         if (result) {
             return res.status(200).json({ success: true, result: "1234", msg: "Otp send successfully 1234" })
         }
@@ -236,8 +236,6 @@ exports.userProfileComplete = async (req, res) => {
         };
 
         await Location.findByIdAndUpdate(id, updatedData, { new: true });
-
-
 
         await checkUser.save()
         return res.status(200).json({ success: true, msg: 'Profile updated successfully', result: checkUser })
