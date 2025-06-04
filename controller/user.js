@@ -142,7 +142,8 @@ exports.verifyOtp = async (req, res) => {
         // let result = await urlVerifyOtp(sessionId, otp)
         checkUser.fcmToken = fcmToken
 
-        if (otp == '1234') {
+        if (otp == '123456') {
+            checkUser.isMobileVerify = true
             const token = await generateToken(checkUser)
             await checkUser.save()
             return res.status(200).json({ success: true, msg: 'Verification successful', data: "result 1234", token })
@@ -233,7 +234,7 @@ exports.userProfileComplete = async (req, res) => {
                 type: 'Point',
                 coordinates: [lng, lat] // Always [longitude, latitude]
             }
-        };
+        }
 
         await Location.findByIdAndUpdate(id, updatedData, { new: true });
 
@@ -241,6 +242,46 @@ exports.userProfileComplete = async (req, res) => {
         return res.status(200).json({ success: true, msg: 'Profile updated successfully', result: checkUser })
     } catch (error) {
         console.log("error on userProfileComplete: ", error);
+        return res.status(500).json({ error: error, success: false, msg: error.message })
+    }
+}
+
+
+exports.verifyVendorMobileNumber = async (req, res) => {
+    const mobile = req.body?.mobile
+
+    try {
+        const checkVendor = await User.findOne({ mobile })
+        if (checkVendor) {
+            return res.status(400).json({ msg: "Mobile number already exists!", success: false })
+        }
+        const result = await User.create({ mobile, role: "vendor" })
+        if (result) {
+            return res.status(200).json({ msg: "OTP sent to your whatsapp.", success: true })
+        }
+        return res.status(400).json({ msg: "Failed to verify mobile number!", success: false })
+    } catch (error) {
+        console.log("error on verifyVendorMobileNumber: ", error);
+        return res.status(500).json({ error: error, success: false, msg: error.message })
+    }
+}
+
+exports.verifyOTPVendorMobile = async (req, res) => {
+    const mobile = req.body?.mobile
+    const otp = req.body?.otp
+    try {
+        const checkUser = await User.findOne({ mobile })
+        if (!checkUser) {
+            return res.status({ msg: "No register mobile number found!", success: false })
+        }
+        if (otp == '123456') {
+            checkUser.isMobileVerify = true
+            await checkUser.save()
+            return res.status(200).json({ msg: "Your OTP verify successfully.", success: true })
+        }
+        return res.status(400).json({ msg: "Faild to verify OTP.", success: false })
+    } catch (error) {
+        console.log("error on verifyOTPVendorMobile: ", error);
         return res.status(500).json({ error: error, success: false, msg: error.message })
     }
 }

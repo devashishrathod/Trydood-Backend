@@ -21,8 +21,12 @@ const UserSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['admin', 'user', 'vendor'], //vendor means brand
+        enum: ['admin', 'user', 'vendor', 'sell'], //vendor means brand
         default: 'user'
+    },
+    isMobileVerify: {
+        type: Boolean,
+        default: false
     },
     lastActivity: {
         type: Date,
@@ -117,6 +121,10 @@ const UserSchema = new mongoose.Schema({
     workHour: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'WorkHours'
+    },
+    referUser: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     }
 }, { timestamps: true })
 const User = mongoose.model('User', UserSchema)

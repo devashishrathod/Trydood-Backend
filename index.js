@@ -10,6 +10,7 @@ const categoryRouter = require('./router/category');
 const subCatRouter = require('./router/subCategory');
 const brandRouter = require('./router/brand');
 const vendorRouter = require('./router/vendor');
+const sellRouter = require('./router/sell');
 
 
 db()
@@ -24,5 +25,6 @@ app.use('/api/v1/categories', categoryRouter)
 app.use('/api/v1/subCategories', subCatRouter)
 app.use('/api/v1/brand', brandRouter)
 app.use('/api/v1/vendors', vendorRouter)
+app.use('/api/v1/selles', sellRouter)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
