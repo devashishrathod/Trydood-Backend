@@ -15,6 +15,12 @@ const LocationSchema = new mongoose.Schema({
     address: {
         type: String
     },
+    area: {
+        type: String
+    },
+    landMark: {
+        type: String
+    },
     state: {
         type: String
     },

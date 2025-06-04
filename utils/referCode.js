@@ -7,3 +7,11 @@ exports.generateReferralCode = (roud) => {
     }
     return referralCode;
 }
+
+
+exports.getEndDate = (startDate, durationInMonths) => {
+    const start = new Date(startDate);
+    const end = new Date(start);
+    end.setMonth(end.getMonth() + durationInMonths);
+    return end;
+}

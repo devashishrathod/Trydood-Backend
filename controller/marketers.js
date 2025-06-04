@@ -1,9 +1,18 @@
-import User from "../model/User"
+/* import User from "../model/User"
 import { generateReferralCode } from "../utils/referCode"
+ */
+
+const User = require("../model/User");
+const { generateReferralCode } = require("../utils/referCode");
 
 
 
-export const addMarketPerson = async (req, res) => {
+
+/* export const addMarketPerson = async (req, res) => {
+    
+}; */
+
+exports.addMarketPerson = async (req, res) => {
     const name = req.body?.name;
     const email = req.body?.email;
     const mobile = req.body?.mobile;
@@ -25,4 +34,4 @@ export const addMarketPerson = async (req, res) => {
         console.log("error on addMarketPerson: ", error);
         return res.status(500).json({ error: error, success: false, msg: error.message });
     }
-};
+}

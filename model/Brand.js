@@ -26,6 +26,12 @@ const BrandSchema = new mongoose.Schema({
     whatsappNumber: {
         type: Number
     },
+    companyName: {
+        type: String
+    },
+    pan: {
+        type: String
+    },
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category'
@@ -50,11 +56,23 @@ const BrandSchema = new mongoose.Schema({
         ref: 'Gst'
     },
     marketPermission: {
-        type: Boolean
+        type: Boolean,
+        default: true
     },
     isActive: {
         type: Boolean,
         default: true
+    },
+    referApply: {
+        type: String
+    },
+    subscribed: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Subscribed'
+    },
+    isSubscribed: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true })
 const Brand = mongoose.model('Brand', BrandSchema)

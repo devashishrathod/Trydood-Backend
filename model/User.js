@@ -125,6 +125,14 @@ const UserSchema = new mongoose.Schema({
     referUser: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
+    },
+    subscribed: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Subscribed'
+    },
+    isSubscribed: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true })
 const User = mongoose.model('User', UserSchema)
