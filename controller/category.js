@@ -57,7 +57,7 @@ exports.addCategory = async (req, res) => {
         const category = new Category({ firstName, lastName, type })
         if (image) {
             let imageUrl = await uploadToCloudinary(image.tempFilePath)
-            user.image = imageUrl
+            category.image = imageUrl
         }
         const result = await category.save()
         return res.status(200).json({ success: true, msg: "Category added successfully.", result })

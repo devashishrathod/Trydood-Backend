@@ -255,7 +255,7 @@ exports.verifyVendorMobileNumber = async (req, res) => {
         if (checkVendor) {
             return res.status(400).json({ msg: "Mobile number already exists!", success: false })
         }
-        const result = await User.create({ mobile, role: "vendor" })
+        const result = await User.create({ mobile, role: "vendor", referCode: generateReferralCode(6) })
         if (result) {
             return res.status(200).json({ msg: "OTP sent to your whatsapp.", success: true })
         }

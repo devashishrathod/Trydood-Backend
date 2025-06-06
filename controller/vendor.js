@@ -1,6 +1,7 @@
 const { generateToken } = require("../middleware/authValidation")
 const Brand = require("../model/Brand")
 const Gst = require("../model/Gst")
+const Location = require("../model/Location")
 const User = require("../model/User")
 const WorkHours = require("../model/WorkHours")
 
@@ -20,7 +21,7 @@ exports.registerVendor = async (req, res) => {
     try {
         const checkUser = await User.findOne({ mobile, role: 'vendor' })
         if (!checkUser) {
-            return res.status(404).json({ msg: "No register mobile number found!", success: false })
+            return res.status(404).json({ msg: "No register mobile number found or verify your mobile number", success: false })
         }
         const checkReferUser = await User.findOne({ referCode })
         if (!checkReferUser) {
@@ -28,6 +29,12 @@ exports.registerVendor = async (req, res) => {
         }
         if (!checkUser.isMobileVerify) {
             return res.status(400).json({ msg: "Please verify your mobile number first.", success: false })
+        }
+
+        // const checkBrand = await Brand.findOne({ user: checkUser?._id, mobile })
+        const checkBrand = await Brand.findOne({ $or: [{ user: checkUser?._id }, { mobile }] });
+        if (checkBrand) {
+            return res.status(400).json({ msg: "Brand already exists!", success: false })
         }
 
         checkUser.email = companyEmail
@@ -39,7 +46,7 @@ exports.registerVendor = async (req, res) => {
         await checkUser.save()
 
         const token = await generateToken(checkUser)
-        return res.status(200).json({ msg: "Vendor registered successfully.", success: true, token })
+        return res.status(200).json({ msg: "Vendor registered successfully.", success: true, token, result: brand })
     } catch (error) {
         console.log("error on registerVendor: ", error);
         return res.status(500).json({ error: error, success: false, msg: error.message })

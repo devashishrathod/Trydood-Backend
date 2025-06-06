@@ -21,7 +21,7 @@ const UserSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['admin', 'user', 'vendor', 'sell'], //vendor means brand
+        enum: ['admin', 'user', 'vendor', 'marketer'], //vendor means brand
         default: 'user'
     },
     isMobileVerify: {
@@ -125,6 +125,10 @@ const UserSchema = new mongoose.Schema({
     referUser: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
+    },
+    isActive: {
+        type: Boolean,
+        default: true
     },
     subscribed: {
         type: mongoose.Schema.Types.ObjectId,

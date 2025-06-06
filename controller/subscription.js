@@ -1,6 +1,7 @@
 const Brand = require("../model/Brand");
 const Subscribed = require("../model/Subscribed");
 const Subscription = require("../model/Subscription");
+const User = require("../model/User");
 const { getEndDate } = require("../utils/referCode");
 
 
