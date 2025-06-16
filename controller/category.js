@@ -24,12 +24,17 @@ exports.getAllCategory = async (req, res) => {
 }
 
 
-exports.getCategoryPagination = async (req, res) => {
+/* exports.getCategoryPagination = async (req, res) => {
     const page = parseInt(req?.query?.page)
     const limit = parseInt(req?.query?.limit)
     const skip = (page - 1) * limit
+    const type = req?.query?.type
     try {
-        const result = await Category.find().sort({ createdAt: -1 }).skip(skip).limit(limit)
+        let query = {}
+        if (type) {
+            query = { type: type }
+        }
+        const result = await Category.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit)
         const totalDocuments = await Category.countDocuments()
         const totalPages = Math.ceil(totalDocuments / limit);
         if (result) {
@@ -40,21 +45,83 @@ exports.getCategoryPagination = async (req, res) => {
         console.log("error on getCategoryPagination: ", error);
         return res.status(500).json({ error: error, success: false, msg: error.message })
     }
+} */
+
+exports.getCategoryPagination = async (req, res) => {
+    const page = parseInt(req?.query?.page) || 1;
+    const limit = parseInt(req?.query?.limit) || 10;
+    const skip = (page - 1) * limit;
+    const type = req?.query?.type;
+    const search = req?.query?.search;
+
+    // console.log("req.query: ", req.query);
+
+
+    try {
+        let matchStage = {};
+        if (type) {
+            matchStage.type = type;
+        }
+        if (search) {
+            matchStage.$or = [
+                { firstName: { $regex: search, $options: 'i' } },
+                { lastName: { $regex: search, $options: 'i' } },
+                { name: { $regex: search, $options: 'i' } },
+            ];
+        }
+
+        const aggregationPipeline = [
+            { $match: matchStage },
+            { $sort: { createdAt: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+            {
+                $lookup: {
+                    from: 'subcategories', // collection name in MongoDB
+                    localField: '_id',
+                    foreignField: 'category',
+                    as: 'subCategories'
+                }
+            },
+            {
+                $addFields: {
+                    subCategoryCount: { $size: '$subCategories' }
+                }
+            },
+            {
+                $project: {
+                    subCategories: 0 // optionally remove full subcategory array
+                }
+            }
+        ];
+
+        const result = await Category.aggregate(aggregationPipeline);
+
+        const totalDocuments = await Category.countDocuments(matchStage);
+        const totalPages = Math.ceil(totalDocuments / limit);
+
+        return res.status(200).json({ success: true, msg: "Category details", result, pagination: { totalDocuments, totalPages, currentPage: page, limit } });
+    } catch (error) {
+        console.log("error on getCategoryPagination: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
 }
+
 
 exports.addCategory = async (req, res) => {
     const firstName = req.body?.firstName
     const lastName = req.body?.lastName
+    const name = req.body?.name
     const image = req.files?.image
     const type = req.files?.type
     try {
         // const checkCategory = await Category.findOne({ $or: [{ firstName }, { lastName }] });
         // const checkCategory = await Category.findOne({ firstName }, { lastName });
-        const checkCategory = await Category.findOne({ $and: [{ firstName }, { lastName }, { type }] });
+        const checkCategory = await Category.findOne({ $and: [{ name }, { type }] });
         if (checkCategory) {
             return res.status(400).json({ success: false, msg: "Category already exists" })
         }
-        const category = new Category({ firstName, lastName, type })
+        const category = new Category({ firstName, lastName, name, type })
         if (image) {
             let imageUrl = await uploadToCloudinary(image.tempFilePath)
             category.image = imageUrl
@@ -71,6 +138,7 @@ exports.updateCategory = async (req, res) => {
     const id = req.params?.id
     const firstName = req.body?.firstName
     const lastName = req.body?.lastName
+    const name = req.body?.name
     const image = req.files?.image
     const type = req.files?.type
     try {
@@ -80,6 +148,7 @@ exports.updateCategory = async (req, res) => {
         }
         if (firstName) checkCategory.firstName = firstName
         if (lastName) checkCategory.lastName = lastName
+        if (name) checkCategory.name = name
         if (type) checkCategory.type = type
         if (image) {
             let imageUrl = await uploadToCloudinary(image.tempFilePath)

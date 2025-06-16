@@ -7,6 +7,9 @@ const SubCategorySchema = new mongoose.Schema({
     lastName: {
         type: String
     },
+    name: {
+        type: String
+    },
     image: {
         type: String
     },
