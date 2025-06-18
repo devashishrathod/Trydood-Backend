@@ -113,7 +113,10 @@ exports.addCategory = async (req, res) => {
     const lastName = req.body?.lastName
     const name = req.body?.name
     const image = req.files?.image
-    const type = req.files?.type
+    const type = req.body?.type
+
+    // console.log("type: ", type);
+
     try {
         // const checkCategory = await Category.findOne({ $or: [{ firstName }, { lastName }] });
         // const checkCategory = await Category.findOne({ firstName }, { lastName });
@@ -161,6 +164,23 @@ exports.updateCategory = async (req, res) => {
         return res.status(200).json({ success: true, msg: "Category updated successfully.", result })
     } catch (error) {
         console.log("error on updateCategory: ", error);
+        return res.status(500).json({ error: error, success: false, msg: error.message })
+    }
+}
+
+exports.updateStatus = async (req, res) => {
+    const id = req.params?.id
+    try {
+        const checkCategory = await Category.findById(id)
+        if (!checkCategory) {
+            return res.status(400).json({ success: false, msg: "Category not found" })
+        }
+        checkCategory.isActive = !checkCategory.isActive
+        const result = await checkCategory.save()
+
+        return res.status(200).json({ success: true, msg: "Category status updated successfully.", result })
+    } catch (error) {
+        console.log("error on updateStatus: ", error);
         return res.status(500).json({ error: error, success: false, msg: error.message })
     }
 }

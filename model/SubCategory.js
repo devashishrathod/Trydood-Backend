@@ -20,6 +20,10 @@ const SubCategorySchema = new mongoose.Schema({
     type: {
         type: String,
         enum: ['web', 'android', 'ios']
+    },
+    isActive: {
+        type: Boolean,
+        default: true
     }
 }, { timestamps: true })
 const SubCategory = mongoose.model('SubCategory', SubCategorySchema)

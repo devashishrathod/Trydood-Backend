@@ -1,6 +1,6 @@
 const express = require('express')
 const { verifyToken, checkRole } = require('../middleware/authValidation')
-const { getAllSubCategory, getSubCategoryPagination, subCategoryByCategoryPagination, subCategoryByCategory, addSubCategory, updateSubCategory, deleteSubCategory } = require('../controller/subCategory')
+const { getAllSubCategory, getSubCategoryPagination, subCategoryByCategoryPagination, subCategoryByCategory, addSubCategory, updateSubCategory, deleteSubCategory, updateStatus } = require('../controller/subCategory')
 const subCatRouter = express.Router()
 
 
@@ -13,6 +13,7 @@ subCatRouter.get('/category/:id', subCategoryByCategory)
 
 subCatRouter.post('/add', verifyToken, checkRole('admin'), addSubCategory)
 subCatRouter.put('/update/:id', verifyToken, checkRole('admin'), updateSubCategory)
+subCatRouter.put('/update/status/:id', verifyToken, checkRole('admin'), updateStatus)
 subCatRouter.delete('/delete/:id', verifyToken, checkRole('admin'), deleteSubCategory)
 
 module.exports = subCatRouter

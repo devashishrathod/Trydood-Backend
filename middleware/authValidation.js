@@ -54,7 +54,7 @@ exports.verifyToken = async (req, res, next) => {
 // middleware/checkRole.js
 exports.checkRole = (...allowedRoles) => {
     // console.log("allowedRoles: ", allowedRoles);
-    
+
     return (req, res, next) => {
         const user = req.payload; // this is set in verifyToken
 

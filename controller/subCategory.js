@@ -137,6 +137,23 @@ exports.updateSubCategory = async (req, res) => {
     }
 }
 
+exports.updateStatus = async (req, res) => {
+    const id = req.params?.id
+    try {
+        const checkCategory = await SubCategory.findById(id)
+        if (!checkCategory) {
+            return res.status(400).json({ success: false, msg: "Sub Category not found" })
+        }
+        checkCategory.isActive = !checkCategory.isActive
+        const result = await checkCategory.save()
+
+        return res.status(200).json({ success: true, msg: "Sub Category status updated successfully.", result })
+    } catch (error) {
+        console.log("error on updateStatus: ", error);
+        return res.status(500).json({ error: error, success: false, msg: error.message })
+    }
+}
+
 exports.deleteSubCategory = async (req, res) => {
     const id = req?.params?.id
     try {

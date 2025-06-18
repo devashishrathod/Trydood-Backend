@@ -16,6 +16,10 @@ const CategorySchema = new mongoose.Schema({
     type: {
         type: String,
         enum: ['web', 'android', 'ios']
+    },
+    isActive: {
+        type: Boolean,
+        default: true
     }
 }, { timestamps: true })
 const Category = mongoose.model('Category', CategorySchema)
