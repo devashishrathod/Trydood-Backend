@@ -1,16 +1,13 @@
 const mongoose = require('mongoose')
 
-const ApplicationHomeSchema = new mongoose.Schema({
+const DealOfCategorySchema = new mongoose.Schema({
     image: {
         type: String
     },
-    title: {
-        type: String,
-    },
-    header: {
+    name: {
         type: String
     },
-    description: {
+    title: {
         type: String
     },
     type: {
@@ -20,5 +17,5 @@ const ApplicationHomeSchema = new mongoose.Schema({
     }
 }, { timestamps: true })
 
-const ApplicationHome = mongoose.model('ApplicationHome', ApplicationHomeSchema)
-module.exports = ApplicationHome
+const DealOfCategory = mongoose.model('DealOfCategory', DealOfCategorySchema)
+module.exports = DealOfCategory

@@ -15,7 +15,8 @@ const CategorySchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['web', 'android', 'ios']
+        enum: ['web', 'android', 'ios'],
+        default: 'web'
     },
     isActive: {
         type: Boolean,

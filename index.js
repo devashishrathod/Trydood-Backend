@@ -12,6 +12,7 @@ const brandRouter = require('./router/brand');
 const vendorRouter = require('./router/vendor');
 const marketRouter = require('./router/marketers');
 const subscriptionRouter = require('./router/subscription');
+const applicationRouter = require('./router/application');
 
 
 db()
@@ -28,5 +29,6 @@ app.use('/api/v1/brand', brandRouter)
 app.use('/api/v1/vendors', vendorRouter)
 app.use('/api/v1/marketers', marketRouter)
 app.use('/api/v1/subscriptions', subscriptionRouter)
+app.use('/api/v1/settings', applicationRouter)
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

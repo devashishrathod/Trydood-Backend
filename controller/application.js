@@ -1,4 +1,7 @@
 const ApplicationHome = require("../model/ApplicationHome");
+const DealOfCategory = require("../model/DealOfCategory");
+const Filter = require("../model/Filter");
+const Privacy = require("../model/Privacy");
 const State = require("../model/State");
 const { uploadToCloudinary, deleteFromCloudinary } = require("../service/uploadImage");
 
@@ -47,8 +50,9 @@ exports.addHomeApplication = async (req, res) => {
     const title = req.body?.title
     const header = req.body?.header
     const description = req.body?.description
+    const type = req.body?.type
     try {
-        const home = new ApplicationHome({ title, header, description })
+        const home = new ApplicationHome({ title, header, description, type })
         if (image) {
             let imageUrl = await uploadToCloudinary(image.tempFilePath)
             home.image = imageUrl
@@ -68,6 +72,7 @@ exports.updateHomeApplication = async (req, res) => {
     const title = req.body?.title
     const header = req.body?.header
     const description = req.body?.description
+    const type = req.body?.type
     try {
         const checkHome = await ApplicationHome.findById(id)
         if (!checkHome) {
@@ -76,6 +81,7 @@ exports.updateHomeApplication = async (req, res) => {
         if (title) checkHome.title = title
         if (header) checkHome.header = header
         if (description) checkHome.description = description
+        if (type) checkHome.type = type
         if (image) {
             let imageUrl = await uploadToCloudinary(image.tempFilePath)
             if (checkHome?.image) {
@@ -114,6 +120,229 @@ exports.deleteHomeApplication = async (req, res) => {
     }
 }
 
+// ===================================== deal of category ====================================================
+exports.getDealOfCategories = async (req, res) => {
+    const id = req.params?.id
+    try {
+        if (id) {
+            const result = await DealOfCategory.findById(id)
+            if (result) {
+                return res.status(200).json({ success: true, msg: "Deal of category details", result })
+            }
+            return res.status(404).json({ msg: "Deal of category not found", success: false })
+        }
+        const result = await DealOfCategory.find().sort({ createdAt: -1 })
+        if (result) {
+            return res.status(200).json({ success: true, msg: "Deal of category details", result })
+        }
+        return res.status(404).json({ msg: "Deal of category not found", success: false })
+    } catch (error) {
+        console.log("error on getDealOfCategories: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+exports.getDealOfDayPagination = async (req, res) => {
+    const page = parseInt(req?.query?.page)
+    const limit = parseInt(req?.query?.limit)
+    const skip = (page - 1) * limit
+    try {
+
+        const result = await DealOfCategory.find().limit(limit).skip(skip).sort({ createdAt: -1 })
+        const totalDocuments = await DealOfCategory.countDocuments()
+        const totalPages = Math.ceil(totalDocuments / limit);
+        if (result) {
+            return res.status(200).json({ success: true, msg: "Deal of category details", result, pagination: { totalDocuments, totalPages, currentPage: page, limit, } })
+        }
+        return res.status(404).json({ msg: "Deal of category not found", success: false })
+    } catch (error) {
+        console.log("error on getDealOfDayPagination: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+exports.addDealOfCategory = async (req, res) => {
+    const image = req.files?.image
+    const title = req.body?.title
+    const name = req.body?.name
+    const type = req.body?.type
+
+
+    try {
+        const checkDealOfCategory = await DealOfCategory.findOne({ name })
+        if (checkDealOfCategory) {
+            return res.status(400).json({ success: false, msg: "Deal of category already exists" });
+        }
+        const dealOfCategory = new DealOfCategory({ title, name, type })
+        if (image) {
+            let imageUrl = await uploadToCloudinary(image.tempFilePath)
+            dealOfCategory.image = imageUrl
+        }
+        const result = await dealOfCategory.save()
+        return res.status(200).json({ success: true, msg: "Deal of category added successfully.", result })
+    } catch (error) {
+        console.log("error on addDealOfCategory: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+exports.updateDealOfCategory = async (req, res) => {
+    const id = req.params?.id
+
+    const type = req.body?.type
+    const image = req.files?.image
+    const title = req.body?.title
+    const name = req.body?.name
+
+    try {
+        const checkDealOfCategory = await DealOfCategory.findById(id)
+        if (!checkDealOfCategory) {
+            return res.status(400).json({ success: false, msg: "Deal of category not found" })
+        }
+        if (title) checkDealOfCategory.title = title
+        if (name) checkDealOfCategory.name = name
+        if (type) checkDealOfCategory.type = type
+        if (image) {
+            let imageUrl = await uploadToCloudinary(image.tempFilePath)
+            if (checkDealOfCategory?.image) {
+                await deleteFromCloudinary(checkDealOfCategory?.image)
+            }
+            checkDealOfCategory.image = imageUrl
+        }
+        const result = await checkDealOfCategory.save()
+        if (result) {
+            return res.status(200).json({ success: true, msg: "Deal of category updated successfully.", result })
+        } else {
+            return res.status(404).json({ success: false, msg: "Deal of category not found" })
+        }
+    } catch (error) {
+        console.log("error on updateDealOfCategory: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+exports.deleteDealOfCategory = async (req, res) => {
+    const id = req.params?.id
+    try {
+        const checkDealOfCategory = await DealOfCategory.findById(id)
+        if (!checkDealOfCategory) {
+            return res.status(400).json({ success: false, msg: "Deal of category not found" })
+        }
+        if (checkDealOfCategory?.image) {
+            await deleteFromCloudinary(checkDealOfCategory?.image)
+        }
+        const result = await DealOfCategory.findByIdAndDelete(id)
+        if (result) {
+            return res.status(200).json({ success: true, msg: "Deal of category deleted successfully.", result })
+        } else {
+            return res.status(404).json({ success: false, msg: "Deal of category not found" })
+        }
+    } catch (error) {
+        console.log("error on deleteDealOfCategory: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+// ===================================== filter ====================================================
+exports.getAllFilter = async (req, res) => {
+    const id = req.params?.id
+
+    try {
+        if (id) {
+            const result = await Filter.findById(id)
+            if (result) {
+                return res.status(200).json({ success: true, msg: "Filter details", result })
+            }
+            return res.status(404).json({ msg: "Filter not found", success: false })
+        }
+        const result = await Filter.find().sort({ createdAt: -1 })
+        if (result) {
+            return res.status(200).json({ success: true, msg: "Filter details", result })
+        }
+        return res.status(404).json({ msg: "Filter not found", success: false })
+    } catch (error) {
+        console.log("error on getAllFilter: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+exports.pagination = async (req, res) => {
+    const page = paraseInt(req?.query?.page)
+    const limit = paraseInt(req?.query?.limit)
+    const skip = (page - 1) * limit
+    try {
+        const result = await Filter.find().limit(limit).skip(skip).sort({ createdAt: -1 })
+        const totalDocuments = await Filter.countDocuments()
+        const totalPages = Math.ceil(totalDocuments / limit);
+        if (result) {
+            return res.status(200).json({ success: true, msg: "Filter details", result, pagination: { totalDocuments, totalPages, currentPage: page, limit, } })
+        }
+        return res.status(404).json({ msg: "Filter not found", success: false })
+    } catch (error) {
+        console.log("error on pagination: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+exports.addFilter = async (req, res) => {
+    const name = req.body?.name
+    const type = req.body?.type
+
+    try {
+        const checkFilter = await Filter.findOne({ name })
+        if (checkFilter) {
+            return res.status(400).json({ success: false, msg: "Filter already exists" });
+        }
+        const filter = new Filter({ name, type })
+        const result = await filter.save()
+        if (result) {
+            return res.status(200).json({ success: true, msg: "Filter added successfully.", result })
+        } else {
+            return res.status(404).json({ success: false, msg: "Filter not found" })
+        }
+    } catch (error) {
+        console.log("error on addFilter: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+exports.updateFilter = async (req, res) => {
+    const id = req.params?.id
+
+    const name = req.body?.name
+    const type = req.body?.type
+    try {
+        const checkFilter = await Filter.findById(id)
+        if (!checkFilter) {
+            return res.status(400).json({ success: false, msg: "Filter not found" })
+        }
+        if (name) checkFilter.name = name
+        if (type) checkFilter.type = type
+        const result = await checkFilter.save()
+        if (result) {
+            return res.status(200).json({ success: true, msg: "Filter updated successfully.", result })
+        }
+        return res.status(404).json({ success: false, msg: "Filter not found" })
+    } catch (error) {
+        console.log("error on updateFilter: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+exports.deleteFilter = async (req, res) => {
+    const id = req.params?.id
+
+    try {
+        const result = await Filter.findByIdAndDelete(id)
+        if (result) {
+            return res.status(200).json({ success: true, msg: "Filter deleted successfully.", result })
+        }
+        return res.status(404).json({ success: false, msg: "Filter not found" })
+    } catch (error) {
+        console.log("error on deleteFilter: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
 
 // ===================================== state ====================================================
 exports.getAllState = async (req, res) => {
@@ -186,6 +415,91 @@ exports.deleteState = async (req, res) => {
         return res.status(400).json({ success: false, msg: "State not found" });
     } catch (error) {
         console.log("error on deleteState: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+
+
+// ===================================== privacy ====================================================
+
+exports.getAllPrivacy = async (req, res) => {
+    const id = req.params?.id
+    try {
+        if (id) {
+            const result = await Privacy.findById(id)
+            if (result) {
+                return res.status(200).json({ success: true, msg: "Privacy details", result });
+            }
+            return res.status(404).json({ msg: "Privacy not found", success: false });
+        }
+        const result = await Privacy.find().sort({ createdAt: -1 })
+        if (result) {
+            return res.status(200).json({ success: true, msg: "Privacy details", result });
+        }
+        return res.status(404).json({ msg: "Privacy not found", success: false });
+    } catch (error) {
+        console.log("error on getAllPrivacy: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+exports.getSinglePrivacy = async (req, res) => {
+    try {
+        const result = await Privacy.findOne().sort({ createdAt: -1 })
+        if (result) {
+            return res.status(200).json({ success: true, msg: "Privacy details", result });
+        }
+        return res.status(404).json({ msg: "Privacy not found", success: false });
+    } catch (error) {
+        console.log("error on getSinglePrivacy: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+exports.addPrivacy = async (req, res) => {
+    const privacy = req.body?.privacy
+    const type = req.body?.type
+    try {
+
+        const result = await Privacy.create({ privacy, type });
+        return res.status(200).json({ success: true, msg: "Privacy added successfully.", result });
+    } catch (error) {
+        console.log("error on addPrivacy: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+exports.updatePrivacy = async (req, res) => {
+    const id = req.params?.id
+    const privacy = req.body?.privacy
+    const type = req.body?.type
+    try {
+        const checkPrivacy = await Privacy.findById(id)
+        if (!checkPrivacy) {
+            return res.status(400).json({ success: false, msg: "Privacy not found" });
+        }
+        checkPrivacy.privacy = privacy
+        checkPrivacy.type = type
+        const result = await checkPrivacy.save();
+        return res.status(200).json({ success: true, msg: "Privacy updated successfully.", result });
+    } catch (error) {
+        console.log("error on updatePrivacy: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+
+exports.deletePrivacy = async (req, res) => {
+    const id = req.params?.id
+    try {
+        const result = await Privacy.findByIdAndDelete(id)
+        if (result) {
+            return res.status(200).json({ success: true, msg: "Privacy deleted successfully." });
+        }
+        return res.status(400).json({ success: false, msg: "Privacy not found" });
+    } catch (error) {
+        console.log("error on deletePrivacy: ", error);
         return res.status(500).json({ success: false, msg: error.message });
     }
 }
