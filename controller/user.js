@@ -4,6 +4,7 @@ const { uploadToCloudinary } = require("../service/uploadImage")
 const bcrypt = require('bcryptjs');
 const { generateReferralCode } = require("../utils/referCode");
 const Location = require("../model/Location");
+const { urlVerifyOtp, urlSendTestOtp } = require("../service/sendOTP");
 let salt = 10;
 
 
@@ -116,11 +117,11 @@ exports.requistOtp = async (req, res) => {
             return res.status(400).json({ success: false, msg: 'User not found!' })
         }
 
-        // let result = await urlSendTestOtp(mobile)
-        // console.log("result: ", result);
-        let result
+        let result = await urlSendTestOtp(mobile)
+        console.log("result: ", result);
+        // let result
         if (result) {
-            return res.status(200).json({ success: true, result: "1234", msg: "Otp send successfully 1234" })
+            return res.status(200).json({ success: true, result, msg: "Otp send successfully 1234" })
         }
     } catch (error) {
         console.log("error on requistOtp: ", error);
@@ -139,23 +140,23 @@ exports.verifyOtp = async (req, res) => {
         if (!checkUser) {
             return res.status(400).json({ success: false, msg: 'User not found!' })
         }
-        // let result = await urlVerifyOtp(sessionId, otp)
-        checkUser.fcmToken = fcmToken
+        let result = await urlVerifyOtp(sessionId, otp)
+        // checkUser.fcmToken = fcmToken
 
-        if (otp == '123456') {
+       /*  if (otp == '123456') {
             checkUser.isMobileVerify = true
             const token = await generateToken(checkUser)
             await checkUser.save()
             return res.status(200).json({ success: true, msg: 'Verification successful', data: "result 1234", token })
-        }
+        } */
 
-        // checkUser.fcmToken = fcmToken
-        // await checkUser.save()
+        checkUser.fcmToken = fcmToken
+        await checkUser.save()
         // return res.status(200).json({ success: true, msg: 'Verification successful', data: "result 1234", token })
-        /*  if (result?.Status == 'Success') {
-             const token = await generateToken(checkUser)
-             return res.status(200).json({ success: true, msg: 'Verification successful', data: result, token })
-         } */
+        if (result?.Status == 'Success') {
+            const token = await generateToken(checkUser)
+            return res.status(200).json({ success: true, msg: 'Verification successful', data: result, token })
+        }
         return res.status(400).json({ success: false, msg: 'Invalid OTP' })
     } catch (error) {
         console.log("error on verifyOtp: ", error);
@@ -176,10 +177,11 @@ exports.login = async (req, res) => {
             checkUser = new User({ mobile, referCode })
             // return res.status(401).json({ error: "Invalid credentials", success: false, msg: "User not found" })
         }
-        // checkUser.fcmToken = req.body?.fcmToken
+        checkUser.fcmToken = req.body?.fcmToken
         await checkUser.save()
+        let result = await urlSendTestOtp(mobile)
         // const token = await generateToken(checkUser)
-        return res.status(200).json({ success: true, msg: "OTP sent to your mobile number successfully.", isFirst, otp: "1234" })
+        return res.status(200).json({ success: true, msg: "OTP sent to your mobile number successfully.", isFirst, result })
     } catch (error) {
         console.log("error on login: ", error);
         return res.status(500).json({ error: error, success: false, msg: error.message })
