@@ -2,7 +2,9 @@ const ApplicationHome = require("../model/ApplicationHome");
 const DealOfCategory = require("../model/DealOfCategory");
 const Filter = require("../model/Filter");
 const Privacy = require("../model/Privacy");
+const RefundPolicy = require("../model/RefundPolicy");
 const State = require("../model/State");
+const Terms = require("../model/Terms");
 const { uploadToCloudinary, deleteFromCloudinary } = require("../service/uploadImage");
 
 
@@ -32,9 +34,13 @@ exports.getAllHome = async (req, res) => {
 
 
 exports.getOne = async (req, res) => {
-
+    const type = req.query?.type
     try {
-        const result = await ApplicationHome.findOne().sort({ createdAt: -1 })
+        const filter = {}
+        if (type) {
+            filter.type = type
+        }
+        const result = await ApplicationHome.findOne(filter).sort({ createdAt: -1 })
         if (result) {
             return res.status(200).json({ success: true, msg: "Home Application details", result })
         }
@@ -46,6 +52,8 @@ exports.getOne = async (req, res) => {
 }
 
 exports.addHomeApplication = async (req, res) => {
+
+    // console.log("req.body: ", req.body);
     const image = req.files?.image
     const title = req.body?.title
     const header = req.body?.header
@@ -66,8 +74,12 @@ exports.addHomeApplication = async (req, res) => {
 }
 
 exports.updateHomeApplication = async (req, res) => {
-    const id = req.params?.id
+    // console.log(" ======================== updateHomeApplication ======================== ");
 
+    const id = req.params?.id
+    // console.log("req.files: ", req.files);
+
+    // console.log("req.body: ", req.body);
     const image = req.files?.image
     const title = req.body?.title
     const header = req.body?.header
@@ -146,10 +158,16 @@ exports.getDealOfDayPagination = async (req, res) => {
     const page = parseInt(req?.query?.page)
     const limit = parseInt(req?.query?.limit)
     const skip = (page - 1) * limit
+    const type = req.query?.type
     try {
 
-        const result = await DealOfCategory.find().limit(limit).skip(skip).sort({ createdAt: -1 })
-        const totalDocuments = await DealOfCategory.countDocuments()
+        const filter = {}
+        if (type) {
+            filter.type = type
+        }
+
+        const result = await DealOfCategory.find(filter).limit(limit).skip(skip).sort({ createdAt: -1 })
+        const totalDocuments = await DealOfCategory.countDocuments(filter)
         const totalPages = Math.ceil(totalDocuments / limit);
         if (result) {
             return res.status(200).json({ success: true, msg: "Deal of category details", result, pagination: { totalDocuments, totalPages, currentPage: page, limit, } })
@@ -247,6 +265,7 @@ exports.deleteDealOfCategory = async (req, res) => {
 exports.getAllFilter = async (req, res) => {
     const id = req.params?.id
 
+    // const search = req.query?.search
     try {
         if (id) {
             const result = await Filter.findById(id)
@@ -500,6 +519,174 @@ exports.deletePrivacy = async (req, res) => {
         return res.status(400).json({ success: false, msg: "Privacy not found" });
     } catch (error) {
         console.log("error on deletePrivacy: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+
+// ===================================== refund policy ====================================================
+
+exports.getAllRefundPolicy = async (req, res) => {
+    const id = req.params?.id
+    try {
+        if (id) {
+            const result = await RefundPolicy.findById(id)
+            if (result) {
+                return res.status(200).json({ success: true, msg: "Privacy details", result });
+            }
+            return res.status(404).json({ msg: "Privacy not found", success: false });
+        }
+        const result = await Privacy.find().sort({ createdAt: -1 })
+        if (result) {
+            return res.status(200).json({ success: true, msg: "Privacy details", result });
+        }
+        return res.status(404).json({ msg: "Privacy not found", success: false });
+    } catch (error) {
+        console.log("error on getAllPrivacy: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+exports.getSingleRefundPolicy = async (req, res) => {
+    try {
+        const result = await RefundPolicy.findOne().sort({ createdAt: -1 })
+        if (result) {
+            return res.status(200).json({ success: true, msg: "Privacy details", result });
+        }
+        return res.status(404).json({ msg: "Privacy not found", success: false });
+    } catch (error) {
+        console.log("error on getSinglePrivacy: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+exports.addRefundPolicy = async (req, res) => {
+    const refundPolicy = req.body?.refundPolicy
+    const type = req.body?.type
+    try {
+
+        const result = await RefundPolicy.create({ refundPolicy, type });
+        return res.status(200).json({ success: true, msg: "Privacy added successfully.", result });
+    } catch (error) {
+        console.log("error on addPrivacy: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+exports.updateRefundPolicy = async (req, res) => {
+    const id = req.params?.id
+    const refundPolicy = req.body?.refundPolicy
+    const type = req.body?.type
+    try {
+        const checkPrivacy = await RefundPolicy.findById(id)
+        if (!checkPrivacy) {
+            return res.status(400).json({ success: false, msg: "Privacy not found" });
+        }
+        checkPrivacy.refundPolicy = refundPolicy
+        checkPrivacy.type = type
+        const result = await checkPrivacy.save();
+        return res.status(200).json({ success: true, msg: "Privacy updated successfully.", result });
+    } catch (error) {
+        console.log("error on updatePrivacy: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+
+exports.deleteRefundPolicy = async (req, res) => {
+    const id = req.params?.id
+    try {
+        const result = await RefundPolicy.findByIdAndDelete(id)
+        if (result) {
+            return res.status(200).json({ success: true, msg: "Privacy deleted successfully." });
+        }
+        return res.status(400).json({ success: false, msg: "Privacy not found" });
+    } catch (error) {
+        console.log("error on deletePrivacy: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+
+// ===================================== terms and condition ====================================================
+
+exports.getAllTerms = async (req, res) => {
+    const id = req.params?.id
+    try {
+        if (id) {
+            const result = await Terms.findById(id)
+            if (result) {
+                return res.status(200).json({ success: true, msg: "Privacy details", result });
+            }
+            return res.status(404).json({ msg: "Privacy not found", success: false });
+        }
+        const result = await Terms.find().sort({ createdAt: -1 })
+        if (result) {
+            return res.status(200).json({ success: true, msg: "Privacy details", result });
+        }
+        return res.status(404).json({ msg: "Privacy not found", success: false });
+    } catch (error) {
+        console.log("error on getAllTerms: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+exports.getSingleTerms = async (req, res) => {
+    try {
+        const result = await Terms.findOne().sort({ createdAt: -1 })
+        if (result) {
+            return res.status(200).json({ success: true, msg: "Privacy details", result });
+        }
+        return res.status(404).json({ msg: "Privacy not found", success: false });
+    } catch (error) {
+        console.log("error on getSingleTerms: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+exports.addTerms = async (req, res) => {
+    const terms = req.body?.terms
+    const type = req.body?.type
+    try {
+
+        const result = await Terms.create({ terms, type });
+        return res.status(200).json({ success: true, msg: "Privacy added successfully.", result });
+    } catch (error) {
+        console.log("error on addTerms: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+exports.updateTerms = async (req, res) => {
+    const id = req.params?.id
+    const terms = req.body?.terms
+    const type = req.body?.type
+    try {
+        const checkPrivacy = await Terms.findById(id)
+        if (!checkPrivacy) {
+            return res.status(400).json({ success: false, msg: "Privacy not found" });
+        }
+        checkPrivacy.terms = terms
+        checkPrivacy.type = type
+        const result = await checkPrivacy.save();
+        return res.status(200).json({ success: true, msg: "Privacy updated successfully.", result });
+    } catch (error) {
+        console.log("error on updateTerms: ", error);
+        return res.status(500).json({ success: false, msg: error.message });
+    }
+}
+
+
+exports.deleteTerms = async (req, res) => {
+    const id = req.params?.id
+    try {
+        const result = await Terms.findByIdAndDelete(id)
+        if (result) {
+            return res.status(200).json({ success: true, msg: "Privacy deleted successfully." });
+        }
+        return res.status(400).json({ success: false, msg: "Privacy not found" });
+    } catch (error) {
+        console.log("error on deleteTerms: ", error);
         return res.status(500).json({ success: false, msg: error.message });
     }
 }

@@ -137,7 +137,19 @@ const UserSchema = new mongoose.Schema({
     isSubscribed: {
         type: Boolean,
         default: false
-    }
+    },
+   /*  street: {
+        type: String
+    },
+    formattedAddress: {
+        type: String
+    },
+    postalCode: {
+        type: String
+    },
+    country: {
+        type: String
+    }, */
 }, { timestamps: true })
 const User = mongoose.model('User', UserSchema)
 module.exports = User

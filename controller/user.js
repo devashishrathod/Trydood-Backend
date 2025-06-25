@@ -118,7 +118,7 @@ exports.requistOtp = async (req, res) => {
         }
 
         let result = await urlSendTestOtp(mobile)
-        console.log("result: ", result);
+        // console.log("result: ", result);
         // let result
         if (result) {
             return res.status(200).json({ success: true, result, msg: "Otp send successfully 1234" })
@@ -143,12 +143,12 @@ exports.verifyOtp = async (req, res) => {
         let result = await urlVerifyOtp(sessionId, otp)
         // checkUser.fcmToken = fcmToken
 
-       /*  if (otp == '123456') {
-            checkUser.isMobileVerify = true
-            const token = await generateToken(checkUser)
-            await checkUser.save()
-            return res.status(200).json({ success: true, msg: 'Verification successful', data: "result 1234", token })
-        } */
+        /*  if (otp == '123456') {
+             checkUser.isMobileVerify = true
+             const token = await generateToken(checkUser)
+             await checkUser.save()
+             return res.status(200).json({ success: true, msg: 'Verification successful', data: "result 1234", token })
+         } */
 
         checkUser.fcmToken = fcmToken
         await checkUser.save()
@@ -200,6 +200,12 @@ exports.userProfileComplete = async (req, res) => {
     const applyReferalCode = req.body?.referCode
     const lat = req.body?.lat
     const lng = req.body?.lng
+    const city = req.body?.city
+    const state = req.body?.state
+    const country = req.body?.country
+    const postalCode = req.body?.postalCode
+    const formattedAddress = req.body?.formattedAddress
+    const street = req.body?.street
 
     try {
         const checkUser = await User.findById(id)
@@ -225,11 +231,35 @@ exports.userProfileComplete = async (req, res) => {
         if (email) checkUser.email = email
         if (address) checkUser.address = address
         if (dob) checkUser.dob = dob
+        // if (city) checkUser.city = city
+        // if (state) checkUser.state = state
+        // if (country) checkUser.country = country
+        // if (postalCode) checkUser.postalCode = postalCode
+        // if (formattedAddress) checkUser.formattedAddress = formattedAddress
+        // if (street) checkUser.street = street
         if (req.body?.isFirst) {
             if (applyReferalCode) checkUser.applyReferalCode = applyReferalCode
         }
 
-        const updatedData = {
+        const updateFields = {
+            name,
+            address,
+            location: {
+                type: 'Point',
+                coordinates: [lng, lat]
+            },
+            ...(city && { city }),
+            ...(state && { state }),
+            ...(country && { country }),
+            ...(postalCode && { pinCode: postalCode }),
+            ...(formattedAddress && { formattedAddress }),
+            ...(street && { street }),
+        };
+
+        await Location.findByIdAndUpdate(id, { $set: updateFields }, { new: true });
+
+
+        /* const updatedData = {
             name,
             address,
             location: {
@@ -238,8 +268,14 @@ exports.userProfileComplete = async (req, res) => {
             }
         }
 
-        await Location.findByIdAndUpdate(id, updatedData, { new: true });
-
+        const addressLocation = await Location.findByIdAndUpdate(id, updatedData, { new: true });
+        if (city) addressLocation.city = city
+        if (state) addressLocation.state = state
+        if (country) addressLocation.country = country
+        if (postalCode) addressLocation.pinCode = postalCode
+        if (formattedAddress) addressLocation.formattedAddress = formattedAddress
+        if (street) addressLocation.street = street
+        await addressLocation.save() */
         await checkUser.save()
         return res.status(200).json({ success: true, msg: 'Profile updated successfully', result: checkUser })
     } catch (error) {

@@ -30,6 +30,15 @@ const LocationSchema = new mongoose.Schema({
     pinCode: {
         type: String
     },
+    country: {
+        type: String
+    },
+    street: {
+        type: String
+    },
+    formattedAddress: {
+        type: String
+    },
     location: {
         type: {
             type: String,
