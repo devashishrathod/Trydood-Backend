@@ -91,6 +91,6 @@ exports.urlVerifyOtp = async (sessionId, otp) => {
         return response.data; // Return the actual data
     } catch (error) {
         console.log("Error: ", error.message);
-        throw error; // Ensure the error is propagated
+        throw "Invalid OTP"; // Ensure the error is propagated
     }
 };
