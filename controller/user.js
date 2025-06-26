@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const { generateReferralCode } = require("../utils/referCode");
 const Location = require("../model/Location");
 const { urlVerifyOtp, urlSendTestOtp } = require("../service/sendOTP");
+const { calculateProfileCompletion } = require("../utils/utils");
 let salt = 10;
 
 
@@ -12,8 +13,10 @@ exports.userProfile = async (req, res) => {
     const id = req.payload?._id
     try {
         const result = await User.findById(id).select('-password -__v -role').populate("location").populate("bankAccount")
+
+        const completion = calculateProfileCompletion(result);
         if (result) {
-            return res.status(200).json({ success: true, msg: "User details", result })
+            return res.status(200).json({ success: true, msg: "User details", result, completion })
         }
         return res.status(404).json({ msg: "User not found", success: false })
     } catch (error) {
@@ -190,7 +193,7 @@ exports.login = async (req, res) => {
 
 
 exports.userProfileComplete = async (req, res) => {
-    console.log("req.boydy: ", req.body);
+    // console.log("req.boydy: ", req.body);
 
     const id = req.payload?._id
     const name = req.body?.name
@@ -206,13 +209,14 @@ exports.userProfileComplete = async (req, res) => {
     const postalCode = req.body?.postalCode
     const formattedAddress = req.body?.formattedAddress
     const street = req.body?.street
+    const landMark = req.body?.landMark
 
     try {
         const checkUser = await User.findById(id)
         if (!checkUser) {
             return res.status(400).json({ success: false, msg: 'User not found!' })
         }
-        const checkLocation = await Location.findOne({ user: id })
+        let checkLocation = await Location.findOne({ user: id })
         if (!checkLocation) {
             const location = new Location({
                 user: id,
@@ -221,61 +225,48 @@ exports.userProfileComplete = async (req, res) => {
                 location: {
                     type: 'Point',
                     coordinates: [lng, lat] // Order: [longitude, latitude]
-                }
+                },
+                city,
+                state,
+                country,
+                postalCode,
+                formattedAddress,
+                street,
+                landMark
             });
             checkUser.location = location._id
             await location.save()
+        } else {
+            checkLocation = new Location({
+                user: id,
+                name,
+                address,
+                location: {
+                    type: 'Point',
+                    coordinates: [lng, lat] // Order: [longitude, latitude]
+                },
+                city,
+                state,
+                country,
+                postalCode,
+                formattedAddress,
+                street,
+                landMark
+            });
+            checkUser.location = checkLocation._id
+
+            await checkLocation.save()
         }
 
         if (name) checkUser.name = name
         if (email) checkUser.email = email
         if (address) checkUser.address = address
         if (dob) checkUser.dob = dob
-        // if (city) checkUser.city = city
-        // if (state) checkUser.state = state
-        // if (country) checkUser.country = country
-        // if (postalCode) checkUser.postalCode = postalCode
-        // if (formattedAddress) checkUser.formattedAddress = formattedAddress
-        // if (street) checkUser.street = street
+
         if (req.body?.isFirst) {
             if (applyReferalCode) checkUser.applyReferalCode = applyReferalCode
         }
 
-        const updateFields = {
-            name,
-            address,
-            location: {
-                type: 'Point',
-                coordinates: [lng, lat]
-            },
-            ...(city && { city }),
-            ...(state && { state }),
-            ...(country && { country }),
-            ...(postalCode && { pinCode: postalCode }),
-            ...(formattedAddress && { formattedAddress }),
-            ...(street && { street }),
-        };
-
-        await Location.findByIdAndUpdate(id, { $set: updateFields }, { new: true });
-
-
-        /* const updatedData = {
-            name,
-            address,
-            location: {
-                type: 'Point',
-                coordinates: [lng, lat] // Always [longitude, latitude]
-            }
-        }
-
-        const addressLocation = await Location.findByIdAndUpdate(id, updatedData, { new: true });
-        if (city) addressLocation.city = city
-        if (state) addressLocation.state = state
-        if (country) addressLocation.country = country
-        if (postalCode) addressLocation.pinCode = postalCode
-        if (formattedAddress) addressLocation.formattedAddress = formattedAddress
-        if (street) addressLocation.street = street
-        await addressLocation.save() */
         await checkUser.save()
         return res.status(200).json({ success: true, msg: 'Profile updated successfully', result: checkUser })
     } catch (error) {
