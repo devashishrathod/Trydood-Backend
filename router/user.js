@@ -1,23 +1,40 @@
-const express = require('express')
-const { loginEmail, registorUser, loginMobile, requistOtp, verifyOtp, userProfile, login, userProfileComplete, verifyVendorMobileNumber, verifyOTPVendorMobile } = require('../controller/user')
-const { verifyToken } = require('../middleware/authValidation')
-const { isFirst } = require('../middleware/helper')
-const userRouter = express.Router()
+const express = require("express");
+const userRouter = express.Router();
 
+const {
+  loginEmail,
+  registorUser,
+  loginMobile,
+  requistOtp,
+  verifyOtp,
+  userProfile,
+  login,
+  // userProfileComplete,
+  verifyVendorMobileNumber,
+  verifyOTPVendorMobile,
+} = require("../controller/user");
+const { userProfileComplete } = require("../controller/users/updateUser");
+const { verifyToken } = require("../middleware/authValidation");
+const { isFirst } = require("../middleware/helper");
 
-userRouter.get('/userProfile', verifyToken, userProfile)
+userRouter.get("/userProfile", verifyToken, userProfile);
 
-userRouter.post('/register', registorUser)
-userRouter.post('/loginEmail', loginEmail)
-userRouter.post('/loginMobile', loginMobile)
+userRouter.post("/register", registorUser);
+userRouter.post("/loginEmail", loginEmail);
+userRouter.post("/loginMobile", loginMobile);
 
-userRouter.post('/requistOtp', requistOtp)
-userRouter.post('/verifyOtp', verifyOtp)
-userRouter.post('/vendorMobileVerify', verifyVendorMobileNumber)
-userRouter.post('/vendorOTPVerify', verifyOTPVendorMobile)
+userRouter.post("/requistOtp", requistOtp);
+userRouter.post("/verifyOtp", verifyOtp);
+userRouter.post("/vendorMobileVerify", verifyVendorMobileNumber);
+userRouter.post("/vendorOTPVerify", verifyOTPVendorMobile);
 
-userRouter.post('/login', login)
+userRouter.post("/login", login);
 
-userRouter.put('/userProfile/update', verifyToken, userProfileComplete)
-userRouter.put('/userProfileComplete', [verifyToken, isFirst], userProfileComplete)
-module.exports = userRouter
+userRouter.put("/userProfile/update", verifyToken, userProfileComplete);
+userRouter.put(
+  "/userProfileComplete",
+  [verifyToken, isFirst],
+  userProfileComplete
+);
+
+module.exports = userRouter;

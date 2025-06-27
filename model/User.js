@@ -152,8 +152,11 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: DefaultImages.profileUrl,
     },
+    uniqueId: {
+      type: String,
+      unique: true,
+    },
   },
   { timestamps: true, versionKey: false }
 );
-const User = mongoose.model("User", UserSchema);
-module.exports = User;
+module.exports = mongoose.model("User", UserSchema);

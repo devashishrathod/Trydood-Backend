@@ -6,6 +6,7 @@ const { generateReferralCode } = require("../utils/referCode");
 const Location = require("../model/Location");
 const { urlVerifyOtp, urlSendTestOtp } = require("../service/sendOTP");
 const { calculateProfileCompletion } = require("../utils/utils");
+const { generateUniqueUserId } = require("../service/userServices");
 let salt = 10;
 
 
@@ -51,8 +52,8 @@ exports.registorUser = async (req, res) => {
                 return res.status(400).json({ success: false, msg: "Admin role is not allowed" });
             }
         } */
-
-        const user = new User({ name, email, mobile, password: hashedPass, role, address })
+        const uniqueId = generateUniqueUserId();
+        const user = new User({ name, email, mobile, password: hashedPass, role, address,uniqueId })
 
         if (image) {
             let imageUrl = await uploadToCloudinary(image.tempFilePath)
@@ -177,7 +178,8 @@ exports.login = async (req, res) => {
         if (!checkUser) {
             isFirst = true
             const referCode = generateReferralCode(6)
-            checkUser = new User({ mobile, referCode })
+            const uniqueId = generateUniqueUserId();
+            checkUser = new User({ mobile, referCode,uniqueId })
             // return res.status(401).json({ error: "Invalid credentials", success: false, msg: "User not found" })
         }
         checkUser.fcmToken = req.body?.fcmToken
