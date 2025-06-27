@@ -92,6 +92,7 @@ exports.loginEmail = async (req, res) => {
         return res.status(500).json({ error: error, success: false, msg: error.message })
     }
 }
+
 exports.loginMobile = async (req, res) => {
     const mobile = req.body?.mobile
     const password = req.body?.password
@@ -153,11 +154,11 @@ exports.verifyOtp = async (req, res) => {
              await checkUser.save()
              return res.status(200).json({ success: true, msg: 'Verification successful', data: "result 1234", token })
          } */
-
-        checkUser.fcmToken = fcmToken
-        await checkUser.save()
         // return res.status(200).json({ success: true, msg: 'Verification successful', data: "result 1234", token })
         if (result?.Status == 'Success') {
+            checkUser.isMobileVerify = true
+              checkUser.fcmToken = fcmToken
+            await checkUser.save()
             const token = await generateToken(checkUser)
             return res.status(200).json({ success: true, msg: 'Verification successful', data: result, token })
         }
@@ -167,8 +168,6 @@ exports.verifyOtp = async (req, res) => {
         return res.status(500).json({ error: error, success: false, msg: error.message })
     }
 }
-
-
 
 exports.login = async (req, res) => {
     const mobile = req.body?.mobile

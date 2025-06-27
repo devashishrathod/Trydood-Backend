@@ -7,6 +7,7 @@ exports.userProfileComplete = async (req, res) => {
   const id = req.payload?._id;
   const name = req.body?.name;
   const email = req.body?.email;
+  const mobile = req.body?.mobile;
   const address = req.body?.address;
   const dob = req.body?.dob;
   const applyReferalCode = req.body?.referCode;
@@ -70,6 +71,7 @@ exports.userProfileComplete = async (req, res) => {
     }
     if (name) checkUser.name = name;
     if (email) checkUser.email = email;
+    if (mobile) checkUser.mobile = mobile;
     if (address) checkUser.address = address;
     if (dob) checkUser.dob = dob;
     if (image) checkUser.image = image;
