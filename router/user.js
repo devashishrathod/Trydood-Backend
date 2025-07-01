@@ -16,6 +16,7 @@ const {
 const { userProfileComplete } = require("../controller/users/updateUser");
 const { verifyToken } = require("../middleware/authValidation");
 const { isFirst } = require("../middleware/helper");
+const { logout } = require("../controller/users");
 
 userRouter.get("/userProfile", verifyToken, userProfile);
 
@@ -36,5 +37,5 @@ userRouter.put(
   [verifyToken, isFirst],
   userProfileComplete
 );
-
+userRouter.put("/logout", verifyToken, logout);
 module.exports = userRouter;
