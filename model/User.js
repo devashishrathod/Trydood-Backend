@@ -1,162 +1,69 @@
 const mongoose = require("mongoose");
-const { DefaultImages } = require("../constants");
+const ObjectId = mongoose.Types.ObjectId;
+const { generateUniqueUserId } = require("../service/userServices");
+const { DefaultImages, ROLES } = require("../constants");
 
-const UserSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-    },
-    email: {
-      type: String,
-    },
-    mobile: {
-      type: Number,
-    },
-    password: {
-      type: String,
-    },
-    address: {
-      type: String,
-    },
-    dob: {
-      type: String,
-    },
+    name: { type: String },
+    email: { type: String },
+    mobile: { type: Number },
+    password: { type: String },
+    address: { type: String },
+    dob: { type: String },
     role: {
       type: String,
-      enum: ["admin", "user", "vendor", "marketer"], //vendor means brand
-      default: "user",
+      enum: [...Object.values(ROLES)],
+      default: ROLES.USER,
     },
-    isMobileVerify: {
-      type: Boolean,
-      default: false,
-    },
-    lastActivity: {
-      type: Date,
-      default: Date.now,
-    },
-    lastLocation: {
-      lat: Number,
-      lng: Number,
-    },
-    currentLocation: {
-      lat: Number,
-      lng: Number,
-    },
-    fcmToken: {
-      type: String,
-    },
-    referCode: {
-      type: String,
-      unique: true,
-    },
-    brand: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Brand",
-    },
-    applyReferalCode: {
-      type: String,
-    },
-    following: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    follwer: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    blockUser: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    likes: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
+    isMobileVerify: { type: Boolean, default: false },
+    lastActivity: { type: Date, default: Date.now },
+    lastLocation: { lat: Number, lng: Number },
+    currentLocation: { lat: Number, lng: Number },
+    fcmToken: { type: String },
+    referCode: { type: String, unique: true },
+    brand: { type: ObjectId, ref: "Brand" },
+    applyReferalCode: { type: String },
+    followings: [{ type: ObjectId, ref: "User" }],
+    followers: [{ type: ObjectId, ref: "User" }],
+    blockUsers: [{ type: ObjectId, ref: "User" }],
+    likes: [{ type: ObjectId, ref: "User" }],
     instagram: {
-      isLinked: {
-        type: Boolean,
-        default: false,
-      },
-      authToken: {
-        type: String,
-      },
+      isLinked: { type: Boolean, default: false },
+      authToken: { type: String },
     },
     facebook: {
-      isLinked: {
-        type: Boolean,
-        default: false,
-      },
-      authToken: {
-        type: String,
-      },
+      isLinked: { type: Boolean, default: false },
+      authToken: { type: String },
     },
     twitter: {
-      isLinked: {
-        type: Boolean,
-        default: false,
-      },
-      authToken: {
-        type: String,
-      },
+      isLinked: { type: Boolean, default: false },
+      authToken: { type: String },
     },
     linkedIn: {
-      isLinked: {
-        type: Boolean,
-        default: false,
-      },
-      authToken: {
-        type: String,
-      },
+      isLinked: { type: Boolean, default: false },
+      authToken: { type: String },
     },
-    location: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Location",
-    },
-    bankAccount: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "BankAccount",
-    },
-    gst: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Gst",
-    },
-    workHour: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "WorkHours",
-    },
-    referUser: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-    subscribed: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Subscribed",
-    },
-    isSubscribed: {
-      type: Boolean,
-      default: false,
-    },
-    image: {
-      type: String,
-      default: DefaultImages.profileUrl,
-    },
-    uniqueId: {
-      type: String,
-      unique: true,
-    },
+    location: { type: ObjectId, ref: "Location" },
+    bankAccount: { type: ObjectId, ref: "BankAccount" },
+    gst: { type: ObjectId, ref: "Gst" },
+    workHour: { type: ObjectId, ref: "WorkHours" },
+    referUser: { type: ObjectId, ref: "User" },
+    isActive: { type: Boolean, default: true },
+    subscribed: { type: ObjectId, ref: "Subscribed" },
+    isSubscribed: { type: Boolean, default: false },
+    image: { type: String, default: DefaultImages.profileUrl },
+    uniqueId: { type: String, unique: true },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }
 );
-module.exports = mongoose.model("User", UserSchema);
+
+userSchema.pre("save", async function (next) {
+  if (this.isNew && !this.uniqueId) {
+    this.uniqueId = await generateUniqueUserId();
+  }
+  next();
+});
+
+module.exports = mongoose.model("User", userSchema);

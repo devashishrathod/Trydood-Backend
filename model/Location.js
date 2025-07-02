@@ -1,60 +1,37 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
 
-const LocationSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    },
-    brand: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Brand'
-    },
-    name: {
-        type: String
-    },
-    address: {
-        type: String
-    },
-    area: {
-        type: String
-    },
-    landMark: {
-        type: String
-    },
-    state: {
-        type: String
-    },
-    city: {
-        type: String
-    },
-    pinCode: {
-        type: String
-    },
-    country: {
-        type: String
-    },
-    street: {
-        type: String
-    },
-    formattedAddress: {
-        type: String
-    },
+const LocationSchema = new mongoose.Schema(
+  {
+    user: { type: ObjectId, ref: "User" },
+    brand: { type: ObjectId, ref: "Brand" },
+    subBrand: { type: ObjectId, ref: "subBrand" },
+    name: { type: String },
+    address: { type: String },
+    area: { type: String },
+    landMark: { type: String },
+    state: { type: String },
+    city: { type: String },
+    pinCode: { type: String },
+    country: { type: String },
+    street: { type: String },
+    formattedAddress: { type: String },
     location: {
-        type: {
-            type: String,
-            enum: ['Point'],
-            // required: true,
-            default: 'Point'
-        },
-        coordinates: {
-            type: [Number], // [longitude, latitude]
-            // required: true
-        }
-    }
-}, { timestamps: true });
+      type: {
+        type: String,
+        enum: ["Point"],
+        // required: true,
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+        // required: true
+      },
+    },
+  },
+  { timestamps: true, versionKey: false }
+);
 
-// Create 2dsphere index for geospatial queries
-LocationSchema.index({ location: '2dsphere' });
+LocationSchema.index({ location: "2dsphere" });
 
-const Location = mongoose.model('Location', LocationSchema);
-module.exports = Location;
+module.exports = mongoose.model("Location", LocationSchema);

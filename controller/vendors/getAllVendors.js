@@ -1,11 +1,10 @@
-const User = require("../../model/User");
-const { ROLES } = require("../../constants");
+const Brand = require("../../model/Brand");
 
 const getAllVendors = async (req, res) => {
   const id = req?.params?.id;
   try {
     if (id) {
-      const result = await User.findById(id).populate("brand");
+      const result = await Brand.findById(id).populate("user");
       if (result) {
         return res
           .status(200)
@@ -13,9 +12,7 @@ const getAllVendors = async (req, res) => {
       }
       return res.status(404).json({ msg: "Vendor not found", success: false });
     }
-    const result = await User.find({ role: ROLES.VENDOR })
-      .sort({ createdAt: -1 })
-      .populate("brand");
+    const result = await Brand.find().sort({ createdAt: -1 }).populate("user");
     if (result) {
       return res
         .status(200)
