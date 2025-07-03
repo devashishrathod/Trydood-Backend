@@ -15,9 +15,9 @@ exports.logout = async (req, res) => {
     //     : firebaseTopics.SEND_TO_ALL_STAGING,
     //   [token]
     // );
-    return sendSuccess(res, "Logout successful");
+    return sendSuccess(res, 200, "Logout successful");
   } catch (error) {
     console.error("Error during logout:", error);
-    return sendError(res, error);
+    return sendError(res, 500, error.message);
   }
 };

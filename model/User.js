@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
-const { generateUniqueUserId } = require("../service/userServices");
-const { generateReferralCode } = require("../utils");
+
 const { DefaultImages, ROLES } = require("../constants");
 
 const userSchema = new mongoose.Schema(
@@ -67,17 +66,5 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true, versionKey: false }
 );
-
-userSchema.pre("save", async function (next) {
-  if (this.isNew) {
-    if (!this.uniqueId) {
-      this.uniqueId = await generateUniqueUserId();
-    }
-    if (!this.referCode) {
-      this.referCode = generateReferralCode(6);
-    }
-  }
-  next();
-});
 
 module.exports = mongoose.model("User", userSchema);

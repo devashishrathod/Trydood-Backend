@@ -1,3 +1,4 @@
 const { getAllVendors } = require("./getAllVendors");
+const { addBrand } = require("./addBrandAsVendor");
 
-module.exports = { getAllVendors };
+module.exports = { getAllVendors, addBrand };

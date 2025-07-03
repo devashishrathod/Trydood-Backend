@@ -1,8 +1,19 @@
 const { ROLES } = require("../../constants");
-const { getBrandByName } = require("../../service/brandServices");
 const { sendError, sendSuccess } = require("../../utils/response");
+const { getUserByPan } = require("../../service/userServices");
+const {
+  createBrand,
+  getBrandByName,
+  generateUniqueBrandId,
+} = require("../../service/brandServices");
+const {
+  addGst,
+  getGstByNumber,
+  updateGstByNumber,
+} = require("../../service/gstServices");
 const { isValidPAN, isValidGSTIN } = require("../../validator/common");
 
+// Add a new brand by Brand Vendor
 exports.addBrand = async (req, res) => {
   try {
     const brandVendor = req?.payload;
@@ -38,9 +49,10 @@ exports.addBrand = async (req, res) => {
 
     panNumber = panNumber?.toUpperCase();
     gstNumber = gstNumber?.toUpperCase();
+    let brandGst = null;
     if (panNumber) {
       const isValid = isValidPAN(panNumber);
-      const checkPan = isValid ? await User.findOne({ panNumber }) : null;
+      const checkPan = isValid ? await getUserByPan(panNumber) : null;
       if (!isValid || checkPan) {
         const message = !isValid
           ? "Invalid PAN number"
@@ -49,30 +61,28 @@ exports.addBrand = async (req, res) => {
       }
     }
     if (gstNumber && isValidGSTIN(gstNumber)) {
-      const checkGst = await Gst.findOne({ gstNumber: gstNumber });
-      if (!checkGst) {
-        const gst = new Gst({
-          companyName,
-          gstNumber,
-          zipCode,
-          user: brandVendor._id,
-        });
-        await gst.save();
-        brandVendor.gst = gst._id;
-      }
+      const checkGst = await getGstByNumber(gstNumber);
+      if (checkGst) return sendError(res, 409, "Gst already exists");
+      const gstData = {
+        gstNumber,
+        panNumber: panNumber ? panNumber : null,
+        companyName,
+        user: brandVendor._id,
+      };
+      brandGst = await addGst(gstData);
     }
-    const newBrand = new Brand({
+    const brandData = {
       name,
       slogan,
       companyName,
-      companyEmail,
-      whatsappNumber,
-      panNumber,
-      gstNumber,
+      companyEmail: companyEmail ? companyEmail : brandVendor?.email,
+      whatsappNumber: whatsappNumber ? whatsappNumber : brandVendor.mobile,
+      panNumber: panNumber ? panNumber : null,
+      gst: brandGst ? brandGst._id : null,
       referMarketId,
       referMarketMobile,
       user: brandVendor._id,
-      gst: gst,
+      uniqueId: await generateUniqueBrandId(),
       // location: location._id,
       // workHours: workingHours._id,
       // logo: brand.logo,
@@ -82,7 +92,9 @@ exports.addBrand = async (req, res) => {
       // description: brand.description,
       // marketPermission: brand.marketPermission,
       // isActive: brand.isActive,
-    });
+    };
+    const newBrand = await createBrand(brandData);
+    if (brandGst) await updateGstByNumber(gstNumber, { brand: newBrand._id });
     return sendSuccess(res, 201, "Brand added successfully", newBrand);
   } catch (error) {
     console.log("error on addBrand: ", error);

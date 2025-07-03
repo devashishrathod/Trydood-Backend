@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
-const { generateUniqueBrandId } = require("../service/brandServices");
 
 const brandSchema = new mongoose.Schema(
   {
@@ -39,12 +38,5 @@ const brandSchema = new mongoose.Schema(
   },
   { timestamps: true, versionKey: false }
 );
-
-brandSchema.pre("save", function (next) {
-  if (this.isNew && !this.uniqueId) {
-    this.uniqueId = generateUniqueBrandId();
-  }
-  next();
-});
 
 module.exports = mongoose.model("Brand", brandSchema);

@@ -188,6 +188,7 @@ exports.verifyOtp = async (req, res) => {
   const otp = req.body.otp;
   const mobile = req.body?.mobile;
   const fcmToken = req.body?.fcmToken;
+  const currentScreen = req.body?.currentScreen;
   try {
     const checkUser = await User.findOne({ mobile });
     if (!checkUser) {
@@ -204,6 +205,7 @@ exports.verifyOtp = async (req, res) => {
          } */
     // return res.status(200).json({ success: true, msg: 'Verification successful', data: "result 1234", token })
     if (result?.Status == "Success") {
+      if (currentScreen) checkUser.currentScreen = currentScreen;
       checkUser.isMobileVerified = true;
       checkUser.fcmToken = fcmToken;
       await checkUser.save();
@@ -226,15 +228,21 @@ exports.verifyOtp = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  let {role, mobile} = req.body;
+  let { role, mobile } = req.body;
   try {
-     role = role || "user";
+    role = role || "user";
     let checkUser = await User.findOne({ mobile });
     let isFirst = false;
     if (!checkUser) {
       isFirst = true;
       // const referCode = generateReferralCode(6);
-      checkUser = new User({ mobile, role });
+
+      checkUser = new User({
+        mobile,
+        role,
+        uniqueId: await generateUniqueUserId(),
+        referCode: generateReferralCode(6),
+      });
       // return res.status(401).json({ error: "Invalid credentials", success: false, msg: "User not found" })
     }
     checkUser.fcmToken = req.body?.fcmToken;
@@ -246,7 +254,7 @@ exports.login = async (req, res) => {
       msg: "OTP sent to your mobile number successfully.",
       isFirst,
       result,
-      user:checkUser
+      user: checkUser,
     });
   } catch (error) {
     console.log("error on login: ", error);
@@ -357,7 +365,7 @@ exports.verifyVendorMobileNumber = async (req, res) => {
     }
     const result = await User.create({
       mobile,
-      role: "vendor"
+      role: "vendor",
     });
     if (result) {
       return res
