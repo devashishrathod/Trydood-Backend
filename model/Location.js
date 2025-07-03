@@ -7,6 +7,7 @@ const LocationSchema = new mongoose.Schema(
     brand: { type: ObjectId, ref: "Brand" },
     subBrand: { type: ObjectId, ref: "subBrand" },
     name: { type: String },
+    shopOrBuildingNumber: { type: String },
     address: { type: String },
     area: { type: String },
     landMark: { type: String },
@@ -20,12 +21,10 @@ const LocationSchema = new mongoose.Schema(
       type: {
         type: String,
         enum: ["Point"],
-        // required: true,
         default: "Point",
       },
       coordinates: {
         type: [Number], // [longitude, latitude]
-        // required: true
       },
     },
   },

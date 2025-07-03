@@ -1,27 +1,41 @@
 // exports.addSubBrand = async (req, res) => {
-//   const name = req.body?.name;
-//   const slogan = req.body?.slogan;
-//   const email = req.body?.email;
-//   const mobile = req.body?.mobile;
-//   const whatsappNumber = req.body?.whatsappNumber;
-//   const category = req.body?.category;
-//   const subCategory = req.body?.subCategory;
-//   const descrpition = req.body?.descrpition;
+//   const brandId = req.params.brandId;
+
+//   const {
+//     shopOrBuildingNumber,
+//     address,
+//     state,
+//     city,
+//     email,
+//     pinCode,
+//     mobile,
+//     whatsappNumber,
+//     category,
+//     subCategory,
+//     description,
+//   } = req.body;
+
+//   // const email = req.body?.email;
+//   //   const mobile = req.body?.mobile;
+//   //   const whatsappNumber = req.body?.whatsappNumber;
+//   //   const category = req.body?.category;
+//   //   const subCategory = req.body?.subCategory;
+//   //   const descrpition = req.body?.descrpition;
 //   // location
-//   const address = req.body?.address;
-//   const state = req.body?.state;
-//   const city = req.body?.city;
-//   const pinCode = req.body?.pinCode;
+//   //   const address = req.body?.address;
+//   //   const state = req.body?.state;
+//   //   const city = req.body?.city;
+//   //   const pinCode = req.body?.pinCode;
 //   // gst
-//   const companyName = req.body?.companyName;
-//   const gstNumber = req.body?.gstNumber;
-//   const zipCode = req.body?.zipCode;
+//   //   const companyName = req.body?.companyName;
+//   //   const gstNumber = req.body?.gstNumber;
+//   //   const zipCode = req.body?.zipCode;
 
-//   const marketPermission = req.body?.marketPermission;
-//   const isActive = req.body?.isActive;
+//   //   const marketPermission = req.body?.marketPermission;
+//   //   const isActive = req.body?.isActive;
 
-//   const loginEmail = req.body?.loginEmail;
-//   const password = req.body?.password;
+//   //   const loginEmail = req.body?.loginEmail;
+//   //   const password = req.body?.password;
 
 //   const monday =
 //     typeof req.body?.monday == "string"
@@ -36,7 +50,7 @@
 //       ? JSON.parse(req.body?.wednesday)
 //       : req.body?.wednesday;
 //   const thursday =
-//     typeof req.body?.thursday == "bigint"
+//     typeof req.body?.thursday == "string"
 //       ? JSON.parse(req.body?.thursday)
 //       : req.body?.thursday;
 //   const friday =
@@ -52,8 +66,8 @@
 //       ? JSON.parse(req.body?.sunday)
 //       : req.body?.sunday;
 
-//   const logo = req.files?.logo;
-//   const cover = req.files?.cover;
+//   //   const logo = req.files?.logo;
+//   //   const cover = req.files?.cover;
 
 //   try {
 //     const checkBrand = await Brand.findOne({ name: name });

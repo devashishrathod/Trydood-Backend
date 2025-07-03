@@ -1,14 +1,17 @@
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
 const { generateUniqueUserId } = require("../service/userServices");
+const { generateReferralCode } = require("../utils");
 const { DefaultImages, ROLES } = require("../constants");
 
 const userSchema = new mongoose.Schema(
   {
     name: { type: String },
     email: { type: String },
+    isEmailVerified: { type: Boolean, default: false },
     mobile: { type: Number },
-    password: { type: String },
+    isMobileVerified: { type: Boolean, default: false },
+    // password: { type: String },
     address: { type: String },
     dob: { type: String },
     role: {
@@ -16,14 +19,13 @@ const userSchema = new mongoose.Schema(
       enum: [...Object.values(ROLES)],
       default: ROLES.USER,
     },
-    isMobileVerify: { type: Boolean, default: false },
     lastActivity: { type: Date, default: Date.now },
     lastLocation: { lat: Number, lng: Number },
     currentLocation: { lat: Number, lng: Number },
     fcmToken: { type: String },
     referCode: { type: String, unique: true },
     brand: { type: ObjectId, ref: "Brand" },
-    applyReferalCode: { type: String },
+    appliedReferalCode: { type: String },
     followings: [{ type: ObjectId, ref: "User" }],
     followers: [{ type: ObjectId, ref: "User" }],
     blockUsers: [{ type: ObjectId, ref: "User" }],
@@ -50,8 +52,15 @@ const userSchema = new mongoose.Schema(
     workHour: { type: ObjectId, ref: "WorkHours" },
     referUser: { type: ObjectId, ref: "User" },
     isActive: { type: Boolean, default: true },
+    panNumber: {
+      type: String,
+      sparse: true,
+      match: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
+    },
     subscribed: { type: ObjectId, ref: "Subscribed" },
     isSubscribed: { type: Boolean, default: false },
+    currentScreen: { type: String },
+    isSignUpCompleted: { type: Boolean, default: false },
     image: { type: String, default: DefaultImages.profileUrl },
     uniqueId: { type: String, unique: true },
     isDeleted: { type: Boolean, default: false },
@@ -60,8 +69,13 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.pre("save", async function (next) {
-  if (this.isNew && !this.uniqueId) {
-    this.uniqueId = await generateUniqueUserId();
+  if (this.isNew) {
+    if (!this.uniqueId) {
+      this.uniqueId = await generateUniqueUserId();
+    }
+    if (!this.referCode) {
+      this.referCode = generateReferralCode(6);
+    }
   }
   next();
 });

@@ -2,7 +2,7 @@ const { generateToken } = require("../middleware/authValidation");
 const User = require("../model/User");
 const { uploadToCloudinary } = require("../service/uploadImage");
 const bcrypt = require("bcryptjs");
-const { generateReferralCode } = require("../utils/referCode");
+const { generateReferralCode } = require("../utils");
 const Location = require("../model/Location");
 const { urlVerifyOtp, urlSendTestOtp } = require("../service/sendOTP");
 const { calculateProfileCompletion } = require("../utils/utils");
@@ -204,14 +204,15 @@ exports.verifyOtp = async (req, res) => {
          } */
     // return res.status(200).json({ success: true, msg: 'Verification successful', data: "result 1234", token })
     if (result?.Status == "Success") {
-      checkUser.isMobileVerify = true;
+      checkUser.isMobileVerified = true;
       checkUser.fcmToken = fcmToken;
       await checkUser.save();
       const token = await generateToken(checkUser);
       return res.status(200).json({
         success: true,
         msg: "Verification successful",
-        data: result,
+        result,
+        user: checkUser,
         token,
       });
     }
@@ -225,14 +226,15 @@ exports.verifyOtp = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  const mobile = req.body?.mobile;
+  let {role, mobile} = req.body;
   try {
+     role = role || "user";
     let checkUser = await User.findOne({ mobile });
     let isFirst = false;
     if (!checkUser) {
       isFirst = true;
-      const referCode = generateReferralCode(6);
-      checkUser = new User({ mobile, referCode });
+      // const referCode = generateReferralCode(6);
+      checkUser = new User({ mobile, role });
       // return res.status(401).json({ error: "Invalid credentials", success: false, msg: "User not found" })
     }
     checkUser.fcmToken = req.body?.fcmToken;
@@ -244,6 +246,7 @@ exports.login = async (req, res) => {
       msg: "OTP sent to your mobile number successfully.",
       isFirst,
       result,
+      user:checkUser
     });
   } catch (error) {
     console.log("error on login: ", error);
@@ -354,8 +357,7 @@ exports.verifyVendorMobileNumber = async (req, res) => {
     }
     const result = await User.create({
       mobile,
-      role: "vendor",
-      referCode: generateReferralCode(6),
+      role: "vendor"
     });
     if (result) {
       return res

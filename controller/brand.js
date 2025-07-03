@@ -5,7 +5,7 @@ const User = require("../model/User")
 const WorkHours = require("../model/WorkHours")
 const { uploadToCloudinary } = require("../service/uploadImage")
 const bcrypt = require('bcryptjs');
-const { generateReferralCode } = require("../utils/referCode")
+const { generateReferralCode } = require("../utils")
 let salt = 10;
 
 
@@ -58,7 +58,7 @@ exports.addBrand = async (req, res) => {
     const whatsappNumber = req.body?.whatsappNumber
     const category = req.body?.category
     const subCategory = req.body?.subCategory
-    const descrpition = req.body?.descrpition
+    const description = req.body?.description
     // location
     const address = req.body?.address
     const state = req.body?.state
@@ -93,7 +93,7 @@ exports.addBrand = async (req, res) => {
             return res.status(400).json({ success: false, msg: "Brand already exists" })
         }
 
-        const brand = new Brand({ name, slogan, email, mobile, whatsappNumber, category, subCategory, descrpition, marketPermission, isActive, });
+        const brand = new Brand({ name, slogan, email, mobile, whatsappNumber, category, subCategory, description, marketPermission, isActive, });
 
         if (logo) {
             let imageUrl = await uploadToCloudinary(logo.tempFilePath)

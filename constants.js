@@ -3,6 +3,7 @@ module.exports = {
     ADMIN: "admin",
     USER: "user",
     VENDOR: "vendor",
+    SUB_VENDOR: "subVendor",
     MARKETER: "marketer",
   }),
 

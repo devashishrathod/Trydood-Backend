@@ -2,11 +2,10 @@ const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
 const { generateUniqueSubBrandId } = require("../service/subBrandServices");
 
-const SubBrandSchema = new mongoose.Schema(
+const subBrandSchema = new mongoose.Schema(
   {
     user: { type: ObjectId, ref: "User" },
     brand: { type: ObjectId, ref: "Brand" },
-    shopOrBuildingNumber: { type: String },
     name: { type: String },
     logo: { type: String },
     cover: { type: String },
@@ -16,6 +15,7 @@ const SubBrandSchema = new mongoose.Schema(
     category: { type: ObjectId, ref: "Category" },
     subCategory: { type: ObjectId, ref: "SubCategory" },
     description: { type: String },
+    joinedDate: { type: Date, default: Date.now },
     location: { type: ObjectId, ref: "Location" },
     workHours: { type: ObjectId, ref: "WorkHours" },
     gst: { type: ObjectId, ref: "Gst" },
@@ -27,11 +27,11 @@ const SubBrandSchema = new mongoose.Schema(
   { timestamps: true, versionKey: false }
 );
 
-SubBrandSchema.pre("save", function (next) {
-  if (this.isNew) {
+subBrandSchema.pre("save", function (next) {
+  if (this.isNew && !this.uniqueId) {
     this.uniqueId = generateUniqueSubBrandId();
   }
   next();
 });
 
-module.exports = mongoose.model("SubBrand", SubBrandSchema);
+module.exports = mongoose.model("SubBrand", subBrandSchema);
