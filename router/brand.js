@@ -6,7 +6,7 @@ const { getAllBrand, pagination } = require("../controller/brand");
 const { addBrand, updateBrand } = require("../controller/vendors");
 const { ROLES } = require("../constants");
 
-brandRouter.post("/addBrand", addBrand);
+brandRouter.post("/addBrand", verifyToken, checkRole(ROLES.VENDOR), addBrand);
 brandRouter.put(
   "/update/:id",
   verifyToken,

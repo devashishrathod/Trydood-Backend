@@ -1,6 +1,6 @@
 const { ROLES } = require("../../constants");
 const { sendError, sendSuccess } = require("../../utils/response");
-const { getUserByPan } = require("../../service/userServices");
+const { getUserByPan, updateUserById } = require("../../service/userServices");
 const {
   createBrand,
   getBrandByName,
@@ -91,10 +91,13 @@ exports.addBrand = async (req, res) => {
       isSignUpCompleted: true,
     };
     const newBrand = await createBrand(brandData);
+    const updatedUser = await updateUserById(brandVendor._id, {
+      brand: newBrand._id,
+    });
     if (brandGst) await updateGstByNumber(gstNumber, { brand: newBrand._id });
     return sendSuccess(res, 201, "Brand added successfully", {
-      ...newBrand,
-      brandVendor,
+      brand: newBrand,
+      user: updatedUser,
     });
   } catch (error) {
     console.log("error on addBrand: ", error);
