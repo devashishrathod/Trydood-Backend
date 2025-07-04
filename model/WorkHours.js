@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
 
-const WorkHoursSchema = new mongoose.Schema(
+const workHoursSchema = new mongoose.Schema(
   {
     brand: { type: ObjectId, ref: "Brand" },
     user: { type: ObjectId, ref: "User" },
@@ -16,4 +16,4 @@ const WorkHoursSchema = new mongoose.Schema(
   { timestamps: true, versionKey: false }
 );
 
-module.exports = mongoose.model("WorkHours", WorkHoursSchema);
+module.exports = mongoose.model("WorkHours", workHoursSchema);

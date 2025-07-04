@@ -2,18 +2,10 @@ const mongoose = require("mongoose");
 
 const CategorySchema = new mongoose.Schema(
   {
-    firstName: {
-      type: String,
-    },
-    lastName: {
-      type: String,
-    },
-    name: {
-      type: String,
-    },
-    image: {
-      type: String,
-    },
+    firstName: { type: String },
+    lastName: { type: String },
+    name: { type: String },
+    image: { type: String },
     type: {
       type: String,
       enum: ["web", "android", "ios"], // web- vendor , android - user
@@ -24,7 +16,6 @@ const CategorySchema = new mongoose.Schema(
       default: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
-const Category = mongoose.model("Category", CategorySchema);
-module.exports = Category;
+module.exports = mongoose.model("Category", CategorySchema);

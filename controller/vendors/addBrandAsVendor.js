@@ -21,7 +21,8 @@ exports.addBrand = async (req, res) => {
     if (
       !brandVendor ||
       brandVendor.role !== ROLES.VENDOR ||
-      !brandVendor.isMobileVerified
+      !brandVendor.isMobileVerified ||
+      brandVendor.brand
     ) {
       if (!brandVendor) {
         errorMsg = "Access denied. Vendor not found.";
@@ -29,6 +30,8 @@ exports.addBrand = async (req, res) => {
         errorMsg = "Access restricted. Only vendors can perform this action.";
       } else if (!brandVendor.isMobileVerified) {
         errorMsg = "Please verify your mobile number to proceed.";
+      } else if (brandVendor.brand) {
+        errorMsg = "Brand already exists! You can register only a brand";
       }
       return sendError(res, 403, errorMsg);
     }
@@ -42,6 +45,7 @@ exports.addBrand = async (req, res) => {
       gstNumber,
       referMarketId,
       referMarketMobile,
+      currentScreen,
     } = req.body;
 
     const checkBrand = await getBrandByName(name);
@@ -83,19 +87,15 @@ exports.addBrand = async (req, res) => {
       referMarketMobile,
       user: brandVendor._id,
       uniqueId: await generateUniqueBrandId(),
-      // location: location._id,
-      // workHours: workingHours._id,
-      // logo: brand.logo,
-      // cover: brand.cover,
-      // category: brand.category,
-      // subCategory: brand.subCategory,
-      // description: brand.description,
-      // marketPermission: brand.marketPermission,
-      // isActive: brand.isActive,
+      currentScreen,
+      isSignUpCompleted: true,
     };
     const newBrand = await createBrand(brandData);
     if (brandGst) await updateGstByNumber(gstNumber, { brand: newBrand._id });
-    return sendSuccess(res, 201, "Brand added successfully", newBrand);
+    return sendSuccess(res, 201, "Brand added successfully", {
+      ...newBrand,
+      brandVendor,
+    });
   } catch (error) {
     console.log("error on addBrand: ", error);
     return sendError(res, 500, error.message);
