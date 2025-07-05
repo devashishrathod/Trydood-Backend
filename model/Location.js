@@ -31,6 +31,13 @@ const LocationSchema = new mongoose.Schema(
   { timestamps: true, versionKey: false }
 );
 
-LocationSchema.index({ location: "2dsphere" });
+LocationSchema.index(
+  { location: "2dsphere" },
+  {
+    partialFilterExpression: {
+      "location.coordinates": { $exists: true, $type: "array" },
+    },
+  }
+);
 
 module.exports = mongoose.model("Location", LocationSchema);

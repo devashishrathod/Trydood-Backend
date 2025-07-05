@@ -2,6 +2,7 @@ const { sendError, sendSuccess } = require("../../utils");
 const { getCategoryById } = require("../../service/categoryServices");
 const { getBrandByUserAndVendorId } = require("../../service/brandServices");
 const { getSubCategoryById } = require("../../service/subCategoryServices");
+const { getUserByFields } = require("../../service/userServices");
 const {
   createWorkHours,
   getWorkHoursByUserAndBrandId,
@@ -16,6 +17,11 @@ exports.updateBrand = async (req, res) => {
   try {
     const brandId = req.params?.id;
     const userId = req.payload?._id;
+    const checkVendor = await getUserByFields({
+      _id: userId,
+      isDeleted: false,
+    });
+    if (!checkVendor) return sendError(res, 404, "Vendor not found!");
     const checkBrand = await getBrandByUserAndVendorId(brandId, userId);
     if (!checkBrand) return sendError(res, 404, "No brand found!");
     const {
@@ -37,6 +43,8 @@ exports.updateBrand = async (req, res) => {
       friday,
       saturday,
       sunday,
+      currentScreen,
+      isOnBoardingCompleted,
     } = req.body;
     /** ----------- Update Category/Subcategory ------------ */
     if (categoryId || subCategoryId) {
@@ -63,6 +71,9 @@ exports.updateBrand = async (req, res) => {
       lat ||
       lng
     ) {
+      if ((lat && !lng) || (!lat && lng)) {
+        return sendError(res, 409, "Both latitude and longitude are required.");
+      }
       let checkLocation = await getLocationByUserAndBrandId(brandId, userId);
       const locationData = {
         shopOrBuildingNumber,
@@ -72,9 +83,18 @@ exports.updateBrand = async (req, res) => {
         state,
         pinCode,
         landMark,
-        location:
-          lng && lat ? { type: "Point", coordinates: [lng, lat] } : undefined,
       };
+      if (
+        lat !== undefined &&
+        lng !== undefined &&
+        !isNaN(lat) &&
+        !isNaN(lng)
+      ) {
+        locationData.location = {
+          type: "Point",
+          coordinates: [parseFloat(lng), parseFloat(lat)],
+        };
+      }
       if (checkLocation) {
         Object.entries(locationData).forEach(([key, value]) => {
           if (value !== undefined) checkLocation[key] = value;
@@ -87,6 +107,7 @@ exports.updateBrand = async (req, res) => {
           ...locationData,
         });
         checkBrand.location = newLocation._id;
+        checkVendor.location = newLocation._id;
       }
     }
     /** ----------- Update/Add Working Hours ------------ */
@@ -124,12 +145,24 @@ exports.updateBrand = async (req, res) => {
         checkBrand.workHours = newWorking._id;
       }
     }
+    if (currentScreen) {
+      checkBrand.currentScreen = currentScreen;
+      checkVendor.currentScreen = currentScreen;
+    }
+    if (isOnBoardingCompleted) {
+      checkBrand.isOnBoardingCompleted = isOnBoardingCompleted;
+      checkVendor.isOnBoardingCompleted = isOnBoardingCompleted;
+    }
     const updatedBrand = await checkBrand.save();
+    const updatedUser = await checkVendor.save();
     return sendSuccess(
       res,
       200,
-      "Brand details updated successfully.",
-      updatedBrand
+      "Brand and Vendor details updated successfully.",
+      {
+        brand: updatedBrand,
+        user: updatedUser,
+      }
     );
   } catch (error) {
     console.log("Error in updateBrandDetails:", error);
