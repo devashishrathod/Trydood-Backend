@@ -48,7 +48,7 @@ exports.updateBrand = async (req, res) => {
       area,
       city,
       state,
-      pinCode,
+      zipCode,
       landMark,
       lat,
       lng,
@@ -93,7 +93,7 @@ exports.updateBrand = async (req, res) => {
       area ||
       city ||
       state ||
-      pinCode ||
+      zipCode ||
       landMark ||
       lat ||
       lng
@@ -108,7 +108,7 @@ exports.updateBrand = async (req, res) => {
         area,
         city,
         state,
-        pinCode,
+        zipCode,
         landMark,
       };
       if (

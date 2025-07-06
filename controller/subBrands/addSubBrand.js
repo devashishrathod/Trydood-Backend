@@ -7,7 +7,7 @@
 //     state,
 //     city,
 //     email,
-//     pinCode,
+//     zipCode,
 //     mobile,
 //     whatsappNumber,
 //     category,
@@ -25,7 +25,7 @@
 //   //   const address = req.body?.address;
 //   //   const state = req.body?.state;
 //   //   const city = req.body?.city;
-//   //   const pinCode = req.body?.pinCode;
+//   //   const zipCode = req.body?.zipCode;
 //   // gst
 //   //   const companyName = req.body?.companyName;
 //   //   const gstNumber = req.body?.gstNumber;
@@ -112,7 +112,7 @@
 //       address,
 //       state,
 //       city,
-//       pinCode,
+//       zipCode,
 //       brand: brand._id,
 //       location: {
 //         type: "Point",
