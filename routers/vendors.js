@@ -1,41 +1,40 @@
 const express = require("express");
-const vendorRouter = express.Router();
-
+const router = express.Router();
 const { ROLES } = require("../constants");
+
 const {
   registerVendor,
   addCategorySubCategory,
   addLocation,
   addWorking,
 } = require("../controller/vendor");
+const { getAllVendors } = require("../controller/vendors");
 const { verifyToken, checkRole } = require("../middleware/authValidation");
 
-const { getAllVendors } = require("../controller/vendors");
-
-vendorRouter.post("/register", registerVendor);
-vendorRouter.get(
+router.post("/register", registerVendor);
+router.get(
   "/getAllVendors",
   verifyToken,
   checkRole(ROLES.ADMIN),
   getAllVendors
 );
-vendorRouter.put(
-  "/addCategorySubCategory/:id",
+router.put(
+  "/addCategorySubCategory/:id", //id of brand
   verifyToken,
   checkRole("vendor"),
   addCategorySubCategory
-); //id of brand
-vendorRouter.put(
-  "/addLocation/:id",
+);
+router.put(
+  "/addLocation/:id", //id of brand
   verifyToken,
-  checkRole("vendor"),
+  checkRole(ROLES.VENDOR),
   addLocation
-); //id of brand
-vendorRouter.put(
-  "/addWorkHours/:id",
+);
+router.put(
+  "/addWorkHours/:id", //id of brand
   verifyToken,
-  checkRole("vendor"),
+  checkRole(ROLES.VENDOR),
   addWorking
-); //id of brand
+);
 
-module.exports = vendorRouter;
+module.exports = router;

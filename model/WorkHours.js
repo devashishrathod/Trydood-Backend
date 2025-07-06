@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
-const ObjectId = mongoose.Types.ObjectId;
+const { userField, brandField } = require("./validMogooseObjectId");
 
 const workHoursSchema = new mongoose.Schema(
   {
-    brand: { type: ObjectId, ref: "Brand" },
-    user: { type: ObjectId, ref: "User" },
+    user: userField,
+    brand: brandField,
     monday: { start: { type: String }, end: { type: String } },
     tuesday: { start: { type: String }, end: { type: String } },
     wednesday: { start: { type: String }, end: { type: String } },
@@ -12,6 +12,8 @@ const workHoursSchema = new mongoose.Schema(
     friday: { start: { type: String }, end: { type: String } },
     saturday: { start: { type: String }, end: { type: String } },
     sunday: { start: { type: String }, end: { type: String } },
+    isActive: { type: Boolean, default: true },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }
 );

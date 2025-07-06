@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
+const { PLATFORMS } = require("../constants");
 
-const CategorySchema = new mongoose.Schema(
+const categorySchema = new mongoose.Schema(
   {
     firstName: { type: String },
     lastName: { type: String },
@@ -8,14 +9,12 @@ const CategorySchema = new mongoose.Schema(
     image: { type: String },
     type: {
       type: String,
-      enum: ["web", "android", "ios"], // web- vendor , android - user
-      default: "web",
+      enum: [...Object.values(PLATFORMS)], // web- vendor , android - user
+      default: PLATFORMS.WEB,
     },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
+    isActive: { type: Boolean, default: true },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }
 );
-module.exports = mongoose.model("Category", CategorySchema);
+module.exports = mongoose.model("Category", categorySchema);

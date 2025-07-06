@@ -1,14 +1,17 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
+const { PLATFORMS } = require("../constants");
 
-const FilterSchema = new mongoose.Schema({
-    name: {
-        type: String
-    },
+const filterSchema = new mongoose.Schema(
+  {
+    name: { type: String },
     type: {
-        type: String,
-        enum: ['web', 'android', 'ios'],
-        default: 'web'
-    }
-}, { timestamps: true })
-const Filter = mongoose.model('Filter', FilterSchema)
-module.exports = Filter
+      type: String,
+      enum: [...Object.values(PLATFORMS)],
+      default: PLATFORMS.WEB,
+    },
+    isDeleted: { type: Boolean, default: false },
+  },
+  { timestamps: true, versionKey: false }
+);
+
+module.exports = mongoose.model("Filter", filterSchema);

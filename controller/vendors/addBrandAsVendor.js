@@ -92,6 +92,7 @@ exports.addBrand = async (req, res) => {
     };
     const newBrand = await createBrand(brandData);
     const updatedUser = await updateUserById(brandVendor._id, {
+      gst: brandGst ? brandGst._id : null,
       brand: newBrand._id,
       currentScreen: currentScreen,
       isSignUpCompleted: true,

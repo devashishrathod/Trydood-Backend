@@ -1,24 +1,46 @@
 const mongoose = require("mongoose");
-const ObjectId = mongoose.Schema.Types.ObjectId;
+const { userField, brandField } = require("./validMogooseObjectId");
+const {
+  isValidGSTIN,
+  isValidPAN,
+  isValidZipCode,
+} = require("../validator/common");
 
-const GstSchema = new mongoose.Schema(
+const gstSchema = new mongoose.Schema(
   {
     companyName: { type: String },
     gstNumber: {
       type: String,
       sparse: true,
-      match: /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/,
+      validate: {
+        validator: isValidGSTIN,
+        message: (props) => `${props.value} is not a valid GST number`,
+      },
     },
     panNumber: {
       type: String,
       sparse: true,
-      match: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
+      validate: {
+        validator: isValidPAN,
+        message: (props) => `${props.value} is not a valid PAN number`,
+      },
     },
-    zipCode: { type: String },
-    user: { type: ObjectId, ref: "User" },
-    brand: { type: ObjectId, ref: "Brand" },
+    country: { type: String, uppercase: true },
+    zipCode: {
+      type: String,
+      validate: {
+        validator: function (v) {
+          return isValidZipCode(this.country, v);
+        },
+        message: (props) =>
+          `${props.value} is not a valid ZIP/postal code for country ${props.instance.country}`,
+      },
+    },
+    user: userField,
+    brand: brandField,
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }
 );
 
-module.exports = mongoose.model("Gst", GstSchema);
+module.exports = mongoose.model("Gst", gstSchema);

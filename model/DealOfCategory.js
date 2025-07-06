@@ -1,21 +1,19 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
+const { PLATFORMS } = require("../constants");
 
-const DealOfCategorySchema = new mongoose.Schema({
-    image: {
-        type: String
-    },
-    name: {
-        type: String
-    },
-    title: {
-        type: String
-    },
+const dealOfCategorySchema = new mongoose.Schema(
+  {
+    image: { type: String },
+    name: { type: String },
+    title: { type: String },
     type: {
-        type: String,
-        enum: ['web', 'android', 'ios'],
-        default: 'web'
-    }
-}, { timestamps: true })
+      type: String,
+      enum: [...Object.values(PLATFORMS)],
+      default: PLATFORMS.WEB,
+    },
+    isDeleted: { type: Boolean, default: false },
+  },
+  { timestamps: true, versionKey: false }
+);
 
-const DealOfCategory = mongoose.model('DealOfCategory', DealOfCategorySchema)
-module.exports = DealOfCategory
+module.exports = mongoose.model("DealOfCategory", dealOfCategorySchema);

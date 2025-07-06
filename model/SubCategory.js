@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const ObjectId = mongoose.Schema.Types.ObjectId;
+const { PLATFORMS } = require("../constants");
+const { categoryField } = require("./validMogooseObjectId");
 
 const subCategorySchema = new mongoose.Schema(
   {
@@ -7,9 +8,10 @@ const subCategorySchema = new mongoose.Schema(
     lastName: { type: String },
     name: { type: String },
     image: { type: String },
-    category: { type: ObjectId, ref: "Category" },
-    type: { type: String, enum: ["web", "android", "ios"] },
+    category: categoryField,
+    type: { type: String, enum: [...Object.values(PLATFORMS)] },
     isActive: { type: Boolean, default: true },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }
 );

@@ -1,24 +1,64 @@
 const mongoose = require("mongoose");
-const ObjectId = mongoose.Types.ObjectId;
+const validator = require("validator");
+const { isValidPhoneNumber, isValidPAN } = require("../validator/common");
 const { generateUniqueSubBrandId } = require("../service/subBrandServices");
+const {
+  userField,
+  brandField,
+  categoryField,
+  subCategoryField,
+  locationField,
+  workHoursField,
+  gstField,
+  bankAccountField,
+} = require("./validMogooseObjectId");
 
 const subBrandSchema = new mongoose.Schema(
   {
-    user: { type: ObjectId, ref: "User" },
-    brand: { type: ObjectId, ref: "Brand" },
     name: { type: String },
     logo: { type: String },
     cover: { type: String },
-    email: { type: String },
-    mobile: { type: Number, unique: true },
-    whatsappNumber: { type: Number },
-    category: { type: ObjectId, ref: "Category" },
-    subCategory: { type: ObjectId, ref: "SubCategory" },
     description: { type: String },
+    email: {
+      type: String,
+      lowercase: true,
+      trim: true,
+      validate: {
+        validator: validator.isEmail,
+        message: (props) => `${props.value} is not a valid email address`,
+      },
+    },
+    mobile: {
+      type: Number,
+      validate: {
+        validator: isValidPhoneNumber,
+        message: (props) => `${props.value} is not a valid mobile number`,
+      },
+    },
+    whatsappNumber: {
+      type: Number,
+      validate: {
+        validator: isValidPhoneNumber,
+        message: (props) => `${props.value} is not a valid WhatsApp number`,
+      },
+    },
+    panNumber: {
+      type: String,
+      sparse: true,
+      validate: {
+        validator: isValidPAN,
+        message: (props) => `${props.value} is not a valid PAN number`,
+      },
+    },
+    user: userField,
+    brand: brandField,
+    category: categoryField,
+    subCategory: subCategoryField,
+    location: locationField,
+    workHours: workHoursField,
+    gst: gstField,
+    bankAccount: bankAccountField,
     joinedDate: { type: Date, default: Date.now },
-    location: { type: ObjectId, ref: "Location" },
-    workHours: { type: ObjectId, ref: "WorkHours" },
-    gst: { type: ObjectId, ref: "Gst" },
     isMarketPermission: { type: Boolean, default: true },
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },

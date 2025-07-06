@@ -7,6 +7,52 @@ module.exports = {
     MARKETER: "marketer",
   }),
 
+  PLATFORMS: Object.freeze({
+    WEB: "web", // Vendor app
+    ANDROID: "android", // Customer app
+    IOS: "ios",
+  }),
+
+  BANK_ACCOUNT_TYPES: Object.freeze({
+    SAVINGS: "savings",
+    CURRENT: "current",
+    SALARY: "salary",
+    FIXED_DEPOSIT: "fixed_deposit",
+    NRE: "nre", // Non-Resident External
+    NRO: "nro", // Non-Resident Ordinary
+    OTHER: "other",
+  }),
+
+  ZIP_CODE_REGEX_MAP: Object.freeze({
+    IN: /^[1-9][0-9]{5}$/, // India (6 digits)
+    US: /^\d{5}(-\d{4})?$/, // USA (ZIP or ZIP+4)
+    CA: /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/, // Canada (A1A 1A1)
+    UK: /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i, // United Kingdom (SW1A 1AA)
+    AU: /^\d{4}$/, // Australia (4 digits)
+    DE: /^\d{5}$/, // Germany
+    FR: /^\d{5}$/, // France
+    IT: /^\d{5}$/, // Italy
+    ES: /^\d{5}$/, // Spain
+    BR: /^\d{5}-?\d{3}$/, // Brazil (12345-678 or 12345678)
+    RU: /^\d{6}$/, // Russia
+  }),
+
+  COUNTRY_NAME_TO_ISO: Object.freeze({
+    india: "IN",
+    unitedstates: "US",
+    usa: "US",
+    canada: "CA",
+    uk: "UK",
+    unitedkingdom: "UK",
+    australia: "AU",
+    germany: "DE",
+    france: "FR",
+    italy: "IT",
+    spain: "ES",
+    brazil: "BR",
+    russia: "RU",
+  }),
+
   DefaultImages: Object.freeze({
     profileUrl:
       "https://res.cloudinary.com/dbrkf1j5w/image/upload/v1750941792/male-avatar_i8f9mx.png",

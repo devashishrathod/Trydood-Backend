@@ -1,6 +1,6 @@
 const Category = require("../../model/Category");
-const { findById } = require("../../db/dbServices");
+const { findOne } = require("../../db/dbServices");
 
 exports.getCategoryById = async (id) => {
-  return await findById(Category, id);
+  return await findOne(Category, { _id: id, isDeleted: false });
 };

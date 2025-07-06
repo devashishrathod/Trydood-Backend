@@ -1,24 +1,20 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
+const { PLATFORMS } = require("../constants");
 
-const ApplicationHomeSchema = new mongoose.Schema({
-    image: {
-        type: String
-    },
-    title: {
-        type: String,
-    },
-    header: {
-        type: String
-    },
-    description: {
-        type: String
-    },
+const applicationHomeSchema = new mongoose.Schema(
+  {
+    image: { type: String },
+    title: { type: String },
+    header: { type: String },
+    description: { type: String },
     type: {
-        type: String,
-        enum: ['web', 'android', 'ios'],
-        default: 'web'
-    }
-}, { timestamps: true })
+      type: String,
+      enum: [...Object.values(PLATFORMS)],
+      default: "web",
+    },
+    isDeleted: { type: Boolean, default: false },
+  },
+  { timestamps: true, versionKey: false }
+);
 
-const ApplicationHome = mongoose.model('ApplicationHome', ApplicationHomeSchema)
-module.exports = ApplicationHome
+module.exports = mongoose.model("ApplicationHome", applicationHomeSchema);

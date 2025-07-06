@@ -2,7 +2,8 @@ const { sendError, sendSuccess } = require("../../utils");
 const { getCategoryById } = require("../../service/categoryServices");
 const { getBrandByUserAndVendorId } = require("../../service/brandServices");
 const { getSubCategoryById } = require("../../service/subCategoryServices");
-const { getUserByFields } = require("../../service/userServices");
+const { addGst, getGstByNumber } = require("../../service/gstServices");
+const { getUserByFields, getUserByPan } = require("../../service/userServices");
 const {
   createWorkHours,
   getWorkHoursByUserAndBrandId,
@@ -11,6 +12,21 @@ const {
   createLacation,
   getLocationByUserAndBrandId,
 } = require("../../service/locationServices");
+const {
+  getBankByUserId,
+  addBankAccount,
+  updateBankAccountById,
+  getBankByAccountNumber,
+} = require("../../service/bankAccountServices");
+const {
+  isValidPAN,
+  isValidGSTIN,
+  isValidAccountNumber,
+  isValidIFSC,
+  isValidMICR,
+  isValidUpiId,
+  isValidAccountType,
+} = require("../../validator/common");
 
 // Update Brand Details
 exports.updateBrand = async (req, res) => {
@@ -43,6 +59,17 @@ exports.updateBrand = async (req, res) => {
       friday,
       saturday,
       sunday,
+      panNumber: rawPanNumber,
+      gstNumber: rawGstNumber,
+      accountType,
+      bankName,
+      branchName,
+      ifscCode,
+      accountNumber,
+      holderName,
+      micrCode,
+      upiId,
+      upiName,
       currentScreen,
       isOnBoardingCompleted,
     } = req.body;
@@ -145,6 +172,131 @@ exports.updateBrand = async (req, res) => {
         checkBrand.workHours = newWorking._id;
       }
     }
+    /** ----------- Update PAN / GST with Validation ------------ */
+    let panNumber = rawPanNumber?.toUpperCase();
+    let gstNumber = rawGstNumber?.toUpperCase();
+    let brandGst = null;
+    if (panNumber) {
+      const isValid = isValidPAN(panNumber);
+      const checkPan = isValid ? await getUserByPan(panNumber) : null;
+      if (!isValid || checkPan) {
+        const message = !isValid
+          ? "Invalid PAN number"
+          : "PAN number already exists";
+        return sendError(res, 400, message);
+      }
+      checkBrand.panNumber = panNumber;
+      checkVendor.panNumber = panNumber;
+    }
+    if (gstNumber) {
+      if (!isValidGSTIN(gstNumber)) {
+        return sendError(res, 400, "Invalid GST number");
+      }
+      const checkGst = await getGstByNumber(gstNumber);
+      if (checkGst) return sendError(res, 409, "GST already exists");
+      const gstData = {
+        gstNumber,
+        panNumber: panNumber || null,
+        companyName: checkBrand.companyName,
+        user: userId,
+        brand: brandId,
+      };
+      brandGst = await addGst(gstData);
+      checkBrand.gst = brandGst._id;
+      checkVendor.gst = brandGst._id;
+    }
+    /** ----------- Add Or Update Bank Account Details ------------ */
+    if (
+      accountType ||
+      bankName ||
+      branchName ||
+      ifscCode ||
+      accountNumber ||
+      holderName ||
+      micrCode ||
+      upiId ||
+      upiName
+    ) {
+      const bankFields = {
+        accountType,
+        bankName,
+        branchName,
+        ifscCode,
+        accountNumber,
+        holderName,
+        micrCode,
+        upiId,
+        upiName,
+      };
+      const hasBankFields = Object.values(bankFields).some(
+        (v) => v !== undefined && v !== null && v !== ""
+      );
+      if (hasBankFields) {
+        const validationMap = [
+          {
+            value: accountType,
+            isValid: isValidAccountType,
+            message: "Invalid account type.",
+          },
+          {
+            value: accountNumber,
+            isValid: isValidAccountNumber,
+            message: "Invalid account number.",
+          },
+          {
+            value: ifscCode,
+            isValid: isValidIFSC,
+            message: "Invalid IFSC code.",
+          },
+          {
+            value: micrCode,
+            isValid: isValidMICR,
+            message: "Invalid MICR Code.",
+          },
+          { value: upiId, isValid: isValidUpiId, message: "Invalid UPI ID." },
+        ];
+        for (const { value, isValid, message } of validationMap) {
+          if (value && !isValid(value)) {
+            return sendError(res, 400, message);
+          }
+        }
+        if (accountNumber) {
+          const existingByAccount = await getBankByAccountNumber(accountNumber);
+          if (
+            existingByAccount &&
+            existingByAccount.user.toString() !== userId.toString()
+          ) {
+            return sendError(
+              res,
+              409,
+              "Account number already exists with another user."
+            );
+          }
+        }
+        const existingBank = await getBankByUserId(userId);
+        const cleanBankFields = {};
+        for (const [key, value] of Object.entries(bankFields)) {
+          if (value !== undefined && value !== null && value !== "") {
+            cleanBankFields[key] = value;
+          }
+        }
+        if (existingBank) {
+          const bankAccount = await updateBankAccountById(
+            existingBank._id,
+            cleanBankFields
+          );
+        } else {
+          const newBankAccount = await addBankAccount({
+            user: userId,
+            brand: brandId,
+            ...cleanBankFields,
+          });
+          checkBrand.bankAccount = newBankAccount._id;
+          checkVendor.bankAccount = newBankAccount._id;
+        }
+      }
+    }
+    /** ----------- Update Current Screen Or OnBoarding Flow ------------ */
     if (currentScreen) {
       checkBrand.currentScreen = currentScreen;
       checkVendor.currentScreen = currentScreen;

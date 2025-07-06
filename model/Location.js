@@ -1,11 +1,15 @@
 const mongoose = require("mongoose");
-const ObjectId = mongoose.Types.ObjectId;
+const {
+  userField,
+  brandField,
+  subBrandField,
+} = require("./validMogooseObjectId");
 
-const LocationSchema = new mongoose.Schema(
+const locationSchema = new mongoose.Schema(
   {
-    user: { type: ObjectId, ref: "User" },
-    brand: { type: ObjectId, ref: "Brand" },
-    subBrand: { type: ObjectId, ref: "subBrand" },
+    user: userField,
+    brand: brandField,
+    subBrand: subBrandField,
     name: { type: String },
     shopOrBuildingNumber: { type: String },
     address: { type: String },
@@ -27,11 +31,12 @@ const LocationSchema = new mongoose.Schema(
         type: [Number], // [longitude, latitude]
       },
     },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }
 );
 
-LocationSchema.index(
+locationSchema.index(
   { location: "2dsphere" },
   {
     partialFilterExpression: {
@@ -40,4 +45,4 @@ LocationSchema.index(
   }
 );
 
-module.exports = mongoose.model("Location", LocationSchema);
+module.exports = mongoose.model("Location", locationSchema);
