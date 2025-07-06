@@ -9,7 +9,7 @@ const categorySchema = new mongoose.Schema(
     image: { type: String },
     type: {
       type: String,
-      enum: [...Object.values(PLATFORMS)], // web- vendor , android - user
+      enum: [...Object.values(PLATFORMS)],
       default: PLATFORMS.WEB,
     },
     isActive: { type: Boolean, default: true },

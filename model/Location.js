@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { isValidZipCode } = require("../validator/common");
 const {
   userField,
   brandField,
@@ -17,10 +18,19 @@ const locationSchema = new mongoose.Schema(
     landMark: { type: String },
     state: { type: String },
     city: { type: String },
-    pinCode: { type: String },
     country: { type: String },
     street: { type: String },
     formattedAddress: { type: String },
+    zipCode: {
+      type: String,
+      validate: {
+        validator: function (v) {
+          return isValidZipCode(this.country, v);
+        },
+        message: (props) =>
+          `${props.value} is not a valid ZIP/postal code for country ${props.instance.country}`,
+      },
+    },
     location: {
       type: {
         type: String,

@@ -1,11 +1,10 @@
 const mongoose = require("mongoose");
-const ObjectId = mongoose.Schema.Types.ObjectId;
+const { BANK_ACCOUNT_TYPES } = require("../constants");
 const {
   userField,
   brandField,
   locationField,
 } = require("./validMogooseObjectId");
-const { BANK_ACCOUNT_TYPES } = require("../constants");
 const {
   isValidAccountNumber,
   isValidIFSC,

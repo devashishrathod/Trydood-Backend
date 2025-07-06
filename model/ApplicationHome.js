@@ -10,7 +10,7 @@ const applicationHomeSchema = new mongoose.Schema(
     type: {
       type: String,
       enum: [...Object.values(PLATFORMS)],
-      default: "web",
+      default: PLATFORMS.WEB,
     },
     isDeleted: { type: Boolean, default: false },
   },

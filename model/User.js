@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-const { isValidPhoneNumber, isValidPAN } = require("../validator/common");
 const { DefaultImages, ROLES } = require("../constants");
+const { isValidPhoneNumber, isValidPAN } = require("../validator/common");
 const {
   userField,
   usersField,
