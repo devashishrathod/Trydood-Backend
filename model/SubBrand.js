@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const { isValidPhoneNumber, isValidPAN } = require("../validator/common");
-const { generateUniqueSubBrandId } = require("../service/subBrandServices");
 const {
   userField,
   brandField,
@@ -66,12 +65,5 @@ const subBrandSchema = new mongoose.Schema(
   },
   { timestamps: true, versionKey: false }
 );
-
-subBrandSchema.pre("save", function (next) {
-  if (this.isNew && !this.uniqueId) {
-    this.uniqueId = generateUniqueSubBrandId();
-  }
-  next();
-});
 
 module.exports = mongoose.model("SubBrand", subBrandSchema);

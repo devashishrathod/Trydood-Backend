@@ -1,3 +1,4 @@
 const { generateUniqueSubBrandId } = require("./generateUniqueSubBrandId");
+const { createSubBrand } = require("./createSubBrand");
 
-module.exports = { generateUniqueSubBrandId };
+module.exports = { createSubBrand, generateUniqueSubBrandId };

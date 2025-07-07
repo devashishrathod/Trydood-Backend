@@ -1,6 +1,15 @@
+const { createLacation } = require("./addLocation");
 const {
   getLocationByUserAndBrandId,
 } = require("./getLocationByUserAndBrandId");
-const { createLacation } = require("./addLocation");
+const {
+  getLocationByBrandAndSubBrandAddress,
+} = require("./getLocationByBrandAndSubBrandAddress");
+const { updateLocationByFields } = require("./updateLocationByFields");
 
-module.exports = { getLocationByUserAndBrandId, createLacation };
+module.exports = {
+  createLacation,
+  getLocationByUserAndBrandId,
+  getLocationByBrandAndSubBrandAddress,
+  updateLocationByFields,
+};

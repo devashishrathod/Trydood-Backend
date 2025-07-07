@@ -11,6 +11,8 @@ const {
   bankAccountField,
   subscribedField,
   brandField,
+  subBrandField,
+  subBrandsField,
 } = require("./validMogooseObjectId");
 
 const userSchema = new mongoose.Schema(
@@ -24,6 +26,8 @@ const userSchema = new mongoose.Schema(
       default: ROLES.USER,
     },
     brand: brandField,
+    subBrand: subBrandField,
+    subBrands: subBrandsField,
     followings: usersField,
     followers: usersField,
     blockUsers: usersField,
