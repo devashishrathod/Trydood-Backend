@@ -47,7 +47,7 @@ exports.addBrand = async (req, res) => {
       referMarketMobile,
       currentScreen,
     } = req.body;
-
+    name = name?.toLowerCase();
     const checkBrand = await getBrandByName(name);
     if (checkBrand) return sendError(res, 409, "Brand already exists");
 
@@ -70,31 +70,36 @@ exports.addBrand = async (req, res) => {
       const gstData = {
         gstNumber,
         panNumber: panNumber ? panNumber : null,
-        companyName,
+        companyName: companyName?.toLowerCase(),
         user: brandVendor._id,
       };
       brandGst = await addGst(gstData);
     }
     const brandData = {
-      name,
-      slogan,
-      companyName,
-      companyEmail: companyEmail ? companyEmail : brandVendor?.email,
-      whatsappNumber: whatsappNumber ? whatsappNumber : brandVendor.mobile,
-      panNumber: panNumber ? panNumber : null,
+      name: name?.toLowerCase(),
+      slogan: slogan?.toLowerCase(),
+      companyName: companyName?.toLowerCase(),
+      companyEmail: companyEmail
+        ? companyEmail?.toLowerCase()
+        : brandVendor?.email,
+      whatsappNumber: whatsappNumber
+        ? whatsappNumber?.toLowerCase()
+        : brandVendor.mobile,
+      panNumber,
       gst: brandGst ? brandGst._id : null,
       referMarketId,
       referMarketMobile,
       user: brandVendor._id,
       uniqueId: await generateUniqueBrandId(),
-      currentScreen,
+      currentScreen: currentScreen?.toUpperCase(),
       isSignUpCompleted: true,
     };
     const newBrand = await createBrand(brandData);
     const updatedUser = await updateUserById(brandVendor._id, {
+      panNumber: panNumber ? panNumber : null,
       gst: brandGst ? brandGst._id : null,
       brand: newBrand._id,
-      currentScreen: currentScreen,
+      currentScreen: currentScreen?.toUpperCase(),
       isSignUpCompleted: true,
     });
     if (brandGst) await updateGstByNumber(gstNumber, { brand: newBrand._id });

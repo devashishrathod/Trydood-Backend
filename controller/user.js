@@ -186,24 +186,15 @@ exports.requistOtp = async (req, res) => {
 exports.verifyOtp = async (req, res) => {
   const sessionId = req.body.sessionId;
   const otp = req.body.otp;
-  const mobile = req.body?.mobile;
+  const mobile = req.body?.mobile?.toLowerCase();
   const fcmToken = req.body?.fcmToken;
-  const currentScreen = req.body?.currentScreen;
+  const currentScreen = req.body?.currentScreen?.toUpperCase();
   try {
     const checkUser = await User.findOne({ mobile });
     if (!checkUser) {
       return res.status(400).json({ success: false, msg: "User not found!" });
     }
     let result = await urlVerifyOtp(sessionId, otp);
-    // checkUser.fcmToken = fcmToken
-
-    /*  if (otp == '123456') {
-             checkUser.isMobileVerify = true
-             const token = await generateToken(checkUser)
-             await checkUser.save()
-             return res.status(200).json({ success: true, msg: 'Verification successful', data: "result 1234", token })
-         } */
-    // return res.status(200).json({ success: true, msg: 'Verification successful', data: "result 1234", token })
     if (result?.Status == "Success") {
       if (currentScreen) checkUser.currentScreen = currentScreen;
       checkUser.isMobileVerified = true;
@@ -230,25 +221,22 @@ exports.verifyOtp = async (req, res) => {
 exports.login = async (req, res) => {
   let { role, mobile } = req.body;
   try {
-    role = role || "user";
+    role = role?.toLowerCase() || "user";
+    mobile = mobile?.toLowerCase();
     let checkUser = await User.findOne({ mobile });
     let isFirst = false;
     if (!checkUser) {
       isFirst = true;
-      // const referCode = generateReferralCode(6);
-
       checkUser = new User({
         mobile,
         role,
         uniqueId: await generateUniqueUserId(),
         referCode: generateReferralCode(6),
       });
-      // return res.status(401).json({ error: "Invalid credentials", success: false, msg: "User not found" })
     }
     checkUser.fcmToken = req.body?.fcmToken;
     await checkUser.save();
     let result = await urlSendTestOtp(mobile);
-    // const token = await generateToken(checkUser)
     return res.status(200).json({
       success: true,
       msg: "OTP sent to your mobile number successfully.",

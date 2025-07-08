@@ -49,7 +49,11 @@ const brandSchema = new mongoose.Schema(
       type: String,
       sparse: true,
       validate: {
-        validator: isValidPAN,
+        validator: function (value) {
+          if (value === null || value === undefined || value === "")
+            return true;
+          return isValidPAN(value);
+        },
         message: (props) => `${props.value} is not a valid PAN number`,
       },
     },

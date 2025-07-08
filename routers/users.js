@@ -24,10 +24,10 @@ router.post("/register", registorUser);
 router.post("/loginEmail", loginEmail);
 router.post("/loginMobile", loginMobile);
 router.post("/requistOtp", requistOtp);
-router.post("/verifyOtp", verifyOtp);
 router.post("/vendorMobileVerify", verifyVendorMobileNumber);
 router.post("/vendorOTPVerify", verifyOTPVendorMobile);
 router.post("/login", login);
+router.post("/verifyOtp", verifyOtp);
 router.put("/logout", verifyToken, logout);
 /* ================= Enhance route with "auth/login" ================== */
 // authRouter.post("/register", registorUser);
