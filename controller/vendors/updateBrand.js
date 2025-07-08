@@ -33,10 +33,7 @@ exports.updateBrand = async (req, res) => {
   try {
     const brandId = req.params?.id;
     const userId = req.payload?._id;
-    const checkVendor = await getUserByFields({
-      _id: userId,
-      isDeleted: false,
-    });
+    const checkVendor = await getUserByFields({ _id: userId });
     if (!checkVendor) return sendError(res, 404, "Vendor not found!");
     const checkBrand = await getBrandByUserAndVendorId(brandId, userId);
     if (!checkBrand) return sendError(res, 404, "No brand found!");

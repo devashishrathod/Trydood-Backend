@@ -14,11 +14,11 @@ const {
 
 const subBrandSchema = new mongoose.Schema(
   {
-    name: { type: String },
+    companyName: { type: String },
     logo: { type: String },
     cover: { type: String },
     description: { type: String },
-    email: {
+    companyEmail: {
       type: String,
       lowercase: true,
       trim: true,
@@ -45,7 +45,11 @@ const subBrandSchema = new mongoose.Schema(
       type: String,
       sparse: true,
       validate: {
-        validator: isValidPAN,
+        validator: function (value) {
+          if (value === null || value === undefined || value === "")
+            return true;
+          return isValidPAN(value);
+        },
         message: (props) => `${props.value} is not a valid PAN number`,
       },
     },
