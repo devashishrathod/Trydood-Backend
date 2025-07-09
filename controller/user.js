@@ -60,7 +60,7 @@ exports.registorUser = async (req, res) => {
                 return res.status(400).json({ success: false, msg: "Admin role is not allowed" });
             }
         } */
-    const uniqueId = generateUniqueUserId();
+    const uniqueId = await generateUniqueUserId();
     const user = new User({
       name,
       email,
@@ -69,6 +69,7 @@ exports.registorUser = async (req, res) => {
       role,
       address,
       uniqueId,
+      referCode: generateReferralCode(6),
     });
 
     if (image) {
