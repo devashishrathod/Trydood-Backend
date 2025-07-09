@@ -1,7 +1,9 @@
 const razorpay = require("../../configs/rajorPay");
-const { createTransaction } = require("../../service/transactionServices");
 const { PAYMENT_STATUS } = require("../../constants");
+const { sendSuccess, sendError } = require("../../utils");
+const { createTransaction } = require("../../service/transactionServices");
 
+// create order and get order Id for payment
 exports.createOrder = async (req, res) => {
   try {
     const { amount, paymentMethod, userId, currency } = req.body;
@@ -24,10 +26,12 @@ exports.createOrder = async (req, res) => {
       razorpayOrderId: order.id,
       receipt: order.receipt,
     });
-
-    res.status(200).json({ success: true, order, transaction });
-  } catch (err) {
-    console.log("error", err);
-    res.status(500).json({ success: false, error: err.message });
+    return sendSuccess(res, 201, "Order created successfully", {
+      order,
+      transaction,
+    });
+  } catch (error) {
+    console.log("error", error);
+    return sendError(res, 500, error.message);
   }
 };

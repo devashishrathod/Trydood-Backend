@@ -1,3 +1,4 @@
 const { createOrder } = require("./createOrder");
+const { verifyTransaction } = require("./verifyTransaction");
 
-module.exports = { createOrder };
+module.exports = { createOrder, verifyTransaction };
