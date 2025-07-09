@@ -18,6 +18,12 @@ router.get(
   checkRole(ROLES.ADMIN),
   getAllVendors
 );
+router.get(
+  "/getAllVendors/:id",
+  verifyToken,
+  checkRole(ROLES.ADMIN),
+  getAllVendors
+);
 router.put(
   "/addCategorySubCategory/:id", //id of brand
   verifyToken,

@@ -14,6 +14,7 @@ module.exports = {
   }),
 
   BANK_ACCOUNT_TYPES: Object.freeze({
+    JOINT: "joint",
     SAVINGS: "savings",
     CURRENT: "current",
     SALARY: "salary",
@@ -22,6 +23,35 @@ module.exports = {
     NRO: "nro", // Non-Resident Ordinary
     OTHER: "other",
   }),
+
+  PAYMENT_STATUS: Object.freeze({
+    CREATED: "created",
+    PAID: "paid",
+    FAILED: "failed",
+  }),
+
+  PAYMENT_METHODS: Object.freeze({
+    CARD: "card",
+    NETBANKING: "netbanking",
+    UPI: "upi",
+    WALLET: "wallet",
+    PAYLATER: "paylater",
+    EMI: "emi",
+    COD: "cod",
+    BANK_TRANSFER: "bank_transfer",
+    CARDLESS_EMI: "cardless_emi",
+  }),
+
+  WALLET_PROVIDERS: Object.freeze([
+    "paytm",
+    "phonepe",
+    "amazonpay",
+    "mobikwik",
+    "freecharge",
+    "jiomoney",
+    "olamoney",
+    "airtelmoney",
+  ]),
 
   ZIP_CODE_REGEX_MAP: Object.freeze({
     IN: /^[1-9][0-9]{5}$/, // India (6 digits)
