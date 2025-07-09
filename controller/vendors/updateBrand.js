@@ -1,9 +1,12 @@
 const { sendError, sendSuccess } = require("../../utils");
 const { getCategoryById } = require("../../service/categoryServices");
-const { getBrandByUserAndVendorId } = require("../../service/brandServices");
 const { getSubCategoryById } = require("../../service/subCategoryServices");
 const { addGst, getGstByNumber } = require("../../service/gstServices");
 const { getUserByFields, getUserByPan } = require("../../service/userServices");
+const {
+  getBrandWithAllDetails,
+  getBrandByUserAndVendorId,
+} = require("../../service/brandServices");
 const {
   createWorkHours,
   getWorkHoursByUserAndBrandId,
@@ -45,6 +48,7 @@ exports.updateBrand = async (req, res) => {
       area,
       city,
       state,
+      country,
       zipCode,
       landMark,
       lat,
@@ -93,7 +97,8 @@ exports.updateBrand = async (req, res) => {
       zipCode ||
       landMark ||
       lat ||
-      lng
+      lng ||
+      country
     ) {
       if ((lat && !lng) || (!lat && lng)) {
         return sendError(res, 409, "Both latitude and longitude are required.");
@@ -105,6 +110,7 @@ exports.updateBrand = async (req, res) => {
         area,
         city,
         state,
+        country,
         zipCode,
         landMark,
       };
@@ -278,10 +284,7 @@ exports.updateBrand = async (req, res) => {
           }
         }
         if (existingBank) {
-          const bankAccount = await updateBankAccountById(
-            existingBank._id,
-            cleanBankFields
-          );
+          await updateBankAccountById(existingBank._id, cleanBankFields);
         } else {
           const newBankAccount = await addBankAccount({
             user: userId,
@@ -302,8 +305,9 @@ exports.updateBrand = async (req, res) => {
       checkBrand.isOnBoardingCompleted = isOnBoardingCompleted;
       checkVendor.isOnBoardingCompleted = isOnBoardingCompleted;
     }
-    const updatedBrand = await checkBrand.save();
+    await checkBrand.save();
     const updatedUser = await checkVendor.save();
+    const updatedBrand = await getBrandWithAllDetails(checkBrand._id);
     return sendSuccess(
       res,
       200,
