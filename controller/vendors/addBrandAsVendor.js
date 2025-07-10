@@ -46,6 +46,7 @@ exports.addBrand = async (req, res) => {
       referMarketId,
       referMarketMobile,
       currentScreen,
+      logo,
     } = req.body;
     name = name?.toLowerCase();
     const checkBrand = await getBrandByName(name);
@@ -92,6 +93,7 @@ exports.addBrand = async (req, res) => {
       user: brandVendor._id,
       uniqueId: await generateUniqueBrandId(),
       currentScreen: currentScreen?.toUpperCase(),
+      logo,
       isSignUpCompleted: true,
     };
     const newBrand = await createBrand(brandData);

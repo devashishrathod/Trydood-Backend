@@ -314,7 +314,7 @@ exports.updateBrand = async (req, res) => {
       "Brand and Vendor details updated successfully.",
       {
         brand: updatedBrand,
-        user: updatedUser,
+        //  user: updatedUser,
       }
     );
   } catch (error) {

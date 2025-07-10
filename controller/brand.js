@@ -9,13 +9,22 @@ const { generateReferralCode } = require("../utils");
 let salt = 10;
 
 exports.getAllBrand = async (req, res) => {
-  const id = req.params?.id;
+  const brandId = req?.params?.id;
+  const userId = req?.payload?._id;
   try {
     if (id) {
-      const result = await Brand.findById(id)
+      const result = await Brand.findOne({
+        _id: brandId,
+        user: userId,
+        isDeleted: false,
+      })
+        .populate("user")
+        .populate("category")
+        .populate("subCategory")
         .populate("location")
         .populate("gst")
-        .populate("workHours");
+        .populate("workHours")
+        .populate("bankAccount");
       if (result) {
         return res
           .status(200)
@@ -23,11 +32,15 @@ exports.getAllBrand = async (req, res) => {
       }
       return res.status(404).json({ msg: "Brand not found", success: false });
     }
-    const result = await Brand.find()
+    const result = await Brand.find({ isDeleted: false })
       .sort({ createdAt: -1 })
+      .populate("user")
+      .populate("category")
+      .populate("subCategory")
       .populate("location")
       .populate("gst")
-      .populate("workHours");
+      .populate("workHours")
+      .populate("bankAccount");
     if (result) {
       return res
         .status(200)
