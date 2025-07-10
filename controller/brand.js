@@ -12,7 +12,7 @@ exports.getAllBrand = async (req, res) => {
   const brandId = req?.params?.id;
   const userId = req?.payload?._id;
   try {
-    if (id) {
+    if (brandId) {
       const result = await Brand.findOne({
         _id: brandId,
         user: userId,
