@@ -5,6 +5,7 @@ const {
   createBrand,
   getBrandByName,
   generateUniqueBrandId,
+  getBrandWithAllDetails,
 } = require("../../service/brandServices");
 const {
   addGst,
@@ -105,9 +106,10 @@ exports.addBrand = async (req, res) => {
       isSignUpCompleted: true,
     });
     if (brandGst) await updateGstByNumber(gstNumber, { brand: newBrand._id });
+    const updatedBrand = await getBrandWithAllDetails(newBrand._id);
     return sendSuccess(res, 201, "Brand added successfully", {
-      brand: newBrand,
-      user: updatedUser,
+      brand: updatedBrand,
+      //  user: updatedUser,
     });
   } catch (error) {
     console.log("error on addBrand: ", error);

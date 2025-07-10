@@ -6,25 +6,15 @@ const WorkHours = require("../model/WorkHours");
 const { uploadToCloudinary } = require("../service/uploadImage");
 const bcrypt = require("bcryptjs");
 const { generateReferralCode } = require("../utils");
+const { getBrandWithAllDetails } = require("../service/brandServices");
 let salt = 10;
 
 exports.getAllBrand = async (req, res) => {
   const brandId = req?.params?.id;
-  const userId = req?.payload?._id;
+  // const userId = req?.payload?._id;
   try {
     if (brandId) {
-      const result = await Brand.findOne({
-        _id: brandId,
-        user: userId,
-        isDeleted: false,
-      })
-        .populate("user")
-        .populate("category")
-        .populate("subCategory")
-        .populate("location")
-        .populate("gst")
-        .populate("workHours")
-        .populate("bankAccount");
+      const result = await getBrandWithAllDetails(brandId);
       if (result) {
         return res
           .status(200)
