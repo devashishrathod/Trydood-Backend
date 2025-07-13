@@ -3,11 +3,13 @@ const { getBrandByName } = require("./getBrandByName");
 const { createBrand } = require("./createBrand");
 const { getBrandByUserAndVendorId } = require("./getBrandByUserAndVendorId");
 const { getBrandById } = require("./getBrandById");
+const { updateBrandById } = require("./updateBrandById");
 const { addSubBrandsToBrand } = require("./addSubBrandsToBrand");
 const { getBrandWithAllDetails } = require("./getBrandWithAllDetails");
 
 module.exports = {
   getBrandById,
+  updateBrandById,
   generateUniqueBrandId,
   createBrand,
   getBrandByName,

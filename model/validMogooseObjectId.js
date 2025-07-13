@@ -27,6 +27,7 @@ module.exports = Object.freeze({
   bankAccountField: refField("BankAccount"),
   subscribedField: refField("Subscribed"),
   subscriptionField: refField("Subscription"),
+  transactionField: refField("Transaction"),
 
   subBrandsField: Object.freeze({
     type: [ObjectId],

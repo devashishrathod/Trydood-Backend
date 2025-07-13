@@ -26,7 +26,8 @@ module.exports = {
 
   PAYMENT_STATUS: Object.freeze({
     CREATED: "created",
-    PAID: "paid",
+    AUTHORIZED: "authorized",
+    CAPTURED: "captured",
     FAILED: "failed",
   }),
 
@@ -52,6 +53,23 @@ module.exports = {
     "olamoney",
     "airtelmoney",
   ]),
+
+  VOUCHER_TYPES: Object.freeze({
+    PERCENTAGE: "percentage",
+    FLAT: "flat",
+    CASHBACK: "cashback",
+  }),
+
+  VOUCHER_STATUS: Object.freeze({
+    DRAFT: "draft",
+    COMPLETED: "completed",
+    ACTIVE: "active",
+    INACTIVE: "inactive",
+    EXPIRED: "expired",
+    USED_UP: "used_up",
+    UPCOMING: "upcoming",
+    DELETED: "deleted",
+  }),
 
   ZIP_CODE_REGEX_MAP: Object.freeze({
     IN: /^[1-9][0-9]{5}$/, // India (6 digits)

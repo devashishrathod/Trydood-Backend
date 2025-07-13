@@ -22,6 +22,15 @@ const brandSchema = new mongoose.Schema(
     cover: { type: String },
     slogan: { type: String },
     description: { type: String },
+    companyEmail: {
+      type: String,
+      lowercase: true,
+      trim: true,
+      validate: {
+        validator: validator.isEmail,
+        message: (props) => `${props.value} is not a valid email address`,
+      },
+    },
     email: {
       type: String,
       lowercase: true,

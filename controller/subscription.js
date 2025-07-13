@@ -86,14 +86,19 @@ exports.getActive = async (req, res) => {
 exports.addSubscription = async (req, res) => {
   const name = req.body?.name;
   const price = req.body?.price;
-  const duration = req.body?.duration;
+  const durationInYears = req.body?.durationInYears;
+  let durationInDays = req.body?.durationInDays;
   const numberOfSubBrands = req.body?.numberOfSubBrands;
   const discount = req.body?.discount;
   try {
+    if (!durationInDays && durationInYears) {
+      durationInDays = durationInYears * 365;
+    }
     const result = await Subscription.create({
       name,
       price,
-      duration,
+      durationInYears,
+      durationInDays,
       numberOfSubBrands,
       discount,
     });
@@ -117,16 +122,21 @@ exports.updateSubscription = async (req, res) => {
   const id = req.params?.id;
   const name = req.body?.name;
   const price = req.body?.price;
-  const duration = req.body?.duration;
+  const durationInYears = req.body?.durationInYears;
+  let durationInDays = req.body?.durationInDays;
   const numberOfSubBrands = req.body?.numberOfSubBrands;
   const discount = req.body?.discount;
   const isActive = req.body?.isActive;
 
   try {
+    if (!durationInDays && durationInYears) {
+      durationInDays = durationInYears * 365;
+    }
     const result = await Subscription.findByIdAndUpdate(id, {
       name,
       price,
-      duration,
+      durationInYears,
+      durationInDays,
       numberOfSubBrands,
       discount,
       isActive,

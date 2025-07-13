@@ -4,7 +4,8 @@ const subscriptionSchema = new mongoose.Schema(
   {
     name: { type: String },
     price: { type: Number },
-    duration: { type: Number },
+    durationInDays: { type: Number },
+    durationInYears: { type: Number },
     numberOfSubBrands: { type: Number },
     discount: { type: Number },
     isActive: { type: Boolean, default: true },

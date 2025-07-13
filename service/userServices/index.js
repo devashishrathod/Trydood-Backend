@@ -1,5 +1,6 @@
 const { createUser } = require("./createUser");
 const { getUserByPan } = require("./getUserByPan");
+const { getUserById } = require("./getUserById");
 const { updateUserById } = require("./updateUserById");
 const { getUserByFields } = require("./getUserByFields");
 const { generateUniqueUserId } = require("./generateUniqueUserId");
@@ -11,6 +12,7 @@ const {
 module.exports = {
   createUser,
   generateUniqueUserId,
+  getUserById,
   getUserByPan,
   updateUserById,
   getUserByFields,
