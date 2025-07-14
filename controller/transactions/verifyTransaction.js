@@ -209,12 +209,9 @@ exports.verifyTransaction = async (req, res) => {
         dueAmount: checkSubscription?.price - paymentDetails?.amount / 100,
         isActive: true,
       };
-      updatedSubscribed = await updateSubscribedAmountById(
-        newSubscribed?._id,
-        amountData
-      );
+      await updateSubscribedAmountById(newSubscribed?._id, amountData);
       const updateBrandAndUserData = {
-        transaction: transactionId,
+        subscribed: newSubscribed?._id,
         isSubscribed: true,
         currentScreen: "HOME_SCREEN",
         isOnBoardingCompleted: true,

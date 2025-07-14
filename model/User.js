@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema(
     gst: gstField,
     workHour: workHoursField,
     referUser: userField,
-    transaction:transactionField,
+    transaction: transactionField,
     password: { type: String },
     email: {
       type: String,

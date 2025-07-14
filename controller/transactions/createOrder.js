@@ -4,8 +4,11 @@ const {
   createTransaction,
   generateUniqueInvoiceId,
 } = require("../../service/transactionServices");
-const { getUserById } = require("../../service/userServices");
-const { getBrandById } = require("../../service/brandServices");
+const { getUserById, updateUserById } = require("../../service/userServices");
+const {
+  getBrandById,
+  updateBrandById,
+} = require("../../service/brandServices");
 const {
   getActiveSubscriptionPlanById,
 } = require("../../service/subscriptionServices");
@@ -76,6 +79,8 @@ exports.createOrder = async (req, res) => {
       createdAtRaw: razorpayOrder?.created_at,
     };
     const transaction = await createTransaction(transactionData);
+    await updateUserById(checkBrand.user, { transaction: transaction?._id });
+    await updateBrandById(brandId, { transaction: transaction?._id });
     return sendSuccess(
       res,
       201,
