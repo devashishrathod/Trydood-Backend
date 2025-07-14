@@ -11,6 +11,7 @@ const {
   subBrandsField,
   bankAccountField,
   subscribedField,
+  transactionField,
 } = require("./validMogooseObjectId");
 
 const brandSchema = new mongoose.Schema(
@@ -74,6 +75,7 @@ const brandSchema = new mongoose.Schema(
     subBrands: subBrandsField,
     bankAccount: bankAccountField,
     subscribed: subscribedField,
+    transaction: transactionField,
     joinedDate: { type: Date, default: Date.now },
     referMarketId: { type: String },
     referMarketMobile: { type: String },

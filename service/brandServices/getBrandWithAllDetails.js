@@ -8,5 +8,7 @@ exports.getBrandWithAllDetails = async (id) => {
     .populate("location")
     .populate("gst")
     .populate("workHours")
-    .populate("bankAccount");
+    .populate("bankAccount")
+    .populate("transaction")
+    .populate("subscribed");
 };

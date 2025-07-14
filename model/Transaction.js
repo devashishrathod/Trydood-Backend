@@ -50,7 +50,6 @@ const transactionSchema = new mongoose.Schema(
     paymentMethod: {
       type: String,
       enum: Object.values(PAYMENT_METHODS),
-      required: true,
     },
     walletProvider: { type: String, enum: WALLET_PROVIDERS },
     razorpayOrderId: { type: String, required: true, unique: true },

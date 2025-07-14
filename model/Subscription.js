@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { SUBSCRIPTION_PLAN_TYPE } = require("../constants");
 
 const subscriptionSchema = new mongoose.Schema(
   {
@@ -8,6 +9,11 @@ const subscriptionSchema = new mongoose.Schema(
     durationInYears: { type: Number },
     numberOfSubBrands: { type: Number },
     discount: { type: Number },
+    type: {
+      type: String,
+      enum: [...Object.values(SUBSCRIPTION_PLAN_TYPE)],
+      default: SUBSCRIPTION_PLAN_TYPE.ANNUAL,
+    },
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
   },

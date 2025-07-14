@@ -54,6 +54,14 @@ module.exports = {
     "airtelmoney",
   ]),
 
+  SUBSCRIPTION_PLAN_TYPE: Object.freeze({
+    MONTHLY: "monthly",
+    QUARTERLY: "quarterly",
+    HALF_YEARLY: "half_yearly",
+    ANNUAL: "annual",
+    DAILY: "daily",
+  }),
+
   VOUCHER_TYPES: Object.freeze({
     PERCENTAGE: "percentage",
     FLAT: "flat",

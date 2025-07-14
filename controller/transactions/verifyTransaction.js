@@ -3,6 +3,7 @@ const { getUserById, updateUserById } = require("../../service/userServices");
 const {
   getBrandById,
   updateBrandById,
+  getBrandWithAllDetails,
 } = require("../../service/brandServices");
 const {
   getTransactionById,
@@ -51,7 +52,7 @@ exports.verifyTransaction = async (req, res) => {
     if (!checkTxn) return sendError(res, 404, "User transaction not found!");
 
     const { user, createdBy, brand, subscription } = checkTxn;
-    if (createdUserId !== createdBy) {
+    if (createdUserId.toString() !== createdBy.toString()) {
       return sendError(
         res,
         404,
@@ -69,6 +70,7 @@ exports.verifyTransaction = async (req, res) => {
       return sendError(res, 404, "Subscription plan not found!");
 
     let newSubscribed;
+    let SubscribedBrand;
     const startDate = new Date();
     const durationInDays = checkSubscription?.durationInDays;
     const durationInYears = checkSubscription?.durationInYears;
@@ -201,7 +203,6 @@ exports.verifyTransaction = async (req, res) => {
       updatedTxnData
     );
     if (!updateTxn) return sendError(res, 404, "Transaction update failed");
-    let updatedSubscribed;
     if (updateTxn?.verified) {
       const amountData = {
         paidAmount: paymentDetails?.amount / 100,
@@ -212,8 +213,15 @@ exports.verifyTransaction = async (req, res) => {
         newSubscribed?._id,
         amountData
       );
-      await updateUserById(user, { isSubscribed: true });
-      await updateBrandById(brand, { isSubscribed: true });
+      const updateBrandAndUserData = {
+        transaction: transactionId,
+        isSubscribed: true,
+        currentScreen: "HOME_SCREEN",
+        isOnBoardingCompleted: true,
+      };
+      await updateUserById(user, updateBrandAndUserData);
+      await updateBrandById(brand, updateBrandAndUserData);
+      SubscribedBrand = await getBrandWithAllDetails(brand);
     } else {
       return sendError(
         res,
@@ -225,10 +233,7 @@ exports.verifyTransaction = async (req, res) => {
       res,
       200,
       "Payment successful! Congratulations — your subscription has been successfully activated",
-      {
-        updateTxn,
-        updatedSubscribed,
-      }
+      { brand: SubscribedBrand }
     );
   } catch (error) {
     console.error("Payment verification error:", error);

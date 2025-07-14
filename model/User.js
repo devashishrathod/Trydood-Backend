@@ -13,6 +13,7 @@ const {
   brandField,
   subBrandField,
   subBrandsField,
+  transactionField,
 } = require("./validMogooseObjectId");
 
 const userSchema = new mongoose.Schema(
@@ -38,6 +39,7 @@ const userSchema = new mongoose.Schema(
     gst: gstField,
     workHour: workHoursField,
     referUser: userField,
+    transaction:transactionField,
     password: { type: String },
     email: {
       type: String,
