@@ -5,13 +5,41 @@ const workHoursSchema = new mongoose.Schema(
   {
     user: userField,
     brand: brandField,
-    monday: { start: { type: String }, end: { type: String } },
-    tuesday: { start: { type: String }, end: { type: String } },
-    wednesday: { start: { type: String }, end: { type: String } },
-    thursday: { start: { type: String }, end: { type: String } },
-    friday: { start: { type: String }, end: { type: String } },
-    saturday: { start: { type: String }, end: { type: String } },
-    sunday: { start: { type: String }, end: { type: String } },
+    monday: {
+      start: { type: String },
+      end: { type: String },
+      isOpen: { type: Boolean, default: false },
+    },
+    tuesday: {
+      start: { type: String },
+      end: { type: String },
+      isOpen: { type: Boolean, default: false },
+    },
+    wednesday: {
+      start: { type: String },
+      end: { type: String },
+      isOpen: { type: Boolean, default: false },
+    },
+    thursday: {
+      start: { type: String },
+      end: { type: String },
+      isOpen: { type: Boolean, default: false },
+    },
+    friday: {
+      start: { type: String },
+      end: { type: String },
+      isOpen: { type: Boolean, default: false },
+    },
+    saturday: {
+      start: { type: String },
+      end: { type: String },
+      isOpen: { type: Boolean, default: false },
+    },
+    sunday: {
+      start: { type: String },
+      end: { type: String },
+      isOpen: { type: Boolean, default: false },
+    },
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
   },

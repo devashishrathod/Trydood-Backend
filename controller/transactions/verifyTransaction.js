@@ -74,10 +74,7 @@ exports.verifyTransaction = async (req, res) => {
     const startDate = new Date();
     const durationInDays = checkSubscription?.durationInDays;
     const durationInYears = checkSubscription?.durationInYears;
-    let endDate = calculateEndDate(startDate, {
-      durationInYears,
-      durationInDays,
-    });
+    let endDate = calculateEndDate(startDate, durationInYears, durationInDays);
     const subscribedData = {
       user,
       brand,
@@ -131,7 +128,7 @@ exports.verifyTransaction = async (req, res) => {
         const totalYears = remainingYears + durationInYears;
         const totalDays = remainingDays + durationInDays;
         const today = new Date();
-        endDate = calculateEndDate(today, { totalYears, totalDays });
+        endDate = calculateEndDate(today, totalYears, totalDays);
         const updatedData = {
           user: user,
           brand: brand,
