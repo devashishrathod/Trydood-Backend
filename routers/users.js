@@ -18,7 +18,11 @@ const {
 const { userProfileComplete } = require("../controller/users/updateUser");
 const { verifyToken } = require("../middleware/authValidation");
 const { isFirst } = require("../middleware/helper");
-const { logout } = require("../controller/users");
+const {
+  logout,
+  changeLoginMobileNumber,
+  verifyChangeMobile,
+} = require("../controller/users");
 
 router.post("/register", registorUser);
 router.post("/loginEmail", loginEmail);
@@ -29,6 +33,8 @@ router.post("/vendorOTPVerify", verifyOTPVendorMobile);
 router.post("/login", login);
 router.post("/verifyOtp", verifyOtp);
 router.put("/logout", verifyToken, logout);
+router.put("/changeMobile", verifyToken, changeLoginMobileNumber);
+router.put("/verifyChangeMobile", verifyToken, verifyChangeMobile);
 /* ================= Enhance route with "auth/login" ================== */
 // authRouter.post("/register", registorUser);
 // authRouter.post("/loginEmail", loginEmail);
