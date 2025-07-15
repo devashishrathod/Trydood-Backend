@@ -1,6 +1,7 @@
 const { urlVerifyOtp } = require("../../service/sendOTP");
 const { sendSuccess, sendError } = require("../../utils");
 const { generateToken } = require("../../middleware/authValidation");
+const { updateBrandById } = require("../../service/brandServices");
 const {
   getUserByFields,
   updateUserById,
@@ -37,6 +38,11 @@ exports.verifyChangeMobile = async (req, res) => {
         currentScreen: currentScreen ? currentScreen : checkUser?.currentScreen,
         isMobileVerified: true,
         fcmToken: fcmToken ? fcmToken : checkUser?.fcmToken,
+        mobile: whatsappNumber,
+        whatsappNumber: whatsappNumber,
+      });
+      await updateBrandById(checkUser?.brand, {
+        currentScreen: currentScreen ? currentScreen : checkUser?.currentScreen,
         mobile: whatsappNumber,
         whatsappNumber: whatsappNumber,
       });
