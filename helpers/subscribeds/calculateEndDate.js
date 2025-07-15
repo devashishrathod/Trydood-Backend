@@ -1,4 +1,4 @@
-exports.calculateEndDate = (startDate, { durationInYears, durationInDays }) => {
+exports.calculateEndDate = (startDate, durationInYears, durationInDays) => {
   const endDate = new Date(startDate);
 
   if (durationInYears) {
