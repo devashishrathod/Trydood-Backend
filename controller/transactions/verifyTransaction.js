@@ -208,6 +208,7 @@ exports.verifyTransaction = async (req, res) => {
       };
       await updateSubscribedAmountById(newSubscribed?._id, amountData);
       const updateBrandAndUserData = {
+        subBrandsLimit: checkSubscription?.numberOfSubBrands,
         subscribed: newSubscribed?._id,
         isSubscribed: true,
         currentScreen: "HOME_SCREEN",

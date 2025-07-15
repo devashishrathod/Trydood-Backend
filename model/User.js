@@ -92,6 +92,8 @@ const userSchema = new mongoose.Schema(
       isLinked: { type: Boolean, default: false },
       authToken: { type: String },
     },
+    subBrandsLimit: { type: Number },
+    subBrandsUsed: { type: Number },
     referCode: { type: String, unique: true },
     appliedReferalCode: { type: String },
     lastActivity: { type: Date, default: Date.now },

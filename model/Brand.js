@@ -76,6 +76,8 @@ const brandSchema = new mongoose.Schema(
     bankAccount: bankAccountField,
     subscribed: subscribedField,
     transaction: transactionField,
+    subBrandsLimit: { type: Number },
+    subBrandsUsed: { type: Number },
     joinedDate: { type: Date, default: Date.now },
     referMarketId: { type: String },
     referMarketMobile: { type: String },

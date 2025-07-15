@@ -1,5 +1,6 @@
 const { ROLES } = require("../../constants");
 const { sendError, sendSuccess, generateReferralCode } = require("../../utils");
+const { getSubscribedById } = require("../../service/subscribedServices");
 const {
   createUser,
   updateUserById,
@@ -15,6 +16,7 @@ const {
 const {
   createSubBrand,
   generateUniqueSubBrandId,
+  // getAllSubBrandsOfOneBrand,
 } = require("../../service/subBrandServices");
 const {
   addSubBrandsToBrand,
@@ -28,6 +30,34 @@ exports.addSubBrand = async (req, res) => {
     const brandId = req?.params?.brandId;
     const checkBrand = await getBrandById(brandId);
     if (!checkBrand) return sendError(res, 404, "Brand not found!");
+    // const vendorSubBrandsLimit = checkBrand?.subBrandsLimit;
+    // const existingSubBrands = await getAllSubBrandsOfOneBrand(brandId);
+    // if (existingSubBrands && existingSubBrands?.length !== 0) {
+    //   if (vendorSubBrandsLimit == existingSubBrands.length) {
+    if (!checkBrand?.isSubscribed) {
+      return sendError(
+        res,
+        403,
+        "Access denied. This feature requires an active subscription. Please subscribe to continue."
+      );
+    } else {
+      const currentSubscribed = await getSubscribedById(checkBrand?.subscribed);
+      if (currentSubscribed && currentSubscribed?.isExpired) {
+        return sendError(
+          res,
+          403,
+          "Your subscription has expired. Please renew or upgrade your plan to continue using this feature."
+        );
+      }
+    }
+    const { subBrandsLimit, subBrandsUsed } = checkBrand;
+    if (subBrandsLimit == subBrandsUsed) {
+      sendError(
+        res,
+        403,
+        "Sub-brand Limit Exceeded! You have reached the maximum number of sub-brands allowed under your current plan. Please upgrade your subscription to add more sub-brands."
+      );
+    }
     let subBrandUserId = null;
     const checkRole = req?.payload?.role;
     if (checkRole == ROLES.SUB_VENDOR) {
@@ -163,36 +193,36 @@ exports.addSubBrand = async (req, res) => {
       isSignUpCompleted: true,
     };
     const newSubBrand = await createSubBrand(subBrandData);
-    if (newSubBrand) {
-      await updateLocationByFields(
-        { brand: brandId, user: subBrandUserId, isDeleted: false },
-        { subBrand: newSubBrand?._id }
-      );
-      newSubBrandLocation.subBrand = newSubBrand?._id;
-      const updateBrandWithAddSubBrands = await addSubBrandsToBrand(
-        brandId,
-        newSubBrand?._id
-      );
-      const updateVendorUser = await addSubBrandsToBrandUser(
-        checkBrand?.user,
-        newSubBrand._id
-      );
-      const updatedSubBrandUser = await updateUserById(subBrandUserId, {
-        brand: brandId,
-        subBrand: newSubBrand?._id,
-        location: newSubBrandLocation?._id,
-        currentScreen: currentScreen?.toUpperCase(),
-        subBrands: undefined,
-        isSignUpCompleted: true,
-      });
-      return sendSuccess(res, 201, "Sub Brand added successfully", {
-        brand: updateBrandWithAddSubBrands,
-        brandUser: updateVendorUser,
-        subBrand: newSubBrand,
-        subBrandUser: updatedSubBrandUser,
-      });
+    if (!newSubBrand) {
+      return sendError(res, 400, "Sub brand not added! try again");
     }
-    return sendError(res, 400, "Sub brand not added! try again");
+    await updateLocationByFields(
+      { brand: brandId, user: subBrandUserId, isDeleted: false },
+      { subBrand: newSubBrand?._id }
+    );
+    newSubBrandLocation.subBrand = newSubBrand?._id;
+    const updateBrandWithAddSubBrands = await addSubBrandsToBrand(
+      brandId,
+      newSubBrand?._id
+    );
+    const updateVendorUser = await addSubBrandsToBrandUser(
+      checkBrand?.user,
+      newSubBrand._id
+    );
+    const updatedSubBrandUser = await updateUserById(subBrandUserId, {
+      brand: brandId,
+      subBrand: newSubBrand?._id,
+      location: newSubBrandLocation?._id,
+      currentScreen: currentScreen?.toUpperCase(),
+      subBrands: undefined,
+      isSignUpCompleted: true,
+    });
+    return sendSuccess(res, 201, "Sub Brand added successfully", {
+      brand: updateBrandWithAddSubBrands,
+      brandUser: updateVendorUser,
+      subBrand: newSubBrand,
+      subBrandUser: updatedSubBrandUser,
+    });
   } catch (error) {
     console.log("error on addBrand: ", error);
     return sendError(res, 500, error.message);

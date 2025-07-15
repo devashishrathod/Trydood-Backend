@@ -1,5 +1,6 @@
 const { urlVerifyOtp } = require("../../service/sendOTP");
 const { sendSuccess, sendError } = require("../../utils");
+const { generateToken } = require("../../middleware/authValidation");
 const {
   getUserByFields,
   updateUserById,
@@ -14,11 +15,6 @@ exports.verifyChangeMobile = async (req, res) => {
       return sendError(res, 400, "User not found");
     }
     let { sessionId, otp, whatsappNumber, fcmToken, currentScreen } = req.body;
-    // const sessionId = req?.body?.sessionId;
-    // const otp = req?.body?.otp;
-    // const whatsappNumber = req?.body?.whatsappNumber?.toLowerCase();
-    // const fcmToken = req?.body?.fcmToken;
-    // const currentScreen = req?.body?.currentScreen?.toUpperCase();
     whatsappNumber = whatsappNumber?.toLowerCase();
     currentScreen = currentScreen?.toUpperCase();
     let updatedUser;
