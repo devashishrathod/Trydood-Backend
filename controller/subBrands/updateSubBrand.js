@@ -168,7 +168,7 @@ exports.updateSubBrand = async (req, res) => {
     return sendSuccess(
       res,
       200,
-      "Brand and Vendor details updated successfully.",
+      "Sub-brand and sub-vendor details updated successfully.",
       { subBrand: updatedSubBrand }
     );
   } catch (error) {
