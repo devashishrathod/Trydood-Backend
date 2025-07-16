@@ -173,6 +173,7 @@ exports.updateBrand = async (req, res) => {
           ...parsedWorking,
         });
         checkBrand.workHours = newWorking._id;
+        checkVendor.workHours = newWorking._id;
       }
     }
     /** ----------- Update PAN / GST with Validation ------------ */
@@ -306,16 +307,13 @@ exports.updateBrand = async (req, res) => {
       checkVendor.isOnBoardingCompleted = isOnBoardingCompleted;
     }
     await checkBrand.save();
-    const updatedUser = await checkVendor.save();
+    await checkVendor.save();
     const updatedBrand = await getBrandWithAllDetails(checkBrand._id);
     return sendSuccess(
       res,
       200,
       "Brand and Vendor details updated successfully.",
-      {
-        brand: updatedBrand,
-        //  user: updatedUser,
-      }
+      { brand: updatedBrand }
     );
   } catch (error) {
     console.log("Error in updateBrandDetails:", error);

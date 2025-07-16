@@ -16,6 +16,7 @@ const {
 const {
   createSubBrand,
   generateUniqueSubBrandId,
+  getSubBrandWithAllDetails,
   // getAllSubBrandsOfOneBrand,
 } = require("../../service/subBrandServices");
 const {
@@ -90,7 +91,7 @@ exports.addSubBrand = async (req, res) => {
       const subBrandUserData = {
         brand: brandOrSubBrandVendor?._id,
         subBrands: undefined,
-        email: brandOrSubBrandVendor?.email,
+        companyEmail: brandOrSubBrandVendor?.companyEmail,
         role: ROLES.SUB_VENDOR,
         whatsappNumber: brandOrSubBrandVendor?.mobile,
         uniqueId: await generateUniqueUserId(),
@@ -201,15 +202,9 @@ exports.addSubBrand = async (req, res) => {
       { subBrand: newSubBrand?._id }
     );
     newSubBrandLocation.subBrand = newSubBrand?._id;
-    const updateBrandWithAddSubBrands = await addSubBrandsToBrand(
-      brandId,
-      newSubBrand?._id
-    );
-    const updateVendorUser = await addSubBrandsToBrandUser(
-      checkBrand?.user,
-      newSubBrand._id
-    );
-    const updatedSubBrandUser = await updateUserById(subBrandUserId, {
+    await addSubBrandsToBrand(brandId, newSubBrand?._id);
+    await addSubBrandsToBrandUser(checkBrand?.user, newSubBrand?._id);
+    await updateUserById(subBrandUserId, {
       brand: brandId,
       subBrand: newSubBrand?._id,
       location: newSubBrandLocation?._id,
@@ -217,11 +212,9 @@ exports.addSubBrand = async (req, res) => {
       subBrands: undefined,
       isSignUpCompleted: true,
     });
+    const updatedSubBrand = await getSubBrandWithAllDetails(newSubBrand?._id);
     return sendSuccess(res, 201, "Sub Brand added successfully", {
-      brand: updateBrandWithAddSubBrands,
-      brandUser: updateVendorUser,
-      subBrand: newSubBrand,
-      subBrandUser: updatedSubBrandUser,
+      subBrand: updatedSubBrand,
     });
   } catch (error) {
     console.log("error on addBrand: ", error);
