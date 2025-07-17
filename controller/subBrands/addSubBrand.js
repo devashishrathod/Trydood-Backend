@@ -23,6 +23,7 @@ const {
 const {
   addSubBrandsToBrand,
   getBrandById,
+  getBrandWithAllDetails,
 } = require("../../service/brandServices");
 
 // Add Sub-Vendor brand by Original/Head Brand Vendor
@@ -253,7 +254,9 @@ exports.addSubBrand = async (req, res) => {
       isSignUpCompleted: true,
     });
     const updatedSubBrand = await getSubBrandWithAllDetails(newSubBrand?._id);
+    const updatedBrand = await getBrandWithAllDetails(brandId);
     return sendSuccess(res, 201, "Sub Brand added successfully", {
+      brand: updatedBrand,
       subBrand: updatedSubBrand,
     });
   } catch (error) {
