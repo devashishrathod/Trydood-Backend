@@ -28,12 +28,7 @@ router.get(
   checkRole(ROLES.VENDOR, ROLES.SUB_VENDOR, ROLES.ADMIN),
   getAllSubBrands
 );
-router.get(
-  "/getAll",
-  verifyToken,
-  checkRole(ROLES.VENDOR, ROLES.SUB_VENDOR, ROLES.ADMIN),
-  getAllSubBrands
-);
+router.get("/getAll", verifyToken, checkRole(ROLES.ADMIN), getAllSubBrands);
 router.get(
   "/getAllSubBrandsOfBrand/:brandId",
   verifyToken,
