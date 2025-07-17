@@ -1,6 +1,7 @@
 const { ROLES } = require("../../constants");
 const { sendError, sendSuccess, generateReferralCode } = require("../../utils");
 const { getSubscribedById } = require("../../service/subscribedServices");
+const { createWorkHours } = require("../../service/workHoursServices");
 const {
   createUser,
   updateUserById,
@@ -60,6 +61,7 @@ exports.addSubBrand = async (req, res) => {
       );
     }
     let subBrandUserId = null;
+    let subBrandUser = null;
     const checkRole = req?.payload?.role;
     if (checkRole == ROLES.SUB_VENDOR) {
       subBrandUserId = brandOrSubBrandVendor?._id;
@@ -98,7 +100,7 @@ exports.addSubBrand = async (req, res) => {
         referCode: generateReferralCode(6),
         isMobileVerified: true,
       };
-      const subBrandUser = await createUser(subBrandUserData);
+      subBrandUser = await createUser(subBrandUserData);
       subBrandUserId = subBrandUser?._id;
     }
     let errorMsg = null;
@@ -140,6 +142,13 @@ exports.addSubBrand = async (req, res) => {
       landMark,
       lat,
       lng,
+      monday,
+      tuesday,
+      wednesday,
+      thursday,
+      friday,
+      saturday,
+      sunday,
     } = req.body;
 
     /** ----------- Add Location ------------ */
@@ -176,6 +185,35 @@ exports.addSubBrand = async (req, res) => {
       user: subBrandUserId,
       ...locationData,
     });
+    //  subBrandUser.location = newSubBrandLocation?._id;
+    /** ----------- Update/Add Working Hours ------------ */
+    let newWorking;
+    const workingFields = {
+      monday,
+      tuesday,
+      wednesday,
+      thursday,
+      friday,
+      saturday,
+      sunday,
+    };
+    const hasWorkingFields = Object.values(workingFields).some(
+      (v) => v !== undefined
+    );
+    if (hasWorkingFields) {
+      const parsedWorking = {};
+      for (const [day, val] of Object.entries(workingFields)) {
+        if (val !== undefined) {
+          parsedWorking[day] = typeof val === "string" ? JSON.parse(val) : val;
+        }
+      }
+      newWorking = await createWorkHours({
+        user: subBrandUserId,
+        brand: brandId,
+        ...parsedWorking,
+      });
+      //   subBrandUser.workHours = newWorking._id;
+    }
     const subBrandData = {
       companyName: companyName
         ? companyName?.toLowerCase()
@@ -189,6 +227,7 @@ exports.addSubBrand = async (req, res) => {
       user: subBrandUserId,
       brand: brandId,
       location: newSubBrandLocation?._id,
+      workHours: newWorking._id,
       uniqueId: await generateUniqueSubBrandId(),
       currentScreen: currentScreen?.toUpperCase(),
       isSignUpCompleted: true,
@@ -201,13 +240,14 @@ exports.addSubBrand = async (req, res) => {
       { brand: brandId, user: subBrandUserId, isDeleted: false },
       { subBrand: newSubBrand?._id }
     );
-    newSubBrandLocation.subBrand = newSubBrand?._id;
+    //  newSubBrandLocation.subBrand = newSubBrand?._id;
     await addSubBrandsToBrand(brandId, newSubBrand?._id);
     await addSubBrandsToBrandUser(checkBrand?.user, newSubBrand?._id);
     await updateUserById(subBrandUserId, {
       brand: brandId,
       subBrand: newSubBrand?._id,
       location: newSubBrandLocation?._id,
+      workHours: newWorking._id,
       currentScreen: currentScreen?.toUpperCase(),
       subBrands: undefined,
       isSignUpCompleted: true,
