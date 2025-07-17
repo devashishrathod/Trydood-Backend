@@ -222,7 +222,7 @@ exports.verifyOtp = async (req, res) => {
 exports.login = async (req, res) => {
   let { role, mobile } = req.body;
   try {
-    role = role?.toLowerCase() || "user";
+    role = role || "user";
     mobile = mobile?.toLowerCase();
     let checkUser = await User.findOne({ mobile });
     let isFirst = false;
