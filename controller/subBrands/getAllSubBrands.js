@@ -16,7 +16,7 @@ exports.getAllSubBrands = async (req, res) => {
         subBrand: findSubBrand,
       });
     }
-    const findAllSubBrands = await getAllSubBrands({ createdAt: -1 });
+    const findAllSubBrands = await getAllSubBrands();
     if (!findAllSubBrands || findAllSubBrands.length === 0) {
       return sendError(res, 404, "No sub brand found.");
     }
