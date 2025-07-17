@@ -18,7 +18,6 @@ const {
   createSubBrand,
   generateUniqueSubBrandId,
   getSubBrandWithAllDetails,
-  // getAllSubBrandsOfOneBrand,
 } = require("../../service/subBrandServices");
 const {
   addSubBrandsToBrand,
@@ -33,10 +32,6 @@ exports.addSubBrand = async (req, res) => {
     const brandId = req?.params?.brandId;
     const checkBrand = await getBrandById(brandId);
     if (!checkBrand) return sendError(res, 404, "Brand not found!");
-    // const vendorSubBrandsLimit = checkBrand?.subBrandsLimit;
-    // const existingSubBrands = await getAllSubBrandsOfOneBrand(brandId);
-    // if (existingSubBrands && existingSubBrands?.length !== 0) {
-    //   if (vendorSubBrandsLimit == existingSubBrands.length) {
     if (!checkBrand?.isSubscribed) {
       return sendError(
         res,
@@ -151,9 +146,7 @@ exports.addSubBrand = async (req, res) => {
       saturday,
       sunday,
     } = req.body;
-
     /** ----------- Add Location ------------ */
-
     if ((lat && !lng) || (!lat && lng)) {
       return sendError(res, 409, "Both latitude and longitude are required.");
     }
@@ -186,7 +179,6 @@ exports.addSubBrand = async (req, res) => {
       user: subBrandUserId,
       ...locationData,
     });
-    //  subBrandUser.location = newSubBrandLocation?._id;
     /** ----------- Update/Add Working Hours ------------ */
     let newWorking;
     const workingFields = {
@@ -213,7 +205,6 @@ exports.addSubBrand = async (req, res) => {
         brand: brandId,
         ...parsedWorking,
       });
-      //   subBrandUser.workHours = newWorking._id;
     }
     const subBrandData = {
       companyName: companyName
@@ -241,7 +232,6 @@ exports.addSubBrand = async (req, res) => {
       { brand: brandId, user: subBrandUserId, isDeleted: false },
       { subBrand: newSubBrand?._id }
     );
-    //  newSubBrandLocation.subBrand = newSubBrand?._id;
     await addSubBrandsToBrand(brandId, newSubBrand?._id);
     await addSubBrandsToBrandUser(checkBrand?.user, newSubBrand?._id);
     await updateUserById(subBrandUserId, {
