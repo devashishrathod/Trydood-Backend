@@ -6,6 +6,11 @@ const {
   getUserByFields,
   updateUserById,
 } = require("../../service/userServices");
+const {
+  getSubBrandByFields,
+  getSubBrandById,
+  updateSubBrandById,
+} = require("../../service/subBrandServices");
 
 // verify OTP and change users Mobile number and generate new token
 exports.verifyChangeMobile = async (req, res) => {
@@ -15,7 +20,14 @@ exports.verifyChangeMobile = async (req, res) => {
     if (!checkUser) {
       return sendError(res, 400, "User not found");
     }
-    let { sessionId, otp, whatsappNumber, fcmToken, currentScreen } = req.body;
+    let {
+      sessionId,
+      otp,
+      whatsappNumber,
+      subBrandId,
+      fcmToken,
+      currentScreen,
+    } = req.body;
     whatsappNumber = whatsappNumber?.toLowerCase();
     currentScreen = currentScreen?.toUpperCase();
     let updatedUser;
@@ -29,6 +41,21 @@ exports.verifyChangeMobile = async (req, res) => {
         "User already exist with this mobile number! Please choose a defferent number"
       );
     }
+    if (subBrandId) {
+      const checksubBrand = await getSubBrandById(subBrandId);
+      if (!checksubBrand)
+        return sendError(res, 404, "No sub-brand/outlet found!");
+      const existingSubBrandWithMobile = await getSubBrandByFields({
+        whatsappNumber: whatsappNumber,
+      });
+      if (existingSubBrandWithMobile) {
+        return sendError(
+          res,
+          404,
+          "Sub-brand already exist  with this mobile number."
+        );
+      }
+    }
     const result = await urlVerifyOtp(sessionId, otp);
     if (result?.Status !== "Success") {
       return sendError(res, 400, "Invalid OTP", result);
@@ -41,11 +68,16 @@ exports.verifyChangeMobile = async (req, res) => {
         mobile: whatsappNumber,
         whatsappNumber: whatsappNumber,
       });
-      await updateBrandById(checkUser?.brand, {
+      const updatedMobile = {
         currentScreen: currentScreen ? currentScreen : checkUser?.currentScreen,
         mobile: whatsappNumber,
         whatsappNumber: whatsappNumber,
-      });
+      };
+      if (subBrandId) {
+        await updateSubBrandById(subBrandId, updatedMobile);
+      } else {
+        await updateBrandById(checkUser?.brand, updatedMobile);
+      }
       const token = await generateToken(updatedUser);
       return sendSuccess(
         res,

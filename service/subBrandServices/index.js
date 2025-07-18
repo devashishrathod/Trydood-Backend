@@ -5,6 +5,7 @@ const { getSubBrandByFields } = require("./getSubBrandByFields");
 const { getAllSubBrandsOfOneBrand } = require("./getAllSubBrandsOfOneBrand");
 const { getSubBrandWithAllDetails } = require("./getSubBrandWithAllDetails");
 const { getAllSubBrands } = require("./getAllSubBrands");
+const { updateSubBrandById } = require("./updateSubBrandById");
 
 module.exports = {
   createSubBrand,
@@ -14,4 +15,5 @@ module.exports = {
   getSubBrandByFields,
   getAllSubBrandsOfOneBrand,
   getSubBrandWithAllDetails,
+  updateSubBrandById,
 };
