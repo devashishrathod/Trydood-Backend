@@ -15,8 +15,9 @@ const imageSchema = new mongoose.Schema(
     subBrand: subBrandField,
     category: categoryField,
     subCategory: subCategoryField,
-    image: { type: String },
+    imageUrl: { type: String },
     type: { type: String, enum: [...Object.values(PLATFORMS)] },
+    isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }

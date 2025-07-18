@@ -164,7 +164,7 @@ exports.updateSubBrand = async (req, res) => {
       checksubBrand.isOnBoardingCompleted = isOnBoardingCompleted;
       checkSubBrandUser.isOnBoardingCompleted = isOnBoardingCompleted;
     }
-    if (isArchive) checksubBrand.isArchive = isArchive;
+    if (isArchive !== undefined) checksubBrand.isArchive = isArchive;
     await checksubBrand.save();
     await checkSubBrandUser.save();
     const updatedSubBrand = await getSubBrandWithAllDetails(subBrandId);

@@ -1,6 +1,6 @@
 const Brand = require("../../model/Brand");
 
-const getAllVendors = async (req, res) => {
+exports.getAllVendors = async (req, res) => {
   const id = req?.params?.id;
   try {
     if (id) {
@@ -26,5 +26,3 @@ const getAllVendors = async (req, res) => {
       .json({ error: error, success: false, msg: error.message });
   }
 };
-
-module.exports = { getAllVendors };

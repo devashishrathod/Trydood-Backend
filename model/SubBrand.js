@@ -10,6 +10,7 @@ const {
   workHoursField,
   gstField,
   bankAccountField,
+  imagesField,
 } = require("./validMogooseObjectId");
 
 const subBrandSchema = new mongoose.Schema(
@@ -61,6 +62,8 @@ const subBrandSchema = new mongoose.Schema(
     workHours: workHoursField,
     gst: gstField,
     bankAccount: bankAccountField,
+    gallery: imagesField,
+    menu: imagesField,
     joinedDate: { type: Date, default: Date.now },
     isMarketPermission: { type: Boolean, default: true },
     isArchive: { type: Boolean, default: false },

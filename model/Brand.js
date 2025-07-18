@@ -12,6 +12,7 @@ const {
   bankAccountField,
   subscribedField,
   transactionField,
+  imagesField,
 } = require("./validMogooseObjectId");
 
 const brandSchema = new mongoose.Schema(
@@ -76,6 +77,8 @@ const brandSchema = new mongoose.Schema(
     bankAccount: bankAccountField,
     subscribed: subscribedField,
     transaction: transactionField,
+    gallery: imagesField,
+    menu: imagesField,
     subBrandsLimit: { type: Number },
     subBrandsUsed: { type: Number },
     joinedDate: { type: Date, default: Date.now },

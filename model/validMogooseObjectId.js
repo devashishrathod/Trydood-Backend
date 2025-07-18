@@ -47,4 +47,13 @@ module.exports = Object.freeze({
       message: (props) => `One or more Users IDs in ${props.value} are invalid`,
     },
   }),
+
+  imagesField: Object.freeze({
+    type: [ObjectId],
+    ref: "Image",
+    validate: {
+      validator: (arr) => Array.isArray(arr) && arr.every(isValidId),
+      message: (props) => `One or more Users IDs in ${props.value} are invalid`,
+    },
+  }),
 });
