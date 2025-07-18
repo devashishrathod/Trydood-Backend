@@ -30,7 +30,7 @@ exports.updateSubBrand = async (req, res) => {
     if (!checksubBrand)
       return sendError(res, 404, "No sub-brand/outlet found!");
     const subBrandOwnerId = checksubBrand?.user;
-    const checkSubBrandUser = getUserById(subBrandOwnerId);
+    const checkSubBrandUser = await getUserById(subBrandOwnerId);
     if (!checkSubBrandUser)
       return sendError(res, 404, "No sub-brand/outlet owner found!");
     const {
@@ -51,6 +51,7 @@ exports.updateSubBrand = async (req, res) => {
       friday,
       saturday,
       sunday,
+      isArchive,
       currentScreen,
       isOnBoardingCompleted,
     } = req.body;
@@ -162,6 +163,7 @@ exports.updateSubBrand = async (req, res) => {
       checksubBrand.isOnBoardingCompleted = isOnBoardingCompleted;
       checkSubBrandUser.isOnBoardingCompleted = isOnBoardingCompleted;
     }
+    if (isArchive) checksubBrand.isArchive = isArchive;
     await checksubBrand.save();
     await checkSubBrandUser.save();
     const updatedSubBrand = await getSubBrandWithAllDetails(subBrandId);

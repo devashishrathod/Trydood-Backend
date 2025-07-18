@@ -63,6 +63,7 @@ const subBrandSchema = new mongoose.Schema(
     bankAccount: bankAccountField,
     joinedDate: { type: Date, default: Date.now },
     isMarketPermission: { type: Boolean, default: true },
+    isArchive: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
     uniqueId: { type: String, unique: true },
