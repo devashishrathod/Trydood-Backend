@@ -23,6 +23,9 @@ exports.createImageForBrandOrSubBrand = async (req, res) => {
     let brand = null;
     let user = null;
     let subBrand = null;
+
+    const imageUrls = Array.isArray(imageUrl) ? imageUrl : [imageUrl];
+
     const brandDoc = await Brand.findOne({ _id: entityId, isDeleted: false });
     if (brandDoc) {
       entityType = "brand";
@@ -42,17 +45,26 @@ exports.createImageForBrandOrSubBrand = async (req, res) => {
       brand = subBrandDoc.brand;
       user = subBrandDoc.user;
     }
-    const image = await createImage({ user, brand, subBrand, imageUrl, type });
+
+    const createdImages = await Promise.all(
+      imageUrls.map((url) =>
+        createImage({ user, brand, subBrand, imageUrl: url, type })
+      )
+    );
+    const newImageIds = createdImages.map((img) => img._id);
+
     const Model = entityType === "brand" ? Brand : SubBrand;
     const entity = await Model.findOne({ _id: entityId, isDeleted: false });
-    entity[fieldType] = [...new Set([...(entity[fieldType] || []), image._id])];
+    entity[fieldType] = [
+      ...new Set([...(entity[fieldType] || []), ...newImageIds]),
+    ];
     await entity.save();
     return sendSuccess(
       res,
       201,
-      `Image added to ${entityType}'s ${fieldType} successfully`,
+      `Images added to ${entityType}'s ${fieldType} successfully`,
       {
-        image,
+        images: createdImages,
         [fieldType]: entity[fieldType],
       }
     );
