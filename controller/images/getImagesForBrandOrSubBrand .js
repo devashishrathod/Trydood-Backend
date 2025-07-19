@@ -5,16 +5,16 @@ const { sendError, sendSuccess } = require("../../utils");
 
 const VALID_FIELDS = ["gallery", "menu"];
 
-exports.getImagesFromFieldOfEntity = async (req, res) => {
+exports.getImagesFromEntity = async (req, res) => {
   try {
     const { entityId } = req.params;
     const { fieldType } = req.query;
 
-    if (!entityId || !fieldType) {
-      return sendError(res, 400, "entityId and fieldType are required");
+    if (!entityId) {
+      return sendError(res, 400, "entityId is required");
     }
 
-    if (!VALID_FIELDS.includes(fieldType)) {
+    if (fieldType && !VALID_FIELDS.includes(fieldType)) {
       return sendError(
         res,
         400,
@@ -26,6 +26,7 @@ exports.getImagesFromFieldOfEntity = async (req, res) => {
       isDeleted: false,
     }).lean();
     let entityType = "brand";
+    let isBrand = true;
 
     if (!entity) {
       entity = await SubBrand.findOne({
@@ -33,24 +34,50 @@ exports.getImagesFromFieldOfEntity = async (req, res) => {
         isDeleted: false,
       }).lean();
       entityType = "subBrand";
+      isBrand = false;
     }
+
     if (!entity) {
       return sendError(res, 404, "No brand or subBrand found with given ID");
     }
-    const imageIds = entity[fieldType] || [];
-    const images = await Image.find({
-      _id: { $in: imageIds },
-      isDeleted: false,
-    }).sort({ createdAt: -1 });
 
-    return sendSuccess(
-      res,
-      200,
-      `Fetched ${fieldType} images for ${entityType}`,
-      { images }
-    );
+    const fetchImages = async (ids) => {
+      const query = {
+        _id: { $in: ids },
+        isDeleted: false,
+      };
+
+      if (isBrand) {
+        query.$or = [{ subBrand: null }, { subBrand: { $exists: false } }];
+      }
+
+      return await Image.find(query).sort({ createdAt: -1 });
+    };
+
+    let result = {};
+
+    if (fieldType) {
+      const ids = entity[fieldType] || [];
+      const images = await fetchImages(ids);
+      result[fieldType] = images;
+    } else {
+      const galleryIds = entity.gallery || [];
+      const menuIds = entity.menu || [];
+
+      const [gallery, menu] = await Promise.all([
+        fetchImages(galleryIds),
+        fetchImages(menuIds),
+      ]);
+
+      result = {
+        gallery,
+        menu,
+      };
+    }
+
+    return sendSuccess(res, 200, `Fetched images from ${entityType}`, result);
   } catch (error) {
-    console.error("Error in getImagesFromFieldOfEntity:", error);
+    console.error("Error in getImagesFromEntity:", error);
     return sendError(res, 500, error.message);
   }
 };
