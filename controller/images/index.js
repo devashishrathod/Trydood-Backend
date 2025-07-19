@@ -2,7 +2,7 @@ const {
   createImageForBrandOrSubBrand,
 } = require("./createImageForBrandOrSubBrand");
 const {
-  getImagesFromFieldOfEntity,
+  getImagesForBrandOrSubBrand,
 } = require("./getImagesForBrandOrSubBrand ");
 
-module.exports = { createImageForBrandOrSubBrand, getImagesFromFieldOfEntity };
+module.exports = { createImageForBrandOrSubBrand, getImagesForBrandOrSubBrand };

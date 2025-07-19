@@ -7,9 +7,8 @@ const FIELD_MAP = ["gallery", "menu"];
 
 exports.createImageForBrandOrSubBrand = async (req, res) => {
   try {
-    const { entityId, fieldType, imageUrl, type } = req.body;
-
-    if (!entityId || !fieldType || !imageUrl || !type) {
+    const { entityId, fieldType, images, type } = req.body;
+    if (!entityId || !fieldType || !images || !type) {
       return sendError(res, 400, "Missing required fields");
     }
     if (!FIELD_MAP.includes(fieldType)) {
@@ -23,9 +22,7 @@ exports.createImageForBrandOrSubBrand = async (req, res) => {
     let brand = null;
     let user = null;
     let subBrand = null;
-
-    const imageUrls = Array.isArray(imageUrl) ? imageUrl : [imageUrl];
-
+    const imageDataArray = Array.isArray(images) ? images : [images];
     const brandDoc = await Brand.findOne({ _id: entityId, isDeleted: false });
     if (brandDoc) {
       entityType = "brand";
@@ -45,14 +42,21 @@ exports.createImageForBrandOrSubBrand = async (req, res) => {
       brand = subBrandDoc.brand;
       user = subBrandDoc.user;
     }
-
     const createdImages = await Promise.all(
-      imageUrls.map((url) =>
-        createImage({ user, brand, subBrand, imageUrl: url, type })
+      imageDataArray.map((img) =>
+        createImage({
+          user,
+          brand,
+          subBrand,
+          imageUrl: img.imageUrl,
+          filename: img.filename,
+          size: img.size,
+          mime: img.mime,
+          type,
+        })
       )
     );
     const newImageIds = createdImages.map((img) => img._id);
-
     const Model = entityType === "brand" ? Brand : SubBrand;
     const entity = await Model.findOne({ _id: entityId, isDeleted: false });
     entity[fieldType] = [

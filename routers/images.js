@@ -6,21 +6,21 @@ const { verifyToken, checkRole } = require("../middleware/authValidation");
 
 const {
   createImageForBrandOrSubBrand,
-  getImagesFromFieldOfEntity,
+  getImagesForBrandOrSubBrand,
 } = require("../controller/images");
 
 router.post(
   "/addImage",
   verifyToken,
-  checkRole(ROLES.ADMIN, ROLES.VENDOR),
+  checkRole(ROLES.ADMIN, ROLES.VENDOR, ROLES.SUB_VENDOR),
   createImageForBrandOrSubBrand
 );
 
 router.get(
   "/getAllImages/:entityId",
   verifyToken,
-  checkRole(ROLES.ADMIN, ROLES.VENDOR),
-  getImagesFromFieldOfEntity
+  checkRole(ROLES.ADMIN, ROLES.VENDOR, ROLES.SUB_VENDOR),
+  getImagesForBrandOrSubBrand
 );
 
 module.exports = router;
