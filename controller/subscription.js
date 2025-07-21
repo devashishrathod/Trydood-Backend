@@ -1,8 +1,4 @@
-const Brand = require("../model/Brand");
-const Subscribed = require("../model/Subscribed");
 const Subscription = require("../model/Subscription");
-const User = require("../model/User");
-const { getEndDate } = require("../utils");
 
 exports.getAllSubscription = async (req, res) => {
   const id = req?.params?.id;
@@ -87,6 +83,7 @@ exports.addSubscription = async (req, res) => {
   const name = req.body?.name;
   const price = req.body?.price;
   const durationInYears = req.body?.durationInYears;
+  const description = req.body?.description;
   let durationInDays = req.body?.durationInDays;
   const numberOfSubBrands = req.body?.numberOfSubBrands;
   const discount = req.body?.discount;
@@ -97,6 +94,7 @@ exports.addSubscription = async (req, res) => {
     const result = await Subscription.create({
       name,
       price,
+      description,
       durationInYears,
       durationInDays,
       numberOfSubBrands,
@@ -122,6 +120,7 @@ exports.updateSubscription = async (req, res) => {
   const id = req.params?.id;
   const name = req.body?.name;
   const price = req.body?.price;
+  const description = req.body?.description;
   const durationInYears = req.body?.durationInYears;
   let durationInDays = req.body?.durationInDays;
   const numberOfSubBrands = req.body?.numberOfSubBrands;
@@ -135,6 +134,7 @@ exports.updateSubscription = async (req, res) => {
     const result = await Subscription.findByIdAndUpdate(id, {
       name,
       price,
+      description,
       durationInYears,
       durationInDays,
       numberOfSubBrands,
@@ -193,67 +193,6 @@ exports.deleteSubscription = async (req, res) => {
       .json({ msg: "Failed to delete subscription!", success: false });
   } catch (error) {
     console.log("error on updateSubscription: ", error);
-    return res
-      .status(500)
-      .json({ error: error, success: false, msg: error.message });
-  }
-};
-
-// =============================== subscribed ===============================
-
-exports.subscribed = async (req, res) => {
-  const userId = req.payload?._id;
-  const id = req?.params?.id; //subscription id
-  const amount = req.body?.amount;
-  try {
-    const checkSubscription = await Subscription.findById(id);
-    if (!checkSubscription) {
-      return res
-        .status(400)
-        .json({ success: false, msg: "Subscription not found" });
-    }
-    const checkUser = await User.findById(userId);
-    if (!checkUser) {
-      return res.status(400).json({ success: false, msg: "User not found" });
-    }
-    if (checkUser.isSubscribed) {
-      return res
-        .status(400)
-        .json({ success: false, msg: "User already subscribed" });
-    }
-
-    const checkBrand = await Brand.findOne({ user: userId });
-
-    const subscribed = new Subscribed({
-      user: userId,
-      brand: id,
-      duration: checkSubscription.duration,
-      startDate: new Date(),
-      price: checkSubscription.price,
-      discount: checkSubscription.discount,
-      paidAmount: amount,
-    });
-    subscribed.endDate = getEndDate(
-      subscribed.startDate,
-      checkSubscription.duration
-    );
-    const result = await subscribed.save();
-    if (result) {
-      checkUser.isSubscribed = true;
-      checkUser.subscribed = subscribed?._id;
-      checkBrand.isSubscribed = true;
-      checkBrand.subscribed = subscribed?._id;
-
-      await checkBrand.save();
-      await checkUser.save();
-
-      return res
-        .status(200)
-        .json({ success: true, msg: "Subscribed successfully" });
-    }
-    return res.status(400).json({ success: false, msg: "Failed to subscribe" });
-  } catch (error) {
-    console.log("error on subscribed: ", error);
     return res
       .status(500)
       .json({ error: error, success: false, msg: error.message });
