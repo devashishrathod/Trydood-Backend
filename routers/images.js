@@ -7,6 +7,7 @@ const { verifyToken, checkRole } = require("../middleware/authValidation");
 const {
   createImageForBrandOrSubBrand,
   getImagesForBrandOrSubBrand,
+  updateImagesForBrandOrSubBrand,
 } = require("../controller/images");
 
 router.post(
@@ -21,6 +22,13 @@ router.get(
   verifyToken,
   checkRole(ROLES.ADMIN, ROLES.VENDOR, ROLES.SUB_VENDOR),
   getImagesForBrandOrSubBrand
+);
+
+router.put(
+  "/updateOrDeleteImages/:entityId",
+  verifyToken,
+  checkRole(ROLES.ADMIN, ROLES.VENDOR, ROLES.SUB_VENDOR),
+  updateImagesForBrandOrSubBrand
 );
 
 module.exports = router;
