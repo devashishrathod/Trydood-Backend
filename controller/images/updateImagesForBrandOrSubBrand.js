@@ -8,7 +8,8 @@ const FIELD_MAP = ["gallery", "menu"];
 
 exports.updateImagesForBrandOrSubBrand = async (req, res) => {
   try {
-    const { entityId, fieldType, newImages, deletedImageIds, type } = req.body;
+    const entityId = req.params?.entityId;
+    const { fieldType, newImages, deletedImageIds, type } = req.body;
     if (!entityId || !fieldType || !type) {
       return sendError(res, 400, "Missing required fields");
     }
