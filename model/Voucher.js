@@ -33,7 +33,7 @@ const voucherSchema = new mongoose.Schema(
     validTill: { type: Date, required: true },
     publishedDate: { type: Date, required: true },
     time: { type: String },
-    voucherId: { type: String },
+    uniqueId: { type: String, required: true },
     isPublished: { type: Boolean, default: true },
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },

@@ -56,4 +56,13 @@ module.exports = Object.freeze({
       message: (props) => `One or more Users IDs in ${props.value} are invalid`,
     },
   }),
+
+  vouchersField: Object.freeze({
+    type: [ObjectId],
+    ref: "Voucher",
+    validate: {
+      validator: (arr) => Array.isArray(arr) && arr.every(isValidId),
+      message: (props) => `One or more Users IDs in ${props.value} are invalid`,
+    },
+  }),
 });

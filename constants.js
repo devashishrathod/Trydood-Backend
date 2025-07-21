@@ -72,7 +72,6 @@ module.exports = {
     DRAFT: "draft",
     COMPLETED: "completed",
     ACTIVE: "active",
-    INACTIVE: "inactive",
     EXPIRED: "expired",
     USED_UP: "used_up",
     UPCOMING: "upcoming",

@@ -17,7 +17,7 @@ const {
 
 const { userProfileComplete } = require("../controller/users/updateUser");
 const { verifyToken } = require("../middleware/authValidation");
-const { isFirst } = require("../middleware/helper");
+const { isFirst } = require("../middleware");
 const {
   logout,
   changeLoginMobileNumber,

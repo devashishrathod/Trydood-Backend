@@ -6,11 +6,11 @@ const {
   getAllSubscription,
   pagination,
   updateSubscription,
-  subscribed,
   addSubscription,
   deleteSubscription,
 } = require("../controller/subscription");
-const { verifyToken, checkRole } = require("../middleware/authValidation");
+
+const { verifyToken, checkRole } = require("../middleware");
 
 router.get("/getAll", getAllSubscription);
 router.get("/getOne/:id", getAllSubscription);
@@ -27,13 +27,6 @@ router.delete(
   verifyToken,
   checkRole(ROLES.ADMIN),
   deleteSubscription
-);
-// ================================ subscribed ===============================
-router.post(
-  "/subscribed/:id", //id will be of subscription
-  verifyToken,
-  checkRole(ROLES.VENDOR),
-  subscribed
 );
 
 module.exports = router;
