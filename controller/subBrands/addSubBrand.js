@@ -3,11 +3,10 @@ const { sendError, sendSuccess, generateReferralCode } = require("../../utils");
 const { getSubscribedById } = require("../../service/subscribedServices");
 const { createWorkHours } = require("../../service/workHoursServices");
 const {
-  createUser,
   updateUserById,
-  getUserByFields,
   generateUniqueUserId,
   addSubBrandsToBrandUser,
+  getUserById,
 } = require("../../service/userServices");
 const {
   createLacation,
@@ -28,7 +27,7 @@ const {
 // Add Sub-Vendor brand by Original/Head Brand Vendor
 exports.addSubBrand = async (req, res) => {
   try {
-    const brandOrSubBrandVendor = req?.payload;
+    const brandVendor = req?.payload;
     const brandId = req?.params?.brandId;
     const checkBrand = await getBrandById(brandId);
     if (!checkBrand) return sendError(res, 404, "Brand not found!");
@@ -56,77 +55,10 @@ exports.addSubBrand = async (req, res) => {
         "Sub-brand Limit Exceeded! You have reached the maximum number of sub-brands allowed under your current plan. Please upgrade your subscription to add more sub-brands."
       );
     }
-    let subBrandUserId = null;
-    let subBrandUser = null;
-    const checkRole = req?.payload?.role;
-    if (checkRole == ROLES.SUB_VENDOR) {
-      subBrandUserId = brandOrSubBrandVendor?._id;
-      brandOrSubBrandVendor.brand = brandId;
-      brandOrSubBrandVendor.save();
-    } else {
-      let existingSubBrandWithMobile = null;
-      const mobile = brandOrSubBrandVendor?.mobile;
-      if (mobile) {
-        existingSubBrandWithMobile = await getUserByFields({
-          whatsappNumber: mobile,
-          role: ROLES.SUB_VENDOR,
-        });
-      }
-      const whatsappNumber = brandOrSubBrandVendor?.whatsappNumber;
-      if (whatsappNumber) {
-        existingSubBrandWithMobile = await getUserByFields({
-          whatsappNumber: whatsappNumber,
-          role: ROLES.SUB_VENDOR,
-        });
-      }
-      if (existingSubBrandWithMobile) {
-        return sendError(
-          res,
-          404,
-          "You are already registered a sub-brand with this mobile number! Please change mobile number and register again"
-        );
-      }
-      const subBrandUserData = {
-        brand: brandOrSubBrandVendor?._id,
-        subBrands: undefined,
-        companyEmail: brandOrSubBrandVendor?.companyEmail,
-        role: ROLES.SUB_VENDOR,
-        whatsappNumber: brandOrSubBrandVendor?.mobile,
-        uniqueId: await generateUniqueUserId(),
-        referCode: generateReferralCode(6),
-        isMobileVerified: true,
-      };
-      subBrandUser = await createUser(subBrandUserData);
-      subBrandUserId = subBrandUser?._id;
-    }
-    let errorMsg = null;
-    if (
-      !brandOrSubBrandVendor ||
-      (brandOrSubBrandVendor?.role !== ROLES.VENDOR &&
-        brandOrSubBrandVendor?.role !== ROLES.SUB_VENDOR) ||
-      !brandOrSubBrandVendor?.isMobileVerified ||
-      !brandOrSubBrandVendor?.brand
-    ) {
-      if (!brandOrSubBrandVendor) {
-        errorMsg = "Access denied. Yendor or Sub-Vendor not found.";
-      } else if (
-        brandOrSubBrandVendor?.role !== ROLES.VENDOR &&
-        brandOrSubBrandVendor?.role !== ROLES.SUB_VENDOR
-      ) {
-        errorMsg =
-          "Access restricted. Only vendor and their Sub-vendors can perform this action.";
-      } else if (!brandOrSubBrandVendor?.isMobileVerified) {
-        errorMsg = "Please verify your mobile number to proceed.";
-      } else if (!brandOrSubBrandVendor?.brand) {
-        errorMsg =
-          "You have not authorized to add sub-brand! Please first register your head brand";
-      }
-      return sendError(res, 403, errorMsg);
-    }
     let {
+      subBrandUserId,
       companyName,
       companyEmail,
-      whatsappNumber,
       currentScreen,
       shopOrBuildingNumber,
       address,
@@ -146,6 +78,40 @@ exports.addSubBrand = async (req, res) => {
       saturday,
       sunday,
     } = req.body;
+
+    const subBrandUser = await getUserById(subBrandUserId);
+    let errorMsg = null;
+    if (
+      !brandVendor ||
+      brandVendor?.role !== ROLES.VENDOR ||
+      !brandVendor?.isMobileVerified ||
+      !brandVendor?.brand ||
+      subBrandUser ||
+      subBrandUser?.isMobileVerified ||
+      subBrandUser?.subBrand
+    ) {
+      if (!brandVendor) {
+        errorMsg = "Access denied. Vendor not found.";
+      } else if (brandVendor?.role !== ROLES.VENDOR) {
+        errorMsg = "Access restricted. Only vendor can perform this action.";
+      } else if (
+        !brandVendor?.isMobileVerified &&
+        subBrandUser?.isMobileVerified
+      ) {
+        errorMsg = "Please verify your mobile number to proceed.";
+      } else if (!brandVendor?.brand) {
+        errorMsg =
+          "You have not authorized to add sub-brand! Please first register your head brand";
+      } else if (
+        subBrandUser?.subBrand !== null ||
+        subBrandUser?.subBrand !== undefined
+      ) {
+        errorMsg =
+          "You are already registered a sub-brand with this mobile number! Please change mobile number and register again";
+      }
+      return sendError(res, 403, errorMsg);
+    }
+
     /** ----------- Add Location ------------ */
     if ((lat && !lng) || (!lat && lng)) {
       return sendError(res, 409, "Both latitude and longitude are required.");
@@ -213,9 +179,7 @@ exports.addSubBrand = async (req, res) => {
       companyEmail: companyEmail
         ? companyEmail?.toLowerCase()
         : checkBrand?.email,
-      whatsappNumber: whatsappNumber
-        ? whatsappNumber?.toLowerCase()
-        : brandOrSubBrandVendor?.mobile,
+      whatsappNumber: subBrandUser?.mobile,
       user: subBrandUserId,
       brand: brandId,
       location: newSubBrandLocation?._id,
@@ -235,11 +199,16 @@ exports.addSubBrand = async (req, res) => {
     await addSubBrandsToBrand(brandId, newSubBrand?._id);
     await addSubBrandsToBrandUser(checkBrand?.user, newSubBrand?._id);
     await updateUserById(subBrandUserId, {
+      companyEmail: companyEmail
+        ? companyEmail?.toLowerCase()
+        : checkBrand?.email,
       brand: brandId,
       subBrand: newSubBrand?._id,
       location: newSubBrandLocation?._id,
       workHours: newWorking._id,
       currentScreen: currentScreen?.toUpperCase(),
+      uniqueId: await generateUniqueUserId(),
+      referCode: generateReferralCode(6),
       subBrands: undefined,
       isSignUpCompleted: true,
     });
