@@ -78,7 +78,6 @@ exports.addSubBrand = async (req, res) => {
       saturday,
       sunday,
     } = req.body;
-
     const subBrandUser = await getUserById(subBrandUserId);
     let errorMsg = null;
     if (
@@ -86,8 +85,8 @@ exports.addSubBrand = async (req, res) => {
       brandVendor?.role !== ROLES.VENDOR ||
       !brandVendor?.isMobileVerified ||
       !brandVendor?.brand ||
-      subBrandUser ||
-      subBrandUser?.isMobileVerified ||
+      !subBrandUser ||
+      !subBrandUser?.isMobileVerified ||
       subBrandUser?.subBrand
     ) {
       if (!brandVendor) {
@@ -95,23 +94,20 @@ exports.addSubBrand = async (req, res) => {
       } else if (brandVendor?.role !== ROLES.VENDOR) {
         errorMsg = "Access restricted. Only vendor can perform this action.";
       } else if (
+        !subBrandUser &&
         !brandVendor?.isMobileVerified &&
-        subBrandUser?.isMobileVerified
+        !subBrandUser?.isMobileVerified
       ) {
         errorMsg = "Please verify your mobile number to proceed.";
       } else if (!brandVendor?.brand) {
         errorMsg =
           "You have not authorized to add sub-brand! Please first register your head brand";
-      } else if (
-        subBrandUser?.subBrand !== null ||
-        subBrandUser?.subBrand !== undefined
-      ) {
+      } else if (subBrandUser?.subBrand) {
         errorMsg =
           "You are already registered a sub-brand with this mobile number! Please change mobile number and register again";
       }
       return sendError(res, 403, errorMsg);
     }
-
     /** ----------- Add Location ------------ */
     if ((lat && !lng) || (!lat && lng)) {
       return sendError(res, 409, "Both latitude and longitude are required.");
