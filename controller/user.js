@@ -230,8 +230,7 @@ exports.login = async (req, res) => {
         fcmToken: fcmToken ? fcmToken : null,
       });
     }
-    // checkUser.fcmToken = req.body?.fcmToken;
-    // await checkUser.save();
+    await checkUser.save();
     let result = await urlSendTestOtp(mobile);
     return res.status(200).json({
       success: true,
