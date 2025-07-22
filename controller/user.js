@@ -161,16 +161,13 @@ exports.loginMobile = async (req, res) => {
 };
 
 exports.requistOtp = async (req, res) => {
-  const mobile = req.body?.mobile;
+  const { mobile, role } = req.body;
   try {
-    const checkUser = await User.findOne({ mobile });
+    const checkUser = await User.findOne({ mobile, role });
     if (!checkUser) {
       return res.status(400).json({ success: false, msg: "User not found!" });
     }
-
     let result = await urlSendTestOtp(mobile);
-    // console.log("result: ", result);
-    // let result
     if (result) {
       return res
         .status(200)
@@ -185,19 +182,16 @@ exports.requistOtp = async (req, res) => {
 };
 
 exports.verifyOtp = async (req, res) => {
-  const sessionId = req.body.sessionId;
-  const otp = req.body.otp;
-  const mobile = req.body?.mobile?.toLowerCase();
-  const fcmToken = req.body?.fcmToken;
-  const currentScreen = req.body?.currentScreen?.toUpperCase();
+  let { sessionId, otp, mobile, role, fcmToken, currentScreen } = req.body;
+  mobile = mobile?.toLowerCase();
   try {
-    const checkUser = await User.findOne({ mobile });
+    const checkUser = await User.findOne({ mobile, role });
     if (!checkUser) {
       return res.status(400).json({ success: false, msg: "User not found!" });
     }
     let result = await urlVerifyOtp(sessionId, otp);
     if (result?.Status == "Success") {
-      if (currentScreen) checkUser.currentScreen = currentScreen;
+      if (currentScreen) checkUser.currentScreen = currentScreen?.toUpperCase();
       checkUser.isMobileVerified = true;
       checkUser.fcmToken = fcmToken;
       await checkUser.save();
@@ -220,11 +214,11 @@ exports.verifyOtp = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  let { role, mobile } = req.body;
+  let { role, mobile, fcmToken } = req.body;
   try {
     role = role || "user";
     mobile = mobile?.toLowerCase();
-    let checkUser = await User.findOne({ mobile });
+    let checkUser = await User.findOne({ mobile, role });
     let isFirst = false;
     if (!checkUser) {
       isFirst = true;
@@ -233,10 +227,11 @@ exports.login = async (req, res) => {
         role,
         uniqueId: await generateUniqueUserId(),
         referCode: generateReferralCode(6),
+        fcmToken: fcmToken ? fcmToken : null,
       });
     }
-    checkUser.fcmToken = req.body?.fcmToken;
-    await checkUser.save();
+    // checkUser.fcmToken = req.body?.fcmToken;
+    // await checkUser.save();
     let result = await urlSendTestOtp(mobile);
     return res.status(200).json({
       success: true,

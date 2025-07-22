@@ -13,6 +13,7 @@ exports.createVoucher = async (req, res) => {
       type,
       status,
       value,
+      discount,
       maxDiscountAmount,
       minOrderAmount,
       usageLimit,
