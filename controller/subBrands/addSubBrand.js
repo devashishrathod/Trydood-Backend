@@ -175,7 +175,7 @@ exports.addSubBrand = async (req, res) => {
       companyEmail: companyEmail
         ? companyEmail?.toLowerCase()
         : checkBrand?.email,
-      whatsappNumber: subBrandUser?.mobile,
+      whatsappNumber: subBrandUser?.whatsappNumber,
       user: subBrandUserId,
       brand: brandId,
       location: newSubBrandLocation?._id,

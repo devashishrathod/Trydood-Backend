@@ -33,8 +33,8 @@ exports.verifyChangeMobile = async (req, res) => {
     currentScreen = currentScreen?.toUpperCase();
     let updatedUser;
     const existingUserWithMobile = await getUserByFields({
-      mobile: whatsappNumber,
-      role: role,
+      whatsappNumber,
+      role,
     });
     if (existingUserWithMobile) {
       return sendError(
@@ -67,12 +67,10 @@ exports.verifyChangeMobile = async (req, res) => {
         currentScreen: currentScreen ? currentScreen : checkUser?.currentScreen,
         isMobileVerified: true,
         fcmToken: fcmToken ? fcmToken : checkUser?.fcmToken,
-        mobile: whatsappNumber,
         whatsappNumber: whatsappNumber,
       });
       const updatedMobile = {
         currentScreen: currentScreen ? currentScreen : checkUser?.currentScreen,
-        mobile: whatsappNumber,
         whatsappNumber: whatsappNumber,
       };
       if (subBrandId) {

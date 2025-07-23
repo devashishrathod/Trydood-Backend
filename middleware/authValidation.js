@@ -8,7 +8,7 @@ exports.generateToken = async (checkUser) => {
       _id: checkUser?._id,
       name: checkUser?.name,
       email: checkUser?.email,
-      mobile: checkUser?.mobile,
+      whatsappNumber: checkUser?.whatsappNumber,
       address: checkUser?.address,
       role: checkUser?.role,
     },

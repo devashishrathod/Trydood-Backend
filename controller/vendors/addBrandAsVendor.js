@@ -41,7 +41,6 @@ exports.addBrand = async (req, res) => {
       slogan,
       companyName,
       companyEmail,
-      whatsappNumber,
       panNumber,
       gstNumber,
       referMarketId,
@@ -84,9 +83,7 @@ exports.addBrand = async (req, res) => {
       companyEmail: companyEmail
         ? companyEmail?.toLowerCase()
         : brandVendor?.email,
-      whatsappNumber: whatsappNumber
-        ? whatsappNumber?.toLowerCase()
-        : brandVendor.mobile,
+      whatsappNumber: brandVendor.whatsappNumber,
       panNumber,
       gst: brandGst ? brandGst._id : null,
       referMarketId,
@@ -98,7 +95,7 @@ exports.addBrand = async (req, res) => {
       isSignUpCompleted: true,
     };
     const newBrand = await createBrand(brandData);
-    const updatedUser = await updateUserById(brandVendor._id, {
+    await updateUserById(brandVendor._id, {
       panNumber: panNumber ? panNumber : null,
       gst: brandGst ? brandGst._id : null,
       brand: newBrand._id,
@@ -109,7 +106,6 @@ exports.addBrand = async (req, res) => {
     const updatedBrand = await getBrandWithAllDetails(newBrand._id);
     return sendSuccess(res, 201, "Brand added successfully", {
       brand: updatedBrand,
-      //  user: updatedUser,
     });
   } catch (error) {
     console.log("error on addBrand: ", error);

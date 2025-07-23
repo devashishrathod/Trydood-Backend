@@ -10,7 +10,7 @@ const {
 exports.changeLoginMobileNumber = async (req, res) => {
   try {
     const user = req?.payload;
-    const previousMobile = user?.mobile;
+    const previousMobile = user?.whatsappNumber;
     let { whatsappNumber, subBrandId, role } = req.body;
     if (previousMobile == whatsappNumber) {
       return sendError(
@@ -20,10 +20,7 @@ exports.changeLoginMobileNumber = async (req, res) => {
       );
     }
     whatsappNumber = whatsappNumber?.toLowerCase();
-    const checkUser = await getUserByFields({
-      mobile: whatsappNumber,
-      role: role,
-    });
+    const checkUser = await getUserByFields({ whatsappNumber, role });
     if (checkUser) {
       return sendError(
         res,

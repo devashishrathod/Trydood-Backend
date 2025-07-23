@@ -182,10 +182,11 @@ exports.requistOtp = async (req, res) => {
 };
 
 exports.verifyOtp = async (req, res) => {
-  let { sessionId, otp, mobile, role, fcmToken, currentScreen } = req.body;
-  mobile = mobile?.toLowerCase();
+  let { sessionId, otp, whatsappNumber, role, fcmToken, currentScreen } =
+    req.body;
+  whatsappNumber = whatsappNumber?.toLowerCase();
   try {
-    const checkUser = await User.findOne({ mobile, role });
+    const checkUser = await User.findOne({ whatsappNumber, role });
     if (!checkUser) {
       return res.status(400).json({ success: false, msg: "User not found!" });
     }
@@ -214,16 +215,16 @@ exports.verifyOtp = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  let { role, mobile, fcmToken } = req.body;
+  let { role, whatsappNumber, fcmToken } = req.body;
   try {
     role = role || "user";
-    mobile = mobile?.toLowerCase();
-    let checkUser = await User.findOne({ mobile, role });
+    whatsappNumber = whatsappNumber?.toLowerCase();
+    let checkUser = await User.findOne({ whatsappNumber, role });
     let isFirst = false;
     if (!checkUser) {
       isFirst = true;
       checkUser = new User({
-        mobile,
+        whatsappNumber,
         role,
         uniqueId: await generateUniqueUserId(),
         referCode: generateReferralCode(6),
@@ -231,7 +232,7 @@ exports.login = async (req, res) => {
       });
     }
     await checkUser.save();
-    let result = await urlSendTestOtp(mobile);
+    let result = await urlSendTestOtp(whatsappNumber);
     return res.status(200).json({
       success: true,
       msg: "OTP sent to your mobile number successfully.",
