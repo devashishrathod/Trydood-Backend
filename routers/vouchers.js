@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { ROLES } = require("../constants");
 
-const { createVoucher } = require("../controller/vouchers");
+const { createVoucher, getAllVouchers } = require("../controller/vouchers");
 const { verifyToken, checkRole, loadBrand } = require("../middleware");
 
 router.post(
@@ -11,6 +11,12 @@ router.post(
   checkRole(ROLES.ADMIN, ROLES.VENDOR),
   loadBrand,
   createVoucher
+);
+router.get(
+  "/getAll",
+  verifyToken,
+  checkRole(ROLES.ADMIN, ROLES.VENDOR, ROLES.SUB_VENDOR),
+  getAllVouchers
 );
 
 module.exports = router;

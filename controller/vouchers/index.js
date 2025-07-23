@@ -1,3 +1,4 @@
 const { createVoucher } = require("./createVoucher");
+const { getAllVouchers } = require("./getAllVouchers");
 
-module.exports = { createVoucher };
+module.exports = { createVoucher, getAllVouchers };

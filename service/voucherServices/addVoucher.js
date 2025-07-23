@@ -1,3 +1,4 @@
+const SubBrand = require("../../model/SubBrand");
 const { VOUCHER_STATUS } = require("../../constants");
 const { createVoucher } = require("./createVoucher");
 const {
@@ -33,7 +34,7 @@ exports.addVoucher = async (voucherData, userId, brandId, brandUserId) => {
     status === VOUCHER_STATUS.EXPIRED ||
     status === VOUCHER_STATUS.USED_UP;
 
-  return await createVoucher({
+  const voucher = await createVoucher({
     ...rest,
     user: brandUserId,
     brand: brandId,
@@ -47,4 +48,11 @@ exports.addVoucher = async (voucherData, userId, brandId, brandUserId) => {
     isPublished,
     uniqueId: await generateUniqueVoucherId(),
   });
+  if (voucher && subBrandsArray.length > 0) {
+    await SubBrand.updateMany(
+      { _id: { $in: subBrandsArray } },
+      { $addToSet: { vouchers: voucher._id } }
+    );
+  }
+  return voucher;
 };
