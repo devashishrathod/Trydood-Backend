@@ -26,7 +26,7 @@ exports.validateVoucherDatesAndStatus = (
 
   switch (status) {
     case VOUCHER_STATUS.DRAFT:
-      if (pubDate && pubDate <= now)
+      if (pubDate && pubDate > now)
         return "Draft cannot have a published date in the past.";
       if (start && start <= now)
         return "Draft cannot have a valid from date in the past.";
