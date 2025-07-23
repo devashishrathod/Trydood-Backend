@@ -26,6 +26,7 @@ exports.createVoucher = async (req, res) => {
     const voucher = await addVoucher(req.body, createdBy, brandId, brandUserId);
     return sendSuccess(res, 201, "Voucher created successfully", voucher);
   } catch (error) {
+    console.log("error on creating voucher ", error);
     return sendError(
       res,
       error.statusCode || 500,
