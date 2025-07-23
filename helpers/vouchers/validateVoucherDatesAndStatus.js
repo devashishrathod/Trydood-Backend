@@ -42,7 +42,7 @@ exports.validateVoucherDatesAndStatus = (
     case VOUCHER_STATUS.ACTIVE:
       if (!pubDate || pubDate > now)
         return "Active voucher must have published date in the past.";
-      if (!start || start > now)
+      if (!start || start < now)
         return "Active voucher must have valid from in the past.";
       if (!end || end < now) return "Active voucher must not be expired.";
       return null;
