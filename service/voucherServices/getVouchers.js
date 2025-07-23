@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Voucher = require("../../model/Voucher");
 
 exports.getVouchers = async (query) => {
@@ -15,8 +16,12 @@ exports.getVouchers = async (query) => {
     sortOrder = "desc",
   } = query;
   const filter = { isDeleted: true };
-  if (brandId) filter.brand = brandId;
-  if (subBrandId) filter.subBrands = subBrandId;
+  if (brandId && mongoose.isValidObjectId(brandId)) {
+    filter.brand = new mongoose.Types.ObjectId(brandId.toString());
+  }
+  if (subBrandId && mongoose.isValidObjectId(subBrandId)) {
+    filter.subBrands = new mongoose.Types.ObjectId(subBrandId.toString());
+  }
   if (status) filter.status = status;
   if (isPublished !== undefined) filter.isPublished = isPublished === "true";
   if (isActive !== undefined) filter.isActive = isActive === "true";
