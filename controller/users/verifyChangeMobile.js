@@ -23,6 +23,7 @@ exports.verifyChangeMobile = async (req, res) => {
     let {
       sessionId,
       otp,
+      role,
       whatsappNumber,
       subBrandId,
       fcmToken,
@@ -33,6 +34,7 @@ exports.verifyChangeMobile = async (req, res) => {
     let updatedUser;
     const existingUserWithMobile = await getUserByFields({
       mobile: whatsappNumber,
+      role: role,
     });
     if (existingUserWithMobile) {
       return sendError(

@@ -24,7 +24,7 @@ const voucherSchema = new mongoose.Schema(
       enum: [...Object.values(VOUCHER_STATUS)],
       required: true,
     },
-    value: { type: Number, required: true },
+    value: { type: Number },
     maxDiscountAmount: { type: Number },
     discount: { type: Number }, // offer percentage
     minOrderAmount: { type: Number }, // value of amount

@@ -11,7 +11,7 @@ exports.changeLoginMobileNumber = async (req, res) => {
   try {
     const user = req?.payload;
     const previousMobile = user?.mobile;
-    let { whatsappNumber, subBrandId } = req.body;
+    let { whatsappNumber, subBrandId, role } = req.body;
     if (previousMobile == whatsappNumber) {
       return sendError(
         res,
@@ -20,7 +20,10 @@ exports.changeLoginMobileNumber = async (req, res) => {
       );
     }
     whatsappNumber = whatsappNumber?.toLowerCase();
-    const checkUser = await getUserByFields({ mobile: whatsappNumber });
+    const checkUser = await getUserByFields({
+      mobile: whatsappNumber,
+      role: role,
+    });
     if (checkUser) {
       return sendError(
         res,
@@ -39,7 +42,7 @@ exports.changeLoginMobileNumber = async (req, res) => {
         return sendError(
           res,
           404,
-          "Sub-brand already exist  with this mobile number."
+          "Sub-brand already exist with this mobile number."
         );
       }
     }

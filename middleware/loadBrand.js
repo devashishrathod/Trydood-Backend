@@ -14,7 +14,7 @@ exports.loadBrand = async (req, res, next) => {
       return sendError(res, 404, "Brand not found");
     }
 
-    const loggedInUserId = req.user._id.toString();
+    const loggedInUserId = req.payload._id.toString();
     const brandOwnerId = brand.user._id.toString();
 
     if (loggedInUserId !== brandOwnerId) {
