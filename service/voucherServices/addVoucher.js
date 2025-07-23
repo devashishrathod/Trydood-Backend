@@ -15,9 +15,10 @@ exports.addVoucher = async (voucherData, userId, brandId, brandUserId) => {
     ? subBrandIds
     : [subBrandIds];
 
-  const finalPublishedDate = publishedDate
-    ? new Date(publishedDate)
-    : new Date(validFrom);
+  const finalPublishedDate = publishedDate ? new Date(publishedDate) : null;
+  // const finalPublishedDate = publishedDate
+  //   ? new Date(publishedDate)
+  //   : new Date(validFrom);
 
   const dateError = validateVoucherDatesAndStatus(
     status,

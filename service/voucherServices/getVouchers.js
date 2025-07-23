@@ -15,7 +15,7 @@ exports.getVouchers = async (query) => {
     sortBy = "createdAt",
     sortOrder = "desc",
   } = query;
-  const filter = { isDeleted: true };
+  const filter = { isDeleted: false };
   if (brandId && mongoose.isValidObjectId(brandId)) {
     filter.brand = new mongoose.Types.ObjectId(brandId.toString());
   }
