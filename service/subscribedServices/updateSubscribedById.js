@@ -13,6 +13,7 @@ exports.updateSubscribedById = async (subscribedId, updatedData) => {
 
   const previousPlanEntry = {
     subscription: subscribed?.subscription,
+    transaction: subscribed?.transaction,
     startDate: subscribed?.startDate,
     endDate: subscribed?.endDate,
     upgradeDate: now,

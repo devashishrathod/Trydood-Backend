@@ -19,6 +19,7 @@ const subscribedSchema = new mongoose.Schema(
         new mongoose.Schema({
           subscription: subscriptionField,
           subscribedBy: userField,
+          transaction: transactionField,
           startDate: { type: Date },
           endDate: { type: Date },
           upgradeDate: { type: Date },

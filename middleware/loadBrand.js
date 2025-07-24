@@ -14,16 +14,20 @@ exports.loadBrand = async (req, res, next) => {
       return sendError(res, 404, "Brand not found");
     }
 
-    const loggedInUserId = req.payload._id.toString();
-    const brandOwnerId = brand.user._id.toString();
+    // const loggedInUserId = req.payload._id.toString();
+    // const brandOwnerId = brand.user._id.toString();
 
-    if (loggedInUserId !== brandOwnerId) {
-      return sendError(res, 403, "You are not authorized to access this brand");
-    }
-    // Optional: Role-based access control
-    // if (![ROLES.VENDOR, ROLES.ADMIN].includes(req.user.role)) {
-    //   return res.status(403).json({ success: false, message: "Access denied" });
+    // if (loggedInUserId !== brandOwnerId) {
+    //   return sendError(res, 403, "You are not authorized to access this brand");
     // }
+
+    if (![ROLES.VENDOR, ROLES.ADMIN].includes(req.payload.role)) {
+      return sendError(
+        res,
+        403,
+        "Access denied! You are not authorized to access this brand"
+      );
+    }
     req.brand = brand;
     next();
   } catch (err) {
