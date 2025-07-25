@@ -5,6 +5,7 @@ const { ROLES } = require("../constants");
 const {
   getAllSubscribed,
   getCurrentSubscribed,
+  subscribeToCoolingPlan,
 } = require("../controller/subscribeds");
 
 const {
@@ -14,6 +15,12 @@ const {
   validateObjectIds,
 } = require("../middleware");
 
+router.post(
+  "/activateCoolingPlan",
+  verifyToken,
+  checkRole(ROLES.VENDOR),
+  subscribeToCoolingPlan
+);
 router.get(
   "/getAll/:brandId",
   validateObjectIds(["brandId"]),

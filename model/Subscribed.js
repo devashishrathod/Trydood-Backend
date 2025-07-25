@@ -44,6 +44,7 @@ const subscribedSchema = new mongoose.Schema(
     upgradeDate: { type: Date },
     expiryDate: { type: Date },
     numberOfUpgrade: { type: Number, default: 0 },
+    isCoolingPlan: { type: Boolean, default: false },
     isExpired: { type: Boolean, default: false },
     isUpgraded: { type: Boolean, default: false },
     isActive: { type: Boolean, default: false },

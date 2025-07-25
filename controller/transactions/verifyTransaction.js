@@ -89,6 +89,7 @@ exports.verifyTransaction = async (req, res) => {
       discount: checkSubscription?.discount,
       numberOfSubBrands: checkSubscription?.numberOfSubBrands,
       price: checkSubscription?.price,
+      isCoolingPlan: false,
     };
     if (checkBrand.isSubscribed) {
       const subscribedDetails = await getSubscribedById(checkBrand?.subscribed);
@@ -142,6 +143,7 @@ exports.verifyTransaction = async (req, res) => {
           discount: checkSubscription?.discount,
           numberOfSubBrands: checkSubscription?.numberOfSubBrands,
           price: checkSubscription?.price,
+          isCoolingPlan: false,
         };
         newSubscribed = await updateSubscribedById(
           subscribedDetails?._id,

@@ -6,6 +6,7 @@ const {
   getCurrentSubscriptionByBrand,
 } = require("./getCurrentSubscriptionByBrand");
 const { getAllSubscriptionByBrand } = require("./getAllSubscriptionByBrand");
+const { getAllSubscribedByUserId } = require("./getAllSubscribedByUserId");
 
 module.exports = {
   getSubscribedById,
@@ -14,4 +15,5 @@ module.exports = {
   updateSubscribedAmountById,
   getCurrentSubscriptionByBrand,
   getAllSubscriptionByBrand,
+  getAllSubscribedByUserId,
 };

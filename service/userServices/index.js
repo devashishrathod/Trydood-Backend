@@ -9,6 +9,7 @@ const { addSubBrandsToBrandUser } = require("./addSubBrandsToBrandUser");
 const {
   removeFcmTokenFromUserFcmTokensSet,
 } = require("./removeFcmTokenFromUserFcmTokensSet");
+const { getUserByPhoneOrEmail } = require("./getUserByPhoneOrEmail");
 
 module.exports = {
   createUser,
@@ -17,6 +18,7 @@ module.exports = {
   getUserByPan,
   updateUserById,
   getBrandOrSubBrandUserById,
+  getUserByPhoneOrEmail,
   getUserByFields,
   addSubBrandsToBrandUser,
   removeFcmTokenFromUserFcmTokensSet,
