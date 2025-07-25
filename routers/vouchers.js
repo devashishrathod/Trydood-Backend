@@ -12,7 +12,7 @@ const { verifyToken, checkRole, loadBrand } = require("../middleware");
 router.post(
   "/add/:brandId",
   verifyToken,
-  checkRole(ROLES.ADMIN, ROLES.VENDOR),
+  checkRole(ROLES.VENDOR),
   loadBrand,
   createVoucher
 );
