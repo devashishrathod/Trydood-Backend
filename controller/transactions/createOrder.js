@@ -64,12 +64,6 @@ exports.createOrder = async (req, res) => {
       status: razorpayOrder?.status,
       razorpayOrderId: razorpayOrder?.id,
       receipt: razorpayOrder?.receipt,
-      // dueAmount: razorpayOrder?.amount_due
-      //   ? razorpayOrder?.amount_due / 100
-      //   : 0,
-      // paidAmount: razorpayOrder?.amount_paid
-      //   ? razorpayOrder?.amount_paid / 100
-      //   : 0,
       dueAmount: (razorpayOrder?.amount_due ?? 0) / 100,
       paidAmount: (razorpayOrder?.amount_paid ?? 0) / 100,
       attempts: razorpayOrder?.attempts,
@@ -79,6 +73,9 @@ exports.createOrder = async (req, res) => {
       createdAtRaw: razorpayOrder?.created_at,
     };
     const transaction = await createTransaction(transactionData);
+    if (!transaction) {
+      return sendError(res, 500, "Failed to create transaction order");
+    }
     await updateUserById(checkBrand.user, { transaction: transaction?._id });
     await updateBrandById(brandId, { transaction: transaction?._id });
     return sendSuccess(

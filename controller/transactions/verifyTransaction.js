@@ -21,6 +21,7 @@ const {
 const {
   generateRazorpaySignature,
   getPaymentDetails,
+  generateAndUploadInvoice,
 } = require("../../helpers/transactions");
 const {
   calculateEndDate,
@@ -208,6 +209,25 @@ exports.verifyTransaction = async (req, res) => {
         dueAmount: checkSubscription?.price - paymentDetails?.amount / 100,
         isActive: true,
       };
+      const invoiceData = {
+        invoiceId: updateTxn.invoiceId,
+        transaction: updateTxn._id.toString(),
+        planName: checkSubscription?.name,
+        price: updateTxn.paidAmount,
+        date: new Date().toLocaleDateString("en-IN"),
+        planEnd: checkSubscription?.endDate
+          ? new Date(checkSubscription?.endDate).toLocaleDateString("en-IN")
+          : null,
+        status: updateTxn.status,
+        paymentMethod: updateTxn.paymentMethod,
+      };
+      const invoiceUrl = await generateAndUploadInvoice(invoiceData);
+      console.log("Invoice URL:", invoiceUrl);
+      const finalTxn = await updateTransactionByOrderAndUserId(
+        { _id: transactionId, user: user, razorpayOrderId },
+        { invoiceUrl }
+      );
+      console.log("Final Transaction:", finalTxn);
       await updateSubscribedAmountById(newSubscribed?._id, amountData);
       const updateBrandAndUserData = {
         subBrandsLimit: checkSubscription?.numberOfSubBrands,
