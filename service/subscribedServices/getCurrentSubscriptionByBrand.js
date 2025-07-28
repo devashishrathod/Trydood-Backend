@@ -6,5 +6,5 @@ exports.getCurrentSubscriptionByBrand = async (brandId) => {
     isDeleted: false,
     isActive: true,
     isExpired: false,
-  }).populate("transaction");
+  }).populate("subscription transaction");
 };

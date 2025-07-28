@@ -75,6 +75,7 @@ exports.subscribeToCoolingPlan = async (req, res) => {
       discount: coolingPlan.discount || 100,
       numberOfSubBrands: coolingPlan.numberOfSubBrands,
       price: 0,
+      isActive: true,
       isCoolingPlan: true,
     };
     const createdSubscribed = await createSubscribed(subscribedData);

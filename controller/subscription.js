@@ -12,7 +12,11 @@ exports.getAllSubscription = async (req, res) => {
         .status(400)
         .json({ msg: "Failed to get subscription!", success: false });
     }
-    const result = await Subscription.find();
+    const result = await Subscription.find({
+      isActive: true,
+      isDeleted: false,
+      name: { $not: /^cooling period$/i },
+    });
     if (result) {
       return res.status(200).json({ data: result, success: true });
     }
