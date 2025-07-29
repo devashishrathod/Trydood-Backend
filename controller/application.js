@@ -5,6 +5,7 @@ const Privacy = require("../model/Privacy");
 const RefundPolicy = require("../model/RefundPolicy");
 const State = require("../model/State");
 const Terms = require("../model/Terms");
+const Legal = require("../model/Legal");
 const {
   uploadToCloudinary,
   deleteFromCloudinary,
@@ -80,13 +81,11 @@ exports.addHomeApplication = async (req, res) => {
       home.image = imageUrl;
     }
     const result = await home.save();
-    return res
-      .status(200)
-      .json({
-        success: true,
-        msg: "Home Application added successfully.",
-        result,
-      });
+    return res.status(200).json({
+      success: true,
+      msg: "Home Application added successfully.",
+      result,
+    });
   } catch (error) {
     console.log("error on addHomeApplication: ", error);
     return res.status(500).json({ success: false, msg: error.message });
@@ -124,13 +123,11 @@ exports.updateHomeApplication = async (req, res) => {
       checkHome.image = imageUrl;
     }
     const result = await checkHome.save();
-    return res
-      .status(200)
-      .json({
-        success: true,
-        msg: "Home Application updated successfully.",
-        result,
-      });
+    return res.status(200).json({
+      success: true,
+      msg: "Home Application updated successfully.",
+      result,
+    });
   } catch (error) {
     console.log("error on updateHomeApplication: ", error);
     return res.status(500).json({ success: false, msg: error.message });
@@ -151,13 +148,11 @@ exports.deleteHomeApplication = async (req, res) => {
     }
     const result = await ApplicationHome.findByIdAndDelete(id);
     if (result) {
-      return res
-        .status(200)
-        .json({
-          success: true,
-          msg: "Home Application deleted successfully.",
-          result,
-        });
+      return res.status(200).json({
+        success: true,
+        msg: "Home Application deleted successfully.",
+        result,
+      });
     } else {
       return res
         .status(404)
@@ -217,14 +212,12 @@ exports.getDealOfDayPagination = async (req, res) => {
     const totalDocuments = await DealOfCategory.countDocuments(filter);
     const totalPages = Math.ceil(totalDocuments / limit);
     if (result) {
-      return res
-        .status(200)
-        .json({
-          success: true,
-          msg: "Deal of category details",
-          result,
-          pagination: { totalDocuments, totalPages, currentPage: page, limit },
-        });
+      return res.status(200).json({
+        success: true,
+        msg: "Deal of category details",
+        result,
+        pagination: { totalDocuments, totalPages, currentPage: page, limit },
+      });
     }
     return res
       .status(404)
@@ -254,13 +247,11 @@ exports.addDealOfCategory = async (req, res) => {
       dealOfCategory.image = imageUrl;
     }
     const result = await dealOfCategory.save();
-    return res
-      .status(200)
-      .json({
-        success: true,
-        msg: "Deal of category added successfully.",
-        result,
-      });
+    return res.status(200).json({
+      success: true,
+      msg: "Deal of category added successfully.",
+      result,
+    });
   } catch (error) {
     console.log("error on addDealOfCategory: ", error);
     return res.status(500).json({ success: false, msg: error.message });
@@ -294,13 +285,11 @@ exports.updateDealOfCategory = async (req, res) => {
     }
     const result = await checkDealOfCategory.save();
     if (result) {
-      return res
-        .status(200)
-        .json({
-          success: true,
-          msg: "Deal of category updated successfully.",
-          result,
-        });
+      return res.status(200).json({
+        success: true,
+        msg: "Deal of category updated successfully.",
+        result,
+      });
     } else {
       return res
         .status(404)
@@ -326,13 +315,11 @@ exports.deleteDealOfCategory = async (req, res) => {
     }
     const result = await DealOfCategory.findByIdAndDelete(id);
     if (result) {
-      return res
-        .status(200)
-        .json({
-          success: true,
-          msg: "Deal of category deleted successfully.",
-          result,
-        });
+      return res.status(200).json({
+        success: true,
+        msg: "Deal of category deleted successfully.",
+        result,
+      });
     } else {
       return res
         .status(404)
@@ -384,14 +371,12 @@ exports.pagination = async (req, res) => {
     const totalDocuments = await Filter.countDocuments();
     const totalPages = Math.ceil(totalDocuments / limit);
     if (result) {
-      return res
-        .status(200)
-        .json({
-          success: true,
-          msg: "Filter details",
-          result,
-          pagination: { totalDocuments, totalPages, currentPage: page, limit },
-        });
+      return res.status(200).json({
+        success: true,
+        msg: "Filter details",
+        result,
+        pagination: { totalDocuments, totalPages, currentPage: page, limit },
+      });
     }
     return res.status(404).json({ msg: "Filter not found", success: false });
   } catch (error) {
@@ -702,13 +687,11 @@ exports.addRefundPolicy = async (req, res) => {
   const type = req.body?.type;
   try {
     const result = await RefundPolicy.create({ refundPolicy, type });
-    return res
-      .status(200)
-      .json({
-        success: true,
-        msg: "Refund policy added successfully.",
-        result,
-      });
+    return res.status(200).json({
+      success: true,
+      msg: "Refund policy added successfully.",
+      result,
+    });
   } catch (error) {
     console.log("error on addRefundPolicy: ", error);
     return res.status(500).json({ success: false, msg: error.message });
@@ -729,13 +712,11 @@ exports.updateRefundPolicy = async (req, res) => {
     checkPrivacy.refundPolicy = refundPolicy;
     checkPrivacy.type = type;
     const result = await checkPrivacy.save();
-    return res
-      .status(200)
-      .json({
-        success: true,
-        msg: "Refund policy updated successfully.",
-        result,
-      });
+    return res.status(200).json({
+      success: true,
+      msg: "Refund policy updated successfully.",
+      result,
+    });
   } catch (error) {
     console.log("error on updateRefundPolicy: ", error);
     return res.status(500).json({ success: false, msg: error.message });
@@ -849,6 +830,105 @@ exports.deleteTerms = async (req, res) => {
     return res.status(400).json({ success: false, msg: "Term not found" });
   } catch (error) {
     console.log("error on deleteTerms: ", error);
+    return res.status(500).json({ success: false, msg: error.message });
+  }
+};
+
+// ===================================== Legal Controller ====================================================
+
+exports.getAllLegal = async (req, res) => {
+  const id = req.params?.id;
+  try {
+    if (id) {
+      const result = await Legal.findById(id);
+      if (result) {
+        return res
+          .status(200)
+          .json({ success: true, msg: "Legal detail", result });
+      }
+      return res.status(404).json({ msg: "Legal not found", success: false });
+    }
+
+    const result = await Legal.find().sort({ createdAt: -1 });
+    if (result) {
+      return res
+        .status(200)
+        .json({ success: true, msg: "All Legal details", result });
+    }
+    return res.status(404).json({ msg: "Legal not found", success: false });
+  } catch (error) {
+    console.log("error on getAllLegal: ", error);
+    return res.status(500).json({ success: false, msg: error.message });
+  }
+};
+
+exports.getSingleLegal = async (req, res) => {
+  try {
+    const result = await Legal.findOne().sort({ createdAt: -1 });
+    if (result) {
+      return res
+        .status(200)
+        .json({ success: true, msg: "Latest Legal detail", result });
+    }
+    return res.status(404).json({ msg: "Legal not found", success: false });
+  } catch (error) {
+    console.log("error on getSingleLegal: ", error);
+    return res.status(500).json({ success: false, msg: error.message });
+  }
+};
+
+exports.addLegal = async (req, res) => {
+  const legal = req.body?.legal;
+  const type = req.body?.type;
+  try {
+    const result = await Legal.create({ legal, type });
+    return res
+      .status(200)
+      .json({ success: true, msg: "Legal added successfully.", result });
+  } catch (error) {
+    console.log("error on addLegal: ", error);
+    return res.status(500).json({ success: false, msg: error.message });
+  }
+};
+
+exports.updateLegal = async (req, res) => {
+  const id = req.params?.id;
+  const legal = req.body?.legal;
+  const type = req.body?.type;
+  try {
+    const checkLegal = await Legal.findById(id);
+    if (!checkLegal) {
+      return res.status(400).json({ success: false, msg: "Legal not found" });
+    }
+
+    checkLegal.legal = legal;
+    checkLegal.type = type;
+
+    const result = await checkLegal.save();
+    return res
+      .status(200)
+      .json({ success: true, msg: "Legal updated successfully.", result });
+  } catch (error) {
+    console.log("error on updateLegal: ", error);
+    return res.status(500).json({ success: false, msg: error.message });
+  }
+};
+
+exports.deleteLegal = async (req, res) => {
+  const id = req.params?.id;
+  try {
+    const result = await Legal.findOneAndUpdate(
+      { _id: id },
+      { isDeleted: true, isActive: false }
+    );
+    if (result) {
+      return res
+        .status(200)
+        .json({ success: true, msg: "Legal deleted successfully." });
+    }
+    return res.status(400).json({ success: false, msg: "Legal not found" });
+  } catch (error) {
+    console.log("error on deleteLegal: ", error);
     return res.status(500).json({ success: false, msg: error.message });
   }
 };

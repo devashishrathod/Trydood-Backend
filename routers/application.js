@@ -37,6 +37,11 @@ const {
   addTerms,
   updateTerms,
   deleteTerms,
+  getSingleLegal,
+  getAllLegal,
+  addLegal,
+  updateLegal,
+  deleteLegal,
 } = require("../controller/application");
 
 const { verifyToken, checkRole } = require("../middleware/authValidation");
@@ -179,6 +184,24 @@ router.delete(
   verifyToken,
   checkRole(ROLES.ADMIN),
   deleteTerms
+);
+
+// ================================= legal ===================================
+router.get("/legal/getOne/:id", getAllLegal);
+router.get("/legal/getAll", getAllLegal);
+router.get("/legal/single", getSingleLegal);
+router.post("/legal/add", verifyToken, checkRole(ROLES.ADMIN), addLegal);
+router.put(
+  "/legal/update/:id",
+  verifyToken,
+  checkRole(ROLES.ADMIN),
+  updateLegal
+);
+router.delete(
+  "/legal/delete/:id",
+  verifyToken,
+  checkRole(ROLES.ADMIN),
+  deleteLegal
 );
 
 module.exports = { router, routePrefix: "/settings" };
