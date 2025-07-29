@@ -1,16 +1,13 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
-const AppDealSchema = new mongoose.Schema({
-    image: {
-        type: String
-    },
-    name: {
-        type: String
-    },
-    title: {
-        type: String
-    }
-}, { timestamps: true })
+const appDealSchema = new mongoose.Schema(
+  {
+    image: { type: String },
+    name: { type: String },
+    title: { type: String },
+    isDeleted: { type: Boolean, default: false },
+  },
+  { timestamps: true, versionKey: false }
+);
 
-const AppDeal = mongoose.model('AppDeal', AppDealSchema)
-module.exports = AppDeal
+module.exports = mongoose.model("AppDeal", appDealSchema);

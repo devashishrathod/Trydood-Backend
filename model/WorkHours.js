@@ -1,70 +1,49 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
+const { userField, brandField } = require("./validMogooseObjectId");
 
-const WorkHoursSchema = new mongoose.Schema({
-    brand: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Brand'
-    },
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    },
+const workHoursSchema = new mongoose.Schema(
+  {
+    user: userField,
+    brand: brandField,
     monday: {
-        start: {
-            type: String
-        },
-        end: {
-            type: String
-        }
+      start: { type: String },
+      end: { type: String },
+      isOpen: { type: Boolean, default: false },
     },
     tuesday: {
-        start: {
-            type: String
-        },
-        end: {
-            type: String
-        }
+      start: { type: String },
+      end: { type: String },
+      isOpen: { type: Boolean, default: false },
     },
     wednesday: {
-        start: {
-            type: String
-        },
-        end: {
-            type: String
-        }
+      start: { type: String },
+      end: { type: String },
+      isOpen: { type: Boolean, default: false },
     },
     thursday: {
-        start: {
-            type: String
-        },
-        end: {
-            type: String
-        }
+      start: { type: String },
+      end: { type: String },
+      isOpen: { type: Boolean, default: false },
     },
     friday: {
-        start: {
-            type: String
-        },
-        end: {
-            type: String
-        }
+      start: { type: String },
+      end: { type: String },
+      isOpen: { type: Boolean, default: false },
     },
     saturday: {
-        start: {
-            type: String
-        },
-        end: {
-            type: String
-        }
+      start: { type: String },
+      end: { type: String },
+      isOpen: { type: Boolean, default: false },
     },
     sunday: {
-        start: {
-            type: String
-        },
-        end: {
-            type: String
-        }
-    }
-}, { timestamps: true })
-const WorkHours = mongoose.model('WorkHours', WorkHoursSchema)
-module.exports = WorkHours
+      start: { type: String },
+      end: { type: String },
+      isOpen: { type: Boolean, default: false },
+    },
+    isActive: { type: Boolean, default: true },
+    isDeleted: { type: Boolean, default: false },
+  },
+  { timestamps: true, versionKey: false }
+);
+
+module.exports = mongoose.model("WorkHours", workHoursSchema);

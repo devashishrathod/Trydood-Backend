@@ -1,14 +1,18 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
+const { PLATFORMS } = require("../constants");
 
-const PrivacySchema = new mongoose.Schema({
-    privacy: {
-        type: String
-    },
+const privacySchema = new mongoose.Schema(
+  {
+    privacy: { type: String },
     type: {
-        type: String,
-        enum: ['web', 'android', 'ios'],
-        default: 'web'
-    }
-}, { timestamps: true })
-const Privacy = mongoose.model('Privacy', PrivacySchema)
-module.exports = Privacy
+      type: String,
+      enum: [...Object.values(PLATFORMS)],
+      default: PLATFORMS.WEB,
+    },
+    isActive: { type: Boolean, default: true },
+    isDeleted: { type: Boolean, default: false },
+  },
+  { timestamps: true, versionKey: false }
+);
+
+module.exports = mongoose.model("Privacy", privacySchema);

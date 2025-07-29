@@ -1,43 +1,56 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
+const {
+  subscriptionField,
+  brandField,
+  userField,
+  transactionField,
+} = require("./validMogooseObjectId");
 
-const subscribedSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+const subscribedSchema = new mongoose.Schema(
+  {
+    user: userField,
+    brand: brandField,
+    subscribedBy: userField,
+    upgradedBy: userField,
+    transaction: transactionField,
+    subscription: subscriptionField,
+    previousPlans: {
+      type: [
+        new mongoose.Schema({
+          subscription: subscriptionField,
+          subscribedBy: userField,
+          transaction: transactionField,
+          startDate: { type: Date },
+          endDate: { type: Date },
+          upgradeDate: { type: Date },
+          paidAmount: { type: Number },
+          price: { type: Number },
+          discount: { type: Number },
+          numberOfSubBrands: { type: Number },
+          dueAmount: { type: Number },
+        }),
+      ],
+      default: [],
     },
-    brand: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Brand'
-    },
-    subscription: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Subscription'
-    },
-    duration: {
-        type: Number
-    },
-    startDate: {
-        type: Date
-    },
-    endDate: {
-        type: Date
-    },
-    price: {
-        type: Number
-    },
-    discount: {
-        type: Number
-    },
-    subBrand: {
-        type: Number
-    },
-    isActive: {
-        type: Boolean,
-        default: true
-    },
-    paidAmount: {
-        type: Number
-    }
-}, { timestamps: true })
-const Subscribed = mongoose.model('Subscribed', subscribedSchema)
-module.exports = Subscribed
+    durationInDays: { type: Number },
+    durationInYears: { type: Number },
+    startDate: { type: Date },
+    endDate: { type: Date },
+    price: { type: Number },
+    discount: { type: Number },
+    numberOfSubBrands: { type: Number },
+    paidAmount: { type: Number },
+    dueAmount: { type: Number },
+    upgradeDate: { type: Date },
+    expiryDate: { type: Date },
+    numberOfUpgrade: { type: Number, default: 0 },
+    isCoolingPlan: { type: Boolean, default: false },
+    isExpired: { type: Boolean, default: false },
+    isUpgraded: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: false },
+    isDeleted: { type: Boolean, default: false },
+  },
+  { timestamps: true, versionKey: false }
+);
+
+module.exports = mongoose.model("Subscribed", subscribedSchema);

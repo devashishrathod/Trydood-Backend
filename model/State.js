@@ -1,10 +1,11 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
-const StateSchema = new mongoose.Schema({
-    name: {
-        type: String
-    }
-}, { timestamps: true })
+const stateSchema = new mongoose.Schema(
+  {
+    name: { type: String },
+    isDeleted: { type: Boolean, default: false },
+  },
+  { timestamps: true, versionKey: false }
+);
 
-const State = mongoose.model('State', StateSchema)
-module.exports = State
+module.exports = mongoose.model("State", stateSchema);

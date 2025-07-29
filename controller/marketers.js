@@ -1,5 +1,5 @@
 const User = require("../model/User");
-const { generateReferralCode } = require("../utils/referCode");
+const { generateReferralCode } = require("../utils");
 
 
 exports.getAllMarketPerson = async (req, res) => {

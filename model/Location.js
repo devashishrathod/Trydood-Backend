@@ -1,60 +1,58 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const { isValidZipCode } = require("../validator/common");
+const {
+  userField,
+  brandField,
+  subBrandField,
+} = require("./validMogooseObjectId");
 
-const LocationSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    },
-    brand: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Brand'
-    },
-    name: {
-        type: String
-    },
-    address: {
-        type: String
-    },
-    area: {
-        type: String
-    },
-    landMark: {
-        type: String
-    },
-    state: {
-        type: String
-    },
-    city: {
-        type: String
-    },
-    pinCode: {
-        type: String
-    },
-    country: {
-        type: String
-    },
-    street: {
-        type: String
-    },
-    formattedAddress: {
-        type: String
+const locationSchema = new mongoose.Schema(
+  {
+    user: userField,
+    brand: brandField,
+    subBrand: subBrandField,
+    name: { type: String },
+    shopOrBuildingNumber: { type: String },
+    address: { type: String },
+    area: { type: String },
+    landMark: { type: String },
+    state: { type: String },
+    city: { type: String },
+    country: { type: String },
+    street: { type: String },
+    formattedAddress: { type: String },
+    zipCode: {
+      type: String,
+      validate: {
+        validator: function (v) {
+          return isValidZipCode(this.country, v);
+        },
+        message: (props) =>
+          `${props.value} is not a valid ZIP/postal code for country ${props.instance.country}`,
+      },
     },
     location: {
-        type: {
-            type: String,
-            enum: ['Point'],
-            // required: true,
-            default: 'Point'
-        },
-        coordinates: {
-            type: [Number], // [longitude, latitude]
-            // required: true
-        }
-    }
-}, { timestamps: true });
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+      },
+    },
+    isDeleted: { type: Boolean, default: false },
+  },
+  { timestamps: true, versionKey: false }
+);
 
-// Create 2dsphere index for geospatial queries
-LocationSchema.index({ location: '2dsphere' });
+locationSchema.index(
+  { location: "2dsphere" },
+  {
+    partialFilterExpression: {
+      "location.coordinates": { $exists: true, $type: "array" },
+    },
+  }
+);
 
-const Location = mongoose.model('Location', LocationSchema);
-module.exports = Location;
+module.exports = mongoose.model("Location", locationSchema);

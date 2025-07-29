@@ -1,25 +1,24 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
+const { SUBSCRIPTION_PLAN_TYPE } = require("../constants");
 
-const subscriptionSchema = new mongoose.Schema({
-    name: {
-        type: String
+const subscriptionSchema = new mongoose.Schema(
+  {
+    name: { type: String },
+    price: { type: Number },
+    description: { type: String },
+    durationInDays: { type: Number },
+    durationInYears: { type: Number },
+    numberOfSubBrands: { type: Number },
+    discount: { type: Number },
+    type: {
+      type: String,
+      enum: [...Object.values(SUBSCRIPTION_PLAN_TYPE)],
+      default: SUBSCRIPTION_PLAN_TYPE.ANNUAL,
     },
-    price: {
-        type: Number
-    },
-    duration: {
-        type: Number
-    },
-    subBrand: {
-        type: Number
-    },
-    discount: {
-        type: Number
-    },
-    isActive: {
-        type: Boolean,
-        default: true
-    }
-}, { timestamps: true })
-const Subscription = mongoose.model('Subscription', subscriptionSchema)
-module.exports = Subscription
+    isActive: { type: Boolean, default: true },
+    isDeleted: { type: Boolean, default: false },
+  },
+  { timestamps: true, versionKey: false }
+);
+
+module.exports = mongoose.model("Subscription", subscriptionSchema);

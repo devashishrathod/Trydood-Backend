@@ -1,65 +1,79 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
+const validator = require("validator");
+const { isValidPhoneNumber, isValidPAN } = require("../validator/common");
+const {
+  userField,
+  brandField,
+  categoryField,
+  subCategoryField,
+  locationField,
+  workHoursField,
+  gstField,
+  bankAccountField,
+  imagesField,
+  vouchersField,
+} = require("./validMogooseObjectId");
 
-const SubBrandSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    },
-    brand: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Brand'
-    },
-    name: {
-        type: String
-    },
-    logo: {
-        type: String
-    },
-    cover: {
-        type: String
-    },
-    slogan: {
-        type: String
-    },
-    email: {
-        type: String
+const subBrandSchema = new mongoose.Schema(
+  {
+    companyName: { type: String },
+    logo: { type: String },
+    cover: { type: String },
+    description: { type: String },
+    companyEmail: {
+      type: String,
+      lowercase: true,
+      trim: true,
+      validate: {
+        validator: validator.isEmail,
+        message: (props) => `${props.value} is not a valid email address`,
+      },
     },
     mobile: {
-        type: Number
+      type: Number,
+      validate: {
+        validator: isValidPhoneNumber,
+        message: (props) => `${props.value} is not a valid mobile number`,
+      },
     },
     whatsappNumber: {
-        type: Number
+      type: Number,
+      validate: {
+        validator: isValidPhoneNumber,
+        message: (props) => `${props.value} is not a valid WhatsApp number`,
+      },
     },
-    category: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Category'
+    panNumber: {
+      type: String,
+      sparse: true,
+      validate: {
+        validator: function (value) {
+          if (value === null || value === undefined || value === "")
+            return true;
+          return isValidPAN(value);
+        },
+        message: (props) => `${props.value} is not a valid PAN number`,
+      },
     },
-    subCategory: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'SubCategory'
-    },
-    descrpition: {
-        type: String
-    },
-    location: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Location'
-    },
-    workHours: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'WorkHours'
-    },
-    gst: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Gst'
-    },
-    marketPermission: {
-        type: Boolean
-    },
-    isActive: {
-        type: Boolean,
-        default: true
-    }
-}, { timestamps: true })
-const SubBrand = mongoose.model('SubBrand', SubBrandSchema)
-module.exports = SubBrand
+    user: userField,
+    brand: brandField,
+    category: categoryField,
+    subCategory: subCategoryField,
+    location: locationField,
+    workHours: workHoursField,
+    gst: gstField,
+    bankAccount: bankAccountField,
+    gallery: imagesField,
+    menu: imagesField,
+    vouchers: vouchersField,
+    joinedDate: { type: Date, default: Date.now },
+    isMarketPermission: { type: Boolean, default: true },
+    isArchive: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true },
+    isDeleted: { type: Boolean, default: false },
+    uniqueId: { type: String, unique: true },
+  },
+  { timestamps: true, versionKey: false }
+);
+
+module.exports = mongoose.model("SubBrand", subBrandSchema);

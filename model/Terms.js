@@ -1,14 +1,18 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
+const { PLATFORMS } = require("../constants");
 
-const TermsSchema = new mongoose.Schema({
-    terms: {
-        type: String
-    },
+const termsSchema = new mongoose.Schema(
+  {
+    terms: { type: String },
     type: {
-        type: String,
-        enum: ['web', 'android', 'ios'],
-        default: 'web'
-    }
-}, { timestamps: true })
-const Terms = mongoose.model('Terms', TermsSchema)
-module.exports = Terms
+      type: String,
+      enum: [...Object.values(PLATFORMS)],
+      default: PLATFORMS.WEB,
+    },
+    isActive: { type: Boolean, default: true },
+    isDeleted: { type: Boolean, default: false },
+  },
+  { timestamps: true, versionKey: false }
+);
+
+module.exports = mongoose.model("Terms", termsSchema);

@@ -1,79 +1,99 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
+const validator = require("validator");
+const { isValidPhoneNumber, isValidPAN } = require("../validator/common");
+const {
+  userField,
+  categoryField,
+  subCategoryField,
+  locationField,
+  workHoursField,
+  gstField,
+  subBrandsField,
+  bankAccountField,
+  subscribedField,
+  transactionField,
+  imagesField,
+} = require("./validMogooseObjectId");
 
-const BrandSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    },
-    name: {
-        type: String
-    },
-    logo: {
-        type: String
-    },
-    cover: {
-        type: String
-    },
-    slogan: {
-        type: String
+const brandSchema = new mongoose.Schema(
+  {
+    user: userField,
+    name: { type: String },
+    companyName: { type: String },
+    logo: { type: String },
+    cover: { type: String },
+    slogan: { type: String },
+    description: { type: String },
+    companyEmail: {
+      type: String,
+      lowercase: true,
+      trim: true,
+      validate: {
+        validator: validator.isEmail,
+        message: (props) => `${props.value} is not a valid email address`,
+      },
     },
     email: {
-        type: String
+      type: String,
+      lowercase: true,
+      trim: true,
+      validate: {
+        validator: validator.isEmail,
+        message: (props) => `${props.value} is not a valid email address`,
+      },
     },
     mobile: {
-        type: Number
+      type: Number,
+      validate: {
+        validator: isValidPhoneNumber,
+        message: (props) => `${props.value} is not a valid mobile number`,
+      },
     },
     whatsappNumber: {
-        type: Number
+      type: Number,
+      validate: {
+        validator: isValidPhoneNumber,
+        message: (props) => `${props.value} is not a valid WhatsApp number`,
+      },
     },
-    companyName: {
-        type: String
+    panNumber: {
+      type: String,
+      sparse: true,
+      validate: {
+        validator: function (value) {
+          if (value === null || value === undefined || value === "")
+            return true;
+          return isValidPAN(value);
+        },
+        message: (props) => `${props.value} is not a valid PAN number`,
+      },
     },
-    pan: {
-        type: String
-    },
-    category: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Category'
-    },
-    subCategory: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'SubCategory'
-    },
-    descrpition: {
-        type: String
-    },
-    location: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Location'
-    },
-    workHours: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'WorkHours'
-    },
-    gst: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Gst'
-    },
-    marketPermission: {
-        type: Boolean,
-        default: true
-    },
-    isActive: {
-        type: Boolean,
-        default: true
-    },
-    referApply: {
-        type: String
-    },
-    subscribed: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Subscribed'
-    },
-    isSubscribed: {
-        type: Boolean,
-        default: false
-    }
-}, { timestamps: true })
-const Brand = mongoose.model('Brand', BrandSchema)
-module.exports = Brand
+    category: categoryField,
+    subCategory: subCategoryField,
+    location: locationField,
+    workHours: workHoursField,
+    gst: gstField,
+    subBrands: subBrandsField,
+    bankAccount: bankAccountField,
+    subscribed: subscribedField,
+    transaction: transactionField,
+    gallery: imagesField,
+    menu: imagesField,
+    subBrandsLimit: { type: Number },
+    subBrandsUsed: { type: Number },
+    joinedDate: { type: Date, default: Date.now },
+    referMarketId: { type: String },
+    referMarketMobile: { type: String },
+    currentScreen: { type: String },
+    isSignUpCompleted: { type: Boolean, default: false },
+    isOnBoardingCompleted: { type: Boolean, default: false },
+    isMarketPermission: { type: Boolean, default: true },
+    isSubscribed: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true },
+    isDeleted: { type: Boolean, default: false },
+    uniqueId: { type: String, unique: true },
+  },
+  { timestamps: true, versionKey: false }
+);
+
+module.exports = mongoose.model("Brand", brandSchema);

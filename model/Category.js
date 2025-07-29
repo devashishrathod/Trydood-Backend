@@ -1,27 +1,20 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
+const { PLATFORMS } = require("../constants");
 
-const CategorySchema = new mongoose.Schema({
-    firstName: {
-        type: String
-    },
-    lastName: {
-        type: String
-    },
-    name: {
-        type: String
-    },
-    image: {
-        type: String
-    },
+const categorySchema = new mongoose.Schema(
+  {
+    firstName: { type: String },
+    lastName: { type: String },
+    name: { type: String },
+    image: { type: String },
     type: {
-        type: String,
-        enum: ['web', 'android', 'ios'],
-        default: 'web'
+      type: String,
+      enum: [...Object.values(PLATFORMS)],
+      default: PLATFORMS.WEB,
     },
-    isActive: {
-        type: Boolean,
-        default: true
-    }
-}, { timestamps: true })
-const Category = mongoose.model('Category', CategorySchema)
-module.exports = Category
+    isActive: { type: Boolean, default: true },
+    isDeleted: { type: Boolean, default: false },
+  },
+  { timestamps: true, versionKey: false }
+);
+module.exports = mongoose.model("Category", categorySchema);

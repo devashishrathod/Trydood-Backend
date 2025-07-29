@@ -85,7 +85,7 @@ exports.addLocation = async (req, res) => {
     const area = req.body?.area
     const city = req.body?.city
     const state = req.body?.state
-    const pinCode = req.body?.pinCode
+    const zipCode = req.body?.zipCode
     const landMark = req.body?.landMark
     const lat = req.body?.lat
     const lng = req.body?.lng
@@ -102,13 +102,13 @@ exports.addLocation = async (req, res) => {
             checkLocation.area = area
             checkLocation.city = city
             checkLocation.state = state
-            checkLocation.pinCode = pinCode
+            checkLocation.zipCode = zipCode
             checkLocation.landMark = landMark
             checkLocation.location = { type: 'Point', coordinates: [lng, lat] }
             await checkLocation.save()
             return res.status(200).json({ msg: "Location updated successfully.", success: true })
         }
-        const location = new Location({ user: userId, brand: brandId, name: checkBrand?.name, address, area, city, state, pinCode, landMark, location: { type: 'Point', coordinates: [lng, lat] } })
+        const location = new Location({ user: userId, brand: brandId, name: checkBrand?.name, address, area, city, state, zipCode, landMark, location: { type: 'Point', coordinates: [lng, lat] } })
         checkBrand.location = location?._id
         await location.save()
         await checkBrand.save()
