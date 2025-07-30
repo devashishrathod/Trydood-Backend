@@ -6,6 +6,7 @@ const {
   createVoucher,
   getAllVouchers,
   getVoucher,
+  updateVoucher,
 } = require("../controller/vouchers");
 const { verifyToken, checkRole, loadBrand } = require("../middleware");
 
@@ -28,5 +29,6 @@ router.get(
   checkRole(ROLES.ADMIN, ROLES.VENDOR, ROLES.SUB_VENDOR),
   getVoucher
 );
+router.put("/update/:id", verifyToken, checkRole(ROLES.VENDOR), updateVoucher);
 
 module.exports = router;
