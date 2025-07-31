@@ -42,7 +42,6 @@ const subscribedSchema = new mongoose.Schema(
     paidAmount: { type: Number },
     dueAmount: { type: Number },
     upgradeDate: { type: Date },
-    expiryDate: { type: Date },
     numberOfUpgrade: { type: Number, default: 0 },
     isCoolingPlan: { type: Boolean, default: false },
     isExpired: { type: Boolean, default: false },
@@ -52,5 +51,7 @@ const subscribedSchema = new mongoose.Schema(
   },
   { timestamps: true, versionKey: false }
 );
+
+subscribedSchema.index({ endDate: 1, isExpired: 1 });
 
 module.exports = mongoose.model("Subscribed", subscribedSchema);

@@ -16,5 +16,7 @@ app.use(cors());
 app.use(morgan("dev"));
 app.use("/api/v1/", allRoutes);
 
+require("./jobs/expireBrandSubscription");
+
 db();
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));

@@ -71,7 +71,6 @@ exports.subscribeToCoolingPlan = async (req, res) => {
       durationInDays: coolingPlan.durationInDays,
       startDate,
       endDate,
-      expiryDate: endDate,
       discount: coolingPlan.discount || 100,
       numberOfSubBrands: coolingPlan.numberOfSubBrands,
       price: 0,

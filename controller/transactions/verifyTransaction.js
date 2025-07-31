@@ -86,7 +86,6 @@ exports.verifyTransaction = async (req, res) => {
       durationInYears,
       startDate,
       endDate,
-      expiryDate: endDate,
       discount: checkSubscription?.discount,
       numberOfSubBrands: checkSubscription?.numberOfSubBrands,
       price: checkSubscription?.price,
@@ -113,7 +112,7 @@ exports.verifyTransaction = async (req, res) => {
         if (currentPlanPrice < previousPlanPrice) {
           return sendError(
             res,
-            404,
+            403,
             "Downgrading is not permitted. Your current plan provides greater value than the selected option. Please choose a higher-tier plan."
           );
         }
@@ -124,23 +123,23 @@ exports.verifyTransaction = async (req, res) => {
             "Upgrade limit reached (Max 3 upgrades). Please start with fresh subscription plan"
           );
         }
-        const { remainingYears, remainingDays } = calculateDuration(
-          subscribedDetails.endDate
-        );
-        const totalYears = remainingYears + durationInYears;
-        const totalDays = remainingDays + durationInDays;
-        const today = new Date();
-        endDate = calculateEndDate(today, totalYears, totalDays);
+        // const { remainingYears, remainingDays } = calculateDuration(
+        //   subscribedDetails.endDate
+        // );
+        // const totalYears = remainingYears + durationInYears;
+        // const totalDays = remainingDays + durationInDays;
+        // const startDate = new Date();
+        //endDate = calculateEndDate(startDate, durationInYears, durationInDays);
         const updatedData = {
-          user: user,
-          brand: brand,
+          user,
+          brand,
           upgradedBy: createdUserId,
           subscription: subscription,
           transaction: checkTxn?._id,
-          endDate: endDate,
-          expiryDate: endDate,
-          durationInYears: totalYears,
-          durationInDays: totalDays,
+          startDate,
+          endDate,
+          durationInYears,
+          durationInDays,
           discount: checkSubscription?.discount,
           numberOfSubBrands: checkSubscription?.numberOfSubBrands,
           price: checkSubscription?.price,
@@ -214,10 +213,8 @@ exports.verifyTransaction = async (req, res) => {
         transaction: updateTxn._id.toString(),
         planName: checkSubscription?.name,
         price: updateTxn.paidAmount,
-        date: new Date().toLocaleDateString("en-IN"),
-        planEnd: checkSubscription?.endDate
-          ? new Date(checkSubscription?.endDate).toLocaleDateString("en-IN")
-          : null,
+        date: new Date(startDate).toLocaleDateString("en-IN"),
+        planEnd: new Date(endDate).toLocaleDateString("en-IN"),
         status: updateTxn.status,
         paymentMethod: updateTxn.paymentMethod,
       };
