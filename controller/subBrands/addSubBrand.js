@@ -183,6 +183,7 @@ exports.addSubBrand = async (req, res) => {
       uniqueId: await generateUniqueSubBrandId(),
       currentScreen: currentScreen?.toUpperCase(),
       isSignUpCompleted: true,
+      isOnBoardingCompleted: true,
     };
     const newSubBrand = await createSubBrand(subBrandData);
     if (!newSubBrand) {
@@ -207,6 +208,7 @@ exports.addSubBrand = async (req, res) => {
       referCode: generateReferralCode(6),
       subBrands: undefined,
       isSignUpCompleted: true,
+      isOnBoardingCompleted: true,
     });
     const updatedSubBrand = await getSubBrandWithAllDetails(newSubBrand?._id);
     const updatedBrand = await getBrandWithAllDetails(brandId);
