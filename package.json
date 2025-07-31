@@ -1,14 +1,16 @@
 {
-  "name": "backend",
+  "name": "trydood",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon run index.js",
+    "start": "node index",
+    "dev": "nodemon server.js",
+    "build": "echo \"Building the project...\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Abdul Karim Ansari",
+  "author": "Mahadev",
   "license": "ISC",
-  "description": "",
+  "description": "E-commerece application with user authentication, voucher management, and payment integration.",
   "dependencies": {
     "2factor": "^1.0.6",
     "axios": "^1.9.0",
@@ -24,9 +26,11 @@
     "moment": "^2.30.1",
     "mongoose": "^8.16.2",
     "morgan": "^1.10.0",
-    "nodemon": "^3.1.10",
     "pdfkit": "^0.17.1",
     "razorpay": "^2.9.6",
     "validator": "^13.15.15"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }

@@ -13,7 +13,7 @@ const {
 router.post(
   "/addSubBrandByVendorOrSubBrandUser/:brandId",
   verifyToken,
-  checkRole(ROLES.VENDOR, ROLES.SUB_VENDOR),
+  checkRole(ROLES.VENDOR),
   addSubBrand
 );
 router.put(
