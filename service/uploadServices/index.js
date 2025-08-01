@@ -17,6 +17,7 @@ exports.uploadPDF = async (pdfPath, fileName) => {
     public_id: fileName.replace(".pdf", ""),
   });
   if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
+  console.log("PDF uploaded successfully:", result);
   return result.secure_url;
 };
 

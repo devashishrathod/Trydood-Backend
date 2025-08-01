@@ -4,6 +4,8 @@ const {
   brandField,
   userField,
   transactionField,
+  subscribedsField,
+  subscribedField,
 } = require("./validMogooseObjectId");
 
 const subscribedSchema = new mongoose.Schema(
@@ -14,28 +16,13 @@ const subscribedSchema = new mongoose.Schema(
     upgradedBy: userField,
     transaction: transactionField,
     subscription: subscriptionField,
-    previousPlans: {
-      type: [
-        new mongoose.Schema({
-          subscription: subscriptionField,
-          subscribedBy: userField,
-          transaction: transactionField,
-          startDate: { type: Date },
-          endDate: { type: Date },
-          upgradeDate: { type: Date },
-          paidAmount: { type: Number },
-          price: { type: Number },
-          discount: { type: Number },
-          numberOfSubBrands: { type: Number },
-          dueAmount: { type: Number },
-        }),
-      ],
-      default: [],
-    },
+    upgradedTo: subscribedField,
+    previousPlans: subscribedsField,
     durationInDays: { type: Number },
     durationInYears: { type: Number },
     startDate: { type: Date },
     endDate: { type: Date },
+    expiryDate: { type: Date },
     price: { type: Number },
     discount: { type: Number },
     numberOfSubBrands: { type: Number },

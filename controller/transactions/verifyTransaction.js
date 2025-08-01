@@ -86,6 +86,7 @@ exports.verifyTransaction = async (req, res) => {
       durationInYears,
       startDate,
       endDate,
+      expiryDate: endDate,
       discount: checkSubscription?.discount,
       numberOfSubBrands: checkSubscription?.numberOfSubBrands,
       price: checkSubscription?.price,
@@ -123,33 +124,31 @@ exports.verifyTransaction = async (req, res) => {
             "Upgrade limit reached (Max 3 upgrades). Please start with fresh subscription plan"
           );
         }
-        // const { remainingYears, remainingDays } = calculateDuration(
-        //   subscribedDetails.endDate
-        // );
-        // const totalYears = remainingYears + durationInYears;
-        // const totalDays = remainingDays + durationInDays;
-        // const startDate = new Date();
-        //endDate = calculateEndDate(startDate, durationInYears, durationInDays);
-        const updatedData = {
-          user,
-          brand,
-          upgradedBy: createdUserId,
-          subscription: subscription,
-          transaction: checkTxn?._id,
-          startDate,
-          endDate,
-          durationInYears,
-          durationInDays,
-          discount: checkSubscription?.discount,
-          numberOfSubBrands: checkSubscription?.numberOfSubBrands,
-          price: checkSubscription?.price,
-          isCoolingPlan: false,
+        const now = new Date();
+        const upgradedData = {
+          ...subscribedData,
+          previousPlans: [
+            ...(subscribedDetails?.previousPlans || []),
+            subscribedDetails._id,
+          ],
         };
-        newSubscribed = await updateSubscribedById(
+        newSubscribed = await createSubscribed(upgradedData);
+        const oldPlanUpdatedData = {
+          upgradedTo: newSubscribed._id,
+          isUpgraded: true,
+          upgradeDate: now,
+          upgradedBy: createdUserId,
+          isActive: false,
+          isExpired: true,
+          expiryDate: now,
+          numberOfUpgrade: (subscribedDetails?.numberOfUpgrade || 0) + 1,
+        };
+        const oldSubscribed = await updateSubscribedById(
           subscribedDetails?._id,
-          updatedData
+          oldPlanUpdatedData
         );
       }
+      console.log("Old Subscribed Details Updated:", oldSubscribed);
     } else {
       newSubscribed = await createSubscribed(subscribedData);
     }

@@ -65,4 +65,14 @@ module.exports = Object.freeze({
       message: (props) => `One or more Users IDs in ${props.value} are invalid`,
     },
   }),
+
+  subscribedsField: Object.freeze({
+    type: [ObjectId],
+    ref: "Subscribed",
+    validate: {
+      validator: (arr) => Array.isArray(arr) && arr.every(isValidId),
+      message: (props) =>
+        `One or more Subscribed IDs in ${props.value} are invalid`,
+    },
+  }),
 });
