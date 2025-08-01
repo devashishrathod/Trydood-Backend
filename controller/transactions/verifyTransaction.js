@@ -143,12 +143,8 @@ exports.verifyTransaction = async (req, res) => {
           expiryDate: now,
           numberOfUpgrade: (subscribedDetails?.numberOfUpgrade || 0) + 1,
         };
-        const oldSubscribed = await updateSubscribedById(
-          subscribedDetails?._id,
-          oldPlanUpdatedData
-        );
+        await updateSubscribedById(subscribedDetails?._id, oldPlanUpdatedData);
       }
-      console.log("Old Subscribed Details Updated:", oldSubscribed);
     } else {
       newSubscribed = await createSubscribed(subscribedData);
     }
