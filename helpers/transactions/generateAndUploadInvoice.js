@@ -12,6 +12,17 @@ exports.generateAndUploadInvoice = async (invoiceData) => {
         ? "Successfully"
         : invoiceData.status;
     const doc = new PDFDocument({ margin: 50 });
+    // Use a Unicode font
+    const fontPath = path.join(
+      __dirname,
+      "..",
+      "assets",
+      "fonts",
+      "NotoSans-Regular.ttf"
+    );
+    doc.registerFont("NotoSans", fontPath);
+    doc.font("NotoSans"); // Set as active font
+
     const fileName = `invoice_${Date.now()}_${Math.floor(
       Math.random() * 10000
     )}.pdf`;
