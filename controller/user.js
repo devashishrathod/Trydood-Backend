@@ -2,11 +2,12 @@ const { generateToken } = require("../middleware/authValidation");
 const User = require("../model/User");
 const { uploadToCloudinary } = require("../service/uploadImage");
 const bcrypt = require("bcryptjs");
-const { generateReferralCode } = require("../utils");
+const { generateReferralCode, sendError } = require("../utils");
 const Location = require("../model/Location");
 const { urlVerifyOtp, urlSendTestOtp } = require("../service/sendOTP");
 const { calculateProfileCompletion } = require("../utils/utils");
 const { generateUniqueUserId } = require("../service/userServices");
+const { ROLES } = require("../constants");
 let salt = 10;
 
 exports.userProfile = async (req, res) => {
@@ -217,10 +218,19 @@ exports.verifyOtp = async (req, res) => {
 exports.login = async (req, res) => {
   let { role, whatsappNumber, fcmToken } = req.body;
   try {
-    role = role || "user";
+    role = role || ROLES.USER;
     whatsappNumber = whatsappNumber?.toLowerCase();
     let checkUser = await User.findOne({ whatsappNumber, role });
     let isFirst = false;
+    if (role == ROLES.SUB_VENDOR) {
+      if (!checkUser) {
+        return sendError(
+          res,
+          400,
+          "Sub Vendor not found! Please contact brand's vendor."
+        );
+      }
+    }
     if (!checkUser) {
       isFirst = true;
       checkUser = new User({

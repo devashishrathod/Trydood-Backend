@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const authRouter = express.Router();
+// const authRouter = express.Router();
 const profileRouter = express.Router();
 
 const {
@@ -19,7 +19,7 @@ const { userProfileComplete } = require("../controller/users/updateUser");
 const { verifyToken } = require("../middleware/authValidation");
 const { isFirst } = require("../middleware");
 const {
-  logout,
+  // logout,
   changeLoginMobileNumber,
   verifyChangeMobile,
 } = require("../controller/users");
@@ -32,7 +32,7 @@ router.post("/vendorMobileVerify", verifyVendorMobileNumber);
 router.post("/vendorOTPVerify", verifyOTPVendorMobile);
 router.post("/login", login);
 router.post("/verifyOtp", verifyOtp);
-router.put("/logout", verifyToken, logout);
+// router.put("/logout", verifyToken, logout);
 router.put("/changeMobile", verifyToken, changeLoginMobileNumber);
 router.put("/verifyChangeMobile", verifyToken, verifyChangeMobile);
 /* ================= Enhance route with "auth/login" ================== */
@@ -62,7 +62,7 @@ module.exports = {
   router,
   //routePrefix: "/user", // default
   extraRoutes: [
-    { path: "/auth", router: authRouter }, // mount /api/auth/*
+    // { path: "/auth", router: authRouter }, // mount /api/auth/*
     { path: "/profile", router: profileRouter },
   ],
 };
