@@ -12,7 +12,7 @@ exports.verifyOtpWithMobile = async ({
   currentScreen,
 }) => {
   whatsappNumber = whatsappNumber?.toLowerCase();
-  const user = await User.findOne({ whatsappNumber, role });
+  const user = await User.findOne({ whatsappNumber, role, isDeleted: false });
   if (!user) {
     throw { statusCode: 400, message: "User not found!" };
   }
@@ -26,10 +26,11 @@ exports.verifyOtpWithMobile = async ({
   await user.save();
   if (
     role === ROLES.VENDOR &&
-    currentScreen?.toLowerCase() === "LANDING_SCREEN"
+    currentScreen?.toUpperCase() === "CATEGORY_SELECTION" &&
+    !user.isSignUpCompleted
   ) {
     await User.updateOne(
-      { whatsappNumber, role: ROLES.SUB_VENDOR },
+      { whatsappNumber, role: ROLES.SUB_VENDOR, isDeleted: false },
       { $set: { isMobileVerified: true } }
     );
   }

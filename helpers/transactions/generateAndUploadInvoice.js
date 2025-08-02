@@ -13,22 +13,20 @@ exports.generateAndUploadInvoice = async (invoiceData) => {
         : invoiceData.status;
     const doc = new PDFDocument({ margin: 50 });
     // Use a Unicode font
-    const fontPath = path.join(
-      __dirname,
-      "..",
-      "assets",
-      "fonts",
-      "NotoSans-Regular.ttf"
-    );
-    doc.registerFont("NotoSans", fontPath);
-    doc.font("NotoSans"); // Set as active font
-
+    // const fontPath = path.join(
+    //   __dirname,
+    //   "..",
+    //   "assets",
+    //   "fonts",
+    //   "NotoSans-Regular.ttf"
+    // );
+    // doc.registerFont("NotoSans", fontPath);
+    // doc.font("NotoSans"); // Set as active font
     const fileName = `invoice_${Date.now()}_${Math.floor(
       Math.random() * 10000
     )}.pdf`;
     const tmpDir = path.join(__dirname, "..", "tmp");
     const filePath = path.join(tmpDir, fileName);
-
     if (!fs.existsSync(tmpDir)) {
       fs.mkdirSync(tmpDir, { recursive: true });
     }
@@ -44,7 +42,6 @@ exports.generateAndUploadInvoice = async (invoiceData) => {
     doc.text(`Status: ${status}`);
     doc.text(`Payment Method: ${invoiceData.paymentMethod}`);
     doc.end();
-
     writeStream.on("finish", async () => {
       try {
         const pdfUrl = await uploadPDF(filePath, fileName);

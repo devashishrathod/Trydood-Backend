@@ -1,9 +1,9 @@
 const { ROLES } = require("../../constants");
 const { sendError, sendSuccess, generateReferralCode } = require("../../utils");
-const {
-  createWorkHours,
-  getWorkHoursByUserAndBrandId,
-} = require("../../service/workHoursServices");
+// const {
+//   createWorkHours,
+//   getWorkHoursByUserAndBrandId,
+// } = require("../../service/workHoursServices");
 const {
   updateUserById,
   generateUniqueUserId,
@@ -77,18 +77,32 @@ exports.createInitialSubBrandForBrand = async (req, res) => {
     const newSubBrandLocation = await createLacation({
       brand: brandId,
       user: subBrandUser?._id,
-      ...checkLocation,
+      location: {
+        type: "Point",
+        coordinates:
+          checkLocation?.location?.coordinates?.length === 2
+            ? checkLocation.location.coordinates
+            : [0, 0],
+      },
+      shopOrBuildingNumber: checkLocation?.shopOrBuildingNumber,
+      area: checkLocation?.area,
+      country: checkLocation?.country,
+      zipCode: checkLocation?.zipCode,
+      landMark: checkLocation?.landMark,
+      address: checkLocation?.address,
+      city: checkLocation?.city,
+      state: checkLocation?.state,
     });
     /** ----------- Update/Add Working Hours ------------ */
-    const brandWorking = getWorkHoursByUserAndBrandId(
-      brandId,
-      brandVendor?._id
-    );
-    const newWorking = await createWorkHours({
-      user: subBrandUser?._id,
-      brand: brandId,
-      ...brandWorking,
-    });
+    // const brandWorking = getWorkHoursByUserAndBrandId(
+    //   brandId,
+    //   brandVendor?._id
+    // );
+    // const newWorking = await createWorkHours({
+    //   user: subBrandUser?._id,
+    //   brand: brandId,
+    //   ...brandWorking,
+    // });
     const subBrandData = {
       companyName: checkBrand?.companyName,
       companyEmail: checkBrand?.companyEmail,
@@ -96,7 +110,7 @@ exports.createInitialSubBrandForBrand = async (req, res) => {
       user: subBrandUser?._id,
       brand: brandId,
       location: newSubBrandLocation?._id,
-      workHours: newWorking._id,
+      //  workHours: newWorking?._id,
       uniqueId: await generateUniqueSubBrandId(),
       currentScreen: "HOME_SCREEN",
       isSignUpCompleted: true,
