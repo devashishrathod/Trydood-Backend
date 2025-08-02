@@ -8,8 +8,15 @@ const {
   updateSubBrand,
   getAllSubBrands,
   getAllSubBrandsOfBrand,
+  createInitialSubBrandForBrand,
 } = require("../controller/subBrands");
 
+router.post(
+  "/createInitialSubBrandForBrand/:brandId",
+  verifyToken,
+  checkRole(ROLES.VENDOR),
+  createInitialSubBrandForBrand
+);
 router.post(
   "/addSubBrandByVendorOrSubBrandUser/:brandId",
   verifyToken,
