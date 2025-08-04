@@ -5,6 +5,8 @@ exports.getVouchers = async (query) => {
   const {
     brandId,
     subBrandId,
+    categoryId,
+    subCategoryId,
     status,
     isPublished,
     isActive,
@@ -22,6 +24,12 @@ exports.getVouchers = async (query) => {
   if (subBrandId && mongoose.isValidObjectId(subBrandId)) {
     filter.subBrands = new mongoose.Types.ObjectId(subBrandId.toString());
   }
+  if (categoryId && mongoose.isValidObjectId(categoryId)) {
+    filter.category = new mongoose.Types.ObjectId(categoryId.toString());
+  }
+  if (subCategoryId && mongoose.isValidObjectId(subCategoryId)) {
+    filter.subCategory = new mongoose.Types.ObjectId(subCategoryId.toString());
+  }
   if (status) filter.status = status;
   if (isPublished !== undefined) filter.isPublished = isPublished === "true";
   if (isActive !== undefined) filter.isActive = isActive === "true";
@@ -36,8 +44,8 @@ exports.getVouchers = async (query) => {
   const skip = (parseInt(page) - 1) * parseInt(limit);
   const [vouchers, total] = await Promise.all([
     Voucher.find(filter)
-      .populate("brand", "name")
-      .populate("subBrands", "name")
+      .populate("brand")
+      .populate("subBrands")
       .sort(sortOption)
       .skip(skip)
       .limit(parseInt(limit)),

@@ -1,6 +1,7 @@
 const SubBrand = require("../../model/SubBrand");
 const { VOUCHER_STATUS } = require("../../constants");
 const { createVoucher } = require("./createVoucher");
+const { getBrandById } = require("../brandServices");
 const {
   validateVoucherDatesAndStatus,
   determineIsActive,
@@ -10,16 +11,14 @@ const {
 exports.addVoucher = async (voucherData, userId, brandId, brandUserId) => {
   let { publishedDate, validFrom, validTill, status, subBrandIds, ...rest } =
     voucherData;
-
+  const brandDetails = await getBrandById(brandId);
+  if (!brandDetails) {
+    throw { statusCode: 404, message: "Brand not found" };
+  }
   const subBrandsArray = Array.isArray(subBrandIds)
     ? subBrandIds
     : [subBrandIds];
-
   const finalPublishedDate = publishedDate ? new Date(publishedDate) : null;
-  // const finalPublishedDate = publishedDate
-  //   ? new Date(publishedDate)
-  //   : new Date(validFrom);
-
   const dateError = validateVoucherDatesAndStatus(
     status,
     finalPublishedDate,
@@ -34,12 +33,13 @@ exports.addVoucher = async (voucherData, userId, brandId, brandUserId) => {
     status === VOUCHER_STATUS.ACTIVE ||
     status === VOUCHER_STATUS.EXPIRED ||
     status === VOUCHER_STATUS.USED_UP;
-
   const voucher = await createVoucher({
     ...rest,
     user: brandUserId,
     brand: brandId,
     createdBy: userId,
+    category: brandDetails?.category,
+    subCategory: brandDetails?.subCategory,
     subBrands: subBrandsArray,
     status,
     publishedDate,
