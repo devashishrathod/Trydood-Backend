@@ -131,7 +131,7 @@ exports.createInitialSubBrandForBrand = async (req, res) => {
       brand: brandId,
       subBrand: newSubBrand?._id,
       location: newSubBrandLocation?._id,
-      workHours: newWorking._id,
+      // workHours: newWorking._id,
       currentScreen: "HOME_SCREEN",
       uniqueId: await generateUniqueUserId(),
       referCode: generateReferralCode(6),

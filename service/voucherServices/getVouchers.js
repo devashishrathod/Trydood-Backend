@@ -44,7 +44,10 @@ exports.getVouchers = async (query) => {
   const skip = (parseInt(page) - 1) * parseInt(limit);
   const [vouchers, total] = await Promise.all([
     Voucher.find(filter)
-      .populate("brand")
+      .populate({
+        path: "brand",
+        populate: { path: "location" },
+      })
       .populate("subBrands")
       .sort(sortOption)
       .skip(skip)
