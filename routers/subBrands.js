@@ -29,12 +29,7 @@ router.put(
   checkRole(ROLES.VENDOR, ROLES.SUB_VENDOR),
   updateSubBrand
 );
-router.get(
-  "/getOne/:subBrandId",
-  verifyToken,
-  checkRole(ROLES.VENDOR, ROLES.SUB_VENDOR, ROLES.ADMIN),
-  getAllSubBrands
-);
+router.get("/getOne/:subBrandId", verifyToken, getAllSubBrands);
 router.get("/getAll", verifyToken, checkRole(ROLES.ADMIN), getAllSubBrands);
 router.get(
   "/getAllSubBrandsOfBrand/:brandId",
