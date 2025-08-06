@@ -1,3 +1,4 @@
 const { createTodayOffer } = require("./createTodayOffer");
+const { getAllTodayOfferCategories } = require("./getAllTodayOfferCategories");
 
-module.exports = { createTodayOffer };
+module.exports = { createTodayOffer, getAllTodayOfferCategories };
