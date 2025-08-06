@@ -21,6 +21,7 @@ module.exports = Object.freeze({
   subBrandField: refField("SubBrand"),
   categoryField: refField("Category"),
   subCategoryField: refField("SubCategory"),
+  dealOfCategoryField: refField("DealOfCategory"),
   locationField: refField("Location"),
   workHoursField: refField("WorkHours"),
   gstField: refField("Gst"),
@@ -28,6 +29,16 @@ module.exports = Object.freeze({
   subscribedField: refField("Subscribed"),
   subscriptionField: refField("Subscription"),
   transactionField: refField("Transaction"),
+
+  vouchersField: Object.freeze({
+    type: [ObjectId],
+    ref: "Voucher",
+    validate: {
+      validator: (arr) => Array.isArray(arr) && arr.every(isValidId),
+      message: (props) =>
+        `One or more SubBrand IDs in ${props.value} are invalid`,
+    },
+  }),
 
   subBrandsField: Object.freeze({
     type: [ObjectId],
