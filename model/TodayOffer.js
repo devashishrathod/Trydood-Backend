@@ -7,7 +7,7 @@ const {
 const todayOfferSchema = new mongoose.Schema(
   {
     dealOfCategory: dealOfCategoryField,
-    voucher: vouchersField,
+    vouchers: vouchersField,
     title: { type: String },
     description: { type: String, trim: true },
     validFrom: { type: Date, required: true },

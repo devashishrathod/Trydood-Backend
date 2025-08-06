@@ -5,6 +5,7 @@ const { ROLES } = require("../constants");
 const {
   addTodayOffer,
   getTodayOfferCategories,
+  getTodayOffersAllVouchers,
 } = require("../controller/todayOffer");
 const { verifyToken, checkRole } = require("../middleware");
 
@@ -14,6 +15,12 @@ router.get(
   verifyToken,
   checkRole(ROLES.USER),
   getTodayOfferCategories
+);
+router.get(
+  "get-all-vouchers/:categoryId",
+  verifyToken,
+  checkRole(ROLES.USER),
+  getTodayOffersAllVouchers
 );
 
 module.exports = router;
