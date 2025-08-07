@@ -1,8 +1,12 @@
+const User = require("../../model/User");
 const { getBrandById } = require("../../service/brandServices");
 const { getSubscribedById } = require("../../service/subscribedServices");
-const { getUserByFields } = require("../../service/userServices");
+const {
+  generateUniqueUserId,
+  getUserByFields,
+} = require("../../service/userServices");
 const { urlSendTestOtp } = require("../../service/sendOTP");
-const { sendError, sendSuccess } = require("../../utils");
+const { generateReferralCode, sendError, sendSuccess } = require("../../utils");
 const { ROLES } = require("../../constants");
 
 exports.signUpSubBrandWithMobile = async (req, res) => {
@@ -47,11 +51,20 @@ exports.signUpSubBrandWithMobile = async (req, res) => {
         "This WhatsApp number is already registered as a Sub Vendor."
       );
     }
+    const subBrand = new User({
+      whatsappNumber,
+      role: ROLES.SUB_VENDOR,
+      uniqueId: await generateUniqueUserId(),
+      referCode: generateReferralCode(6),
+      fcmToken: fcmToken || null,
+    });
+    await subBrand.save();
     const otpResult = await urlSendTestOtp(whatsappNumber);
     return sendSuccess(
       res,
+      201,
       "OTP sent successfully to sub-brand WhatsApp number.",
-      { result: otpResult }
+      { result: otpResult, user: subBrand }
     );
   } catch (error) {
     console.error("Error verifying sub-brand mobile:", error);
