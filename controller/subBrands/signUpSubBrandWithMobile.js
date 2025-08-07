@@ -40,17 +40,19 @@ exports.signUpSubBrandWithMobile = async (req, res) => {
         "Sub-brand Limit Exceeded! You have reached the maximum number of sub-brands allowed under your current plan. Please upgrade your subscription to add more sub-brands."
       );
     }
+    let otpResult;
     const existingSubVendor = await getUserByFields({
       whatsappNumber: whatsappNumber.toLowerCase(),
       role: ROLES.SUB_VENDOR,
-      isMobileVerified: true,
     });
-    if (existingSubVendor) {
+    if (existingSubVendor && existingSubVendor.isMobileVerified) {
       return sendError(
         res,
         409,
         "This WhatsApp number is already registered as a Sub Vendor."
       );
+    } else if (existingSubVendor && !existingSubVendor.isMobileVerified) {
+      otpResult = await urlSendTestOtp(existingSubVendor.whatsappNumber);
     }
     const subBrand = new User({
       whatsappNumber,
@@ -59,7 +61,7 @@ exports.signUpSubBrandWithMobile = async (req, res) => {
       referCode: generateReferralCode(6),
     });
     await subBrand.save();
-    const otpResult = await urlSendTestOtp(whatsappNumber);
+    otpResult = await urlSendTestOtp(whatsappNumber);
     return sendSuccess(
       res,
       201,
