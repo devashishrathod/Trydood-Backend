@@ -60,7 +60,7 @@ exports.signUpSubBrandWithMobile = async (req, res) => {
         uniqueId: await generateUniqueUserId(),
         referCode: generateReferralCode(6),
       });
-      await subBrand.save();
+      await existingSubVendor.save();
     }
     otpResult = await urlSendTestOtp(whatsappNumber);
     return sendSuccess(
