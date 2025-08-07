@@ -41,7 +41,7 @@ exports.signUpSubBrandWithMobile = async (req, res) => {
       );
     }
     let otpResult;
-    const existingSubVendor = await getUserByFields({
+    let existingSubVendor = await getUserByFields({
       whatsappNumber: whatsappNumber.toLowerCase(),
       role: ROLES.SUB_VENDOR,
     });
@@ -54,7 +54,7 @@ exports.signUpSubBrandWithMobile = async (req, res) => {
     } else if (existingSubVendor && !existingSubVendor.isMobileVerified) {
       otpResult = await urlSendTestOtp(existingSubVendor.whatsappNumber);
     } else {
-      const subBrand = new User({
+      existingSubVendor = new User({
         whatsappNumber,
         role: ROLES.SUB_VENDOR,
         uniqueId: await generateUniqueUserId(),
@@ -67,7 +67,7 @@ exports.signUpSubBrandWithMobile = async (req, res) => {
       res,
       201,
       "OTP sent successfully to sub-brand WhatsApp number.",
-      { result: otpResult, user: subBrand }
+      { result: otpResult, user: existingSubVendor }
     );
   } catch (error) {
     console.error("Error verifying sub-brand mobile:", error);
