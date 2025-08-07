@@ -5,6 +5,7 @@ const { getAllSubBrandsOfBrand } = require("./getAllSubBrandsOfBrand");
 const {
   createInitialSubBrandForBrand,
 } = require("./createInitialSubBrandForBrand");
+const { signUpSubBrandWithMobile } = require("./signUpSubBrandWithMobile");
 
 module.exports = {
   addSubBrand,
@@ -12,4 +13,5 @@ module.exports = {
   getAllSubBrands,
   getAllSubBrandsOfBrand,
   createInitialSubBrandForBrand,
+  signUpSubBrandWithMobile,
 };

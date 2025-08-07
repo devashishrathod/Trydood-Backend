@@ -9,6 +9,7 @@ const {
   getAllSubBrands,
   getAllSubBrandsOfBrand,
   createInitialSubBrandForBrand,
+  signUpSubBrandWithMobile,
 } = require("../controller/subBrands");
 
 router.post(
@@ -16,6 +17,12 @@ router.post(
   verifyToken,
   checkRole(ROLES.VENDOR),
   createInitialSubBrandForBrand
+);
+router.post(
+  "/signUp/:brandId",
+  verifyToken,
+  checkRole(ROLES.VENDOR),
+  signUpSubBrandWithMobile
 );
 router.post(
   "/addSubBrandByVendorOrSubBrandUser/:brandId",
