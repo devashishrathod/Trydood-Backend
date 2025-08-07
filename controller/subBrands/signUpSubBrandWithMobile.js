@@ -53,14 +53,15 @@ exports.signUpSubBrandWithMobile = async (req, res) => {
       );
     } else if (existingSubVendor && !existingSubVendor.isMobileVerified) {
       otpResult = await urlSendTestOtp(existingSubVendor.whatsappNumber);
+    } else {
+      const subBrand = new User({
+        whatsappNumber,
+        role: ROLES.SUB_VENDOR,
+        uniqueId: await generateUniqueUserId(),
+        referCode: generateReferralCode(6),
+      });
+      await subBrand.save();
     }
-    const subBrand = new User({
-      whatsappNumber,
-      role: ROLES.SUB_VENDOR,
-      uniqueId: await generateUniqueUserId(),
-      referCode: generateReferralCode(6),
-    });
-    await subBrand.save();
     otpResult = await urlSendTestOtp(whatsappNumber);
     return sendSuccess(
       res,
