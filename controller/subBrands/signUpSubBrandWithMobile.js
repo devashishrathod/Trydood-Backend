@@ -43,6 +43,7 @@ exports.signUpSubBrandWithMobile = async (req, res) => {
     const existingSubVendor = await getUserByFields({
       whatsappNumber: whatsappNumber.toLowerCase(),
       role: ROLES.SUB_VENDOR,
+      isMobileVerified: true,
     });
     if (existingSubVendor) {
       return sendError(
@@ -56,7 +57,6 @@ exports.signUpSubBrandWithMobile = async (req, res) => {
       role: ROLES.SUB_VENDOR,
       uniqueId: await generateUniqueUserId(),
       referCode: generateReferralCode(6),
-      fcmToken: fcmToken || null,
     });
     await subBrand.save();
     const otpResult = await urlSendTestOtp(whatsappNumber);
