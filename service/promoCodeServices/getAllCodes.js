@@ -12,7 +12,7 @@ exports.getAllCodes = async (filters) => {
     voucher,
     validFrom,
     validTill,
-    maxDiscount,
+    maxDiscountValue,
     userLimit,
   } = filters;
   const query = { isDeleted: false };
@@ -20,7 +20,7 @@ exports.getAllCodes = async (filters) => {
   if (title) query.title = { $regex: title, $options: "i" };
   if (isActive !== undefined) query.isActive = isActive === "true";
   if (voucher) query.voucher = voucher;
-  if (maxDiscount) query.maxDiscount = Number(maxDiscount);
+  if (maxDiscountValue) query.maxDiscountValue = Number(maxDiscountValue);
   if (userLimit) query.userLimit = Number(userLimit);
   if (validFrom) query.validFrom = { $gte: new Date(validFrom) };
   if (validTill) query.validTill = { $lte: new Date(validTill) };

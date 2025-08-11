@@ -44,12 +44,11 @@ exports.validateCreatePromoCode = (promoCodeData) => {
       "string.empty": "Promo code cannot be empty",
       "string.min": "Promo code must be at least 3 characters long",
     }),
-    maxDiscount: Joi.number().positive().min(1).max(100).required().messages({
+    maxDiscountValue: Joi.number().positive().min(1).required().messages({
       "any.required": "Max discount is required",
       "number.base": "Max discount must be a number",
       "number.positive": "Max discount must be greater than 0",
-      "number.min": "Max discount must be at least 1%",
-      "number.max": "Max discount cannot exceed 100%",
+      "number.min": "Max discount must be at least 1",
     }),
     userLimit: Joi.number().positive().required().messages({
       "any.required": "User limit is required",
