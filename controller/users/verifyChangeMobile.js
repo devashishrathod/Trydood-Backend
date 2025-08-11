@@ -34,6 +34,7 @@ exports.verifyChangeMobile = async (req, res) => {
     whatsappNumber = whatsappNumber?.toLowerCase();
     currentScreen = currentScreen?.toUpperCase();
     let updatedUser;
+    let checksubBrand;
     const existingUserWithMobile = await getUserByFields({
       whatsappNumber,
       role,
@@ -46,9 +47,10 @@ exports.verifyChangeMobile = async (req, res) => {
       );
     }
     if (subBrandId) {
-      const checksubBrand = await getSubBrandById(subBrandId);
-      if (!checksubBrand)
+      checksubBrand = await getSubBrandById(subBrandId);
+      if (!checksubBrand) {
         return sendError(res, 404, "No sub-brand/outlet found!");
+      }
       const existingSubBrandWithMobile = await getSubBrandByFields({
         whatsappNumber: whatsappNumber,
       });
@@ -68,12 +70,17 @@ exports.verifyChangeMobile = async (req, res) => {
     if (!result?.ok) {
       return sendError(res, 400, result?.reason);
     }
-    updatedUser = await updateUserById(userId, {
+    const updatedUserData = {
       currentScreen: currentScreen ? currentScreen : checkUser?.currentScreen,
       isMobileVerified: true,
       fcmToken: fcmToken ? fcmToken : checkUser?.fcmToken,
       whatsappNumber: whatsappNumber,
-    });
+    };
+    if (subBrandId) {
+      updatedUser = await updateUserById(checksubBrand?.user, updatedUserData);
+    } else {
+      updatedUser = await updateUserById(userId, updatedUserData);
+    }
     const updatedMobile = {
       currentScreen: currentScreen ? currentScreen : checkUser?.currentScreen,
       whatsappNumber: whatsappNumber,
