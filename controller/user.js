@@ -4,7 +4,8 @@ const { uploadToCloudinary } = require("../service/uploadImage");
 const bcrypt = require("bcryptjs");
 const { generateReferralCode, sendError } = require("../utils");
 const Location = require("../model/Location");
-const { urlVerifyOtp, urlSendTestOtp } = require("../service/sendOTP");
+//const { urlVerifyOtp, urlSendTestOtp } = require("../service/sendOTP");
+const { sendOtp, verifyOtp } = require("../service/otpServices");
 const { calculateProfileCompletion } = require("../utils/utils");
 const { generateUniqueUserId } = require("../service/userServices");
 const { ROLES } = require("../constants");
@@ -168,11 +169,12 @@ exports.requistOtp = async (req, res) => {
     if (!checkUser) {
       return res.status(400).json({ success: false, msg: "User not found!" });
     }
-    let result = await urlSendTestOtp(mobile);
-    if (result) {
+    // let result = await urlSendTestOtp(mobile);
+    let result = await sendOtp(mobile);
+    if (result.ApiResponse == "Success") {
       return res
         .status(200)
-        .json({ success: true, result, msg: "Otp send successfully 1234" });
+        .json({ success: true, result, msg: "Otp send successfully" });
     }
   } catch (error) {
     console.log("error on requistOtp: ", error);
@@ -183,7 +185,7 @@ exports.requistOtp = async (req, res) => {
 };
 
 exports.verifyOtp = async (req, res) => {
-  let { sessionId, otp, whatsappNumber, role, fcmToken, currentScreen } =
+  let { /*sessionId,*/ otp, whatsappNumber, role, fcmToken, currentScreen } =
     req.body;
   whatsappNumber = whatsappNumber?.toLowerCase();
   try {
@@ -191,22 +193,23 @@ exports.verifyOtp = async (req, res) => {
     if (!checkUser) {
       return res.status(400).json({ success: false, msg: "User not found!" });
     }
-    let result = await urlVerifyOtp(sessionId, otp);
-    if (result?.Status == "Success") {
-      if (currentScreen) checkUser.currentScreen = currentScreen?.toUpperCase();
-      checkUser.isMobileVerified = true;
-      checkUser.fcmToken = fcmToken;
-      await checkUser.save();
-      const token = await generateToken(checkUser);
-      return res.status(200).json({
-        success: true,
-        msg: "Verification successful",
-        result,
-        user: checkUser,
-        token,
-      });
+    // let result = await urlVerifyOtp(sessionId, otp);
+    let result = await verifyOtp(whatsappNumber, otp);
+    if (!result?.ok) {
+      return res.status(400).json({ success: false, msg: result?.reason });
     }
-    return res.status(400).json({ success: false, msg: "Invalid OTP" });
+    if (currentScreen) checkUser.currentScreen = currentScreen?.toUpperCase();
+    checkUser.isMobileVerified = true;
+    checkUser.fcmToken = fcmToken;
+    await checkUser.save();
+    const token = await generateToken(checkUser);
+    return res.status(200).json({
+      success: true,
+      msg: "Verification successful",
+      result,
+      user: checkUser,
+      token,
+    });
   } catch (error) {
     console.log("error on verifyOtp: ", error);
     return res
@@ -242,14 +245,20 @@ exports.login = async (req, res) => {
       });
     }
     await checkUser.save();
-    let result = await urlSendTestOtp(whatsappNumber);
-    return res.status(200).json({
-      success: true,
-      msg: "OTP sent to your mobile number successfully.",
-      isFirst,
-      result,
-      user: checkUser,
-    });
+    //  let result = await urlSendTestOtp(whatsappNumber);
+    let result = await sendOtp(whatsappNumber);
+    if (result.ApiResponse == "Success") {
+      return res.status(200).json({
+        success: true,
+        msg: "OTP sent to your mobile number successfully.",
+        isFirst,
+        result,
+        user: checkUser,
+      });
+    }
+    return res
+      .status(400)
+      .json({ success: false, msg: "something went wrong" });
   } catch (error) {
     console.log("error on login: ", error);
     return res
@@ -259,8 +268,6 @@ exports.login = async (req, res) => {
 };
 
 exports.userProfileComplete = async (req, res) => {
-  // console.log("req.boydy: ", req.body);
-
   const id = req.payload?._id;
   const name = req.body?.name;
   const email = req.body?.email;

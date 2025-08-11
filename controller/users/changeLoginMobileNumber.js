@@ -1,4 +1,5 @@
-const { urlSendTestOtp } = require("../../service/sendOTP");
+// const { urlSendTestOtp } = require("../../service/sendOTP");
+const { sendOtp } = require("../../service/otpServices");
 const { sendSuccess, sendError } = require("../../utils");
 const { getUserByFields } = require("../../service/userServices");
 const {
@@ -43,7 +44,11 @@ exports.changeLoginMobileNumber = async (req, res) => {
         );
       }
     }
-    const result = await urlSendTestOtp(whatsappNumber);
+    //  const result = await urlSendTestOtp(whatsappNumber);
+    const result = await sendOtp(whatsappNumber);
+    if (result.ApiResponse == "Fail") {
+      return sendError(res, 503, "Please try again! OTP service unavailable");
+    }
     return sendSuccess(
       res,
       200,

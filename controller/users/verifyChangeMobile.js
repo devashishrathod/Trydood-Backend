@@ -1,4 +1,5 @@
-const { urlVerifyOtp } = require("../../service/sendOTP");
+// const { urlVerifyOtp } = require("../../service/sendOTP");
+const { verifyOtp } = require("../../service/otpServices");
 const { sendSuccess, sendError } = require("../../utils");
 const { generateToken } = require("../../middleware/authValidation");
 const { updateBrandById } = require("../../service/brandServices");
@@ -21,7 +22,7 @@ exports.verifyChangeMobile = async (req, res) => {
       return sendError(res, 400, "User not found");
     }
     let {
-      sessionId,
+      // sessionId,
       otp,
       role,
       whatsappNumber,
@@ -58,34 +59,36 @@ exports.verifyChangeMobile = async (req, res) => {
         );
       }
     }
-    const result = await urlVerifyOtp(sessionId, otp);
-    if (result?.Status !== "Success") {
-      return sendError(res, 400, "Invalid OTP", result);
+    // const result = await urlVerifyOtp(sessionId, otp);
+    // if (result?.Status !== "Success") {
+    //   return sendError(res, 400, "Invalid OTP", result);
+    // }
+    let result = await verifyOtp(whatsappNumber, otp);
+    if (!result?.ok) {
+      return sendError(res, 400, result?.reason);
     }
-    if (result?.Status == "Success") {
-      updatedUser = await updateUserById(userId, {
-        currentScreen: currentScreen ? currentScreen : checkUser?.currentScreen,
-        isMobileVerified: true,
-        fcmToken: fcmToken ? fcmToken : checkUser?.fcmToken,
-        whatsappNumber: whatsappNumber,
-      });
-      const updatedMobile = {
-        currentScreen: currentScreen ? currentScreen : checkUser?.currentScreen,
-        whatsappNumber: whatsappNumber,
-      };
-      if (subBrandId) {
-        await updateSubBrandById(subBrandId, updatedMobile);
-      } else {
-        await updateBrandById(checkUser?.brand, updatedMobile);
-      }
-      const token = await generateToken(updatedUser);
-      return sendSuccess(
-        res,
-        200,
-        "Verification successfully! Your mobile number changed successfully",
-        { result, user: updatedUser, token }
-      );
+    updatedUser = await updateUserById(userId, {
+      currentScreen: currentScreen ? currentScreen : checkUser?.currentScreen,
+      isMobileVerified: true,
+      fcmToken: fcmToken ? fcmToken : checkUser?.fcmToken,
+      whatsappNumber: whatsappNumber,
+    });
+    const updatedMobile = {
+      currentScreen: currentScreen ? currentScreen : checkUser?.currentScreen,
+      whatsappNumber: whatsappNumber,
+    };
+    if (subBrandId) {
+      await updateSubBrandById(subBrandId, updatedMobile);
+    } else {
+      await updateBrandById(checkUser?.brand, updatedMobile);
     }
+    const token = await generateToken(updatedUser);
+    return sendSuccess(
+      res,
+      200,
+      "Verification successfully! Your mobile number changed successfully",
+      { result, user: updatedUser, token }
+    );
   } catch (error) {
     console.log("error on verifyOtp and change mobile number: ", error);
     return sendError(res, 500, error.message);
