@@ -85,8 +85,10 @@ exports.verifyChangeMobile = async (req, res) => {
       currentScreen: currentScreen ? currentScreen : checkUser?.currentScreen,
       whatsappNumber: whatsappNumber,
     };
-    if (subBrandId || role === ROLES.SUB_VENDOR) {
+    if (subBrandId) {
       await updateSubBrandById(subBrandId, updatedMobile);
+    } else if (role === ROLES.SUB_VENDOR) {
+      await updateSubBrandById(checkUser?.subBrand, updatedMobile);
     } else if (role === ROLES.VENDOR) {
       await updateBrandById(checkUser?.brand, updatedMobile);
     }
