@@ -1,4 +1,5 @@
 // const { urlVerifyOtp } = require("../../service/sendOTP");
+const { ROLES } = require("../../constants");
 const { verifyOtp } = require("../../service/otpServices");
 const { sendSuccess, sendError } = require("../../utils");
 const { generateToken } = require("../../middleware/authValidation");
@@ -77,9 +78,9 @@ exports.verifyChangeMobile = async (req, res) => {
       currentScreen: currentScreen ? currentScreen : checkUser?.currentScreen,
       whatsappNumber: whatsappNumber,
     };
-    if (subBrandId) {
+    if (subBrandId || role === ROLES.SUB_VENDOR) {
       await updateSubBrandById(subBrandId, updatedMobile);
-    } else {
+    } else if (role === ROLES.VENDOR) {
       await updateBrandById(checkUser?.brand, updatedMobile);
     }
     const token = await generateToken(updatedUser);
