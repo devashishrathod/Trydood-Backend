@@ -1,3 +1,4 @@
 const { createCode } = require("./createCode");
+const { getAllCodes } = require("./getAllCodes");
 
-module.exports = { createCode };
+module.exports = { createCode, getAllCodes };
