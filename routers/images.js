@@ -17,12 +17,7 @@ router.post(
   createImageForBrandOrSubBrand
 );
 
-router.get(
-  "/getAllImages/:entityId",
-  verifyToken,
-  checkRole(ROLES.ADMIN, ROLES.VENDOR, ROLES.SUB_VENDOR),
-  getImagesForBrandOrSubBrand
-);
+router.get("/getAllImages/:entityId", verifyToken, getImagesForBrandOrSubBrand);
 
 router.put(
   "/updateOrDeleteImages/:entityId",

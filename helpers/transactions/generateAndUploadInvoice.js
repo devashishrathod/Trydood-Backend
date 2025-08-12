@@ -2,13 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const PDFDocument = require("pdfkit");
 const { PAYMENT_STATUS } = require("../../constants");
-const cloudinary = require("cloudinary").v2;
-
-cloudinary.config({
-  cloud_name: "dbrkf1j5w",
-  api_key: "795633858137547",
-  api_secret: "u2aK09fu1bQ9Isv25Zt1S85M6-c",
-});
+const { uploadPDF } = require("../../service/uploadServices");
 
 exports.generateAndUploadInvoice = async (invoiceData) => {
   console.log("invoiceData====", invoiceData);
@@ -18,16 +12,24 @@ exports.generateAndUploadInvoice = async (invoiceData) => {
         ? "Successfully"
         : invoiceData.status;
     const doc = new PDFDocument({ margin: 50 });
+    // Use a Unicode font
+    // const fontPath = path.join(
+    //   __dirname,
+    //   "..",
+    //   "assets",
+    //   "fonts",
+    //   "NotoSans-Regular.ttf"
+    // );
+    // doc.registerFont("NotoSans", fontPath);
+    // doc.font("NotoSans"); // Set as active font
     const fileName = `invoice_${Date.now()}_${Math.floor(
       Math.random() * 10000
     )}.pdf`;
     const tmpDir = path.join(__dirname, "..", "tmp");
     const filePath = path.join(tmpDir, fileName);
-
     if (!fs.existsSync(tmpDir)) {
       fs.mkdirSync(tmpDir, { recursive: true });
     }
-
     const writeStream = fs.createWriteStream(filePath);
     doc.pipe(writeStream);
     doc.fontSize(20).text("Invoice", { align: "center" }).moveDown(2);
@@ -40,16 +42,10 @@ exports.generateAndUploadInvoice = async (invoiceData) => {
     doc.text(`Status: ${status}`);
     doc.text(`Payment Method: ${invoiceData.paymentMethod}`);
     doc.end();
-
     writeStream.on("finish", async () => {
       try {
-        const result = await cloudinary.uploader.upload(filePath, {
-          resource_type: "auto",
-          folder: "invoices",
-          public_id: fileName.replace(".pdf", ""),
-        });
-        fs.unlinkSync(filePath);
-        resolve(result.secure_url);
+        const pdfUrl = await uploadPDF(filePath, fileName);
+        resolve(pdfUrl);
       } catch (err) {
         reject(err);
       }

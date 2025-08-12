@@ -4,6 +4,8 @@ const {
   userField,
   brandField,
   subBrandsField,
+  categoryField,
+  subCategoryField,
 } = require("./validMogooseObjectId");
 
 const voucherSchema = new mongoose.Schema(
@@ -12,6 +14,8 @@ const voucherSchema = new mongoose.Schema(
     brand: brandField,
     subBrands: subBrandsField,
     createdBy: userField,
+    category: categoryField,
+    subCategory: subCategoryField,
     title: { type: String },
     description: { type: String, trim: true },
     type: {

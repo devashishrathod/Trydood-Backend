@@ -1,16 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const authRouter = express.Router();
+// const authRouter = express.Router();
 const profileRouter = express.Router();
 
 const {
   loginEmail,
   registorUser,
   loginMobile,
-  requistOtp,
-  verifyOtp,
   userProfile,
-  login,
   verifyVendorMobileNumber,
   verifyOTPVendorMobile,
 } = require("../controller/user");
@@ -19,7 +16,7 @@ const { userProfileComplete } = require("../controller/users/updateUser");
 const { verifyToken } = require("../middleware/authValidation");
 const { isFirst } = require("../middleware");
 const {
-  logout,
+  // logout,
   changeLoginMobileNumber,
   verifyChangeMobile,
 } = require("../controller/users");
@@ -27,12 +24,10 @@ const {
 router.post("/register", registorUser);
 router.post("/loginEmail", loginEmail);
 router.post("/loginMobile", loginMobile);
-router.post("/requistOtp", requistOtp);
 router.post("/vendorMobileVerify", verifyVendorMobileNumber);
 router.post("/vendorOTPVerify", verifyOTPVendorMobile);
-router.post("/login", login);
-router.post("/verifyOtp", verifyOtp);
-router.put("/logout", verifyToken, logout);
+
+// router.put("/logout", verifyToken, logout);
 router.put("/changeMobile", verifyToken, changeLoginMobileNumber);
 router.put("/verifyChangeMobile", verifyToken, verifyChangeMobile);
 /* ================= Enhance route with "auth/login" ================== */
@@ -62,7 +57,7 @@ module.exports = {
   router,
   //routePrefix: "/user", // default
   extraRoutes: [
-    { path: "/auth", router: authRouter }, // mount /api/auth/*
+    // { path: "/auth", router: authRouter }, // mount /api/auth/*
     { path: "/profile", router: profileRouter },
   ],
 };

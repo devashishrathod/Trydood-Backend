@@ -2,11 +2,12 @@ const { generateToken } = require("../middleware/authValidation");
 const User = require("../model/User");
 const { uploadToCloudinary } = require("../service/uploadImage");
 const bcrypt = require("bcryptjs");
-const { generateReferralCode } = require("../utils");
+const { generateReferralCode, sendError } = require("../utils");
 const Location = require("../model/Location");
-const { urlVerifyOtp, urlSendTestOtp } = require("../service/sendOTP");
+const { sendOtp, verifyOtp } = require("../service/otpServices");
 const { calculateProfileCompletion } = require("../utils/utils");
 const { generateUniqueUserId } = require("../service/userServices");
+const { ROLES } = require("../constants");
 let salt = 10;
 
 exports.userProfile = async (req, res) => {
@@ -160,97 +161,7 @@ exports.loginMobile = async (req, res) => {
   }
 };
 
-exports.requistOtp = async (req, res) => {
-  const { mobile, role } = req.body;
-  try {
-    const checkUser = await User.findOne({ mobile, role });
-    if (!checkUser) {
-      return res.status(400).json({ success: false, msg: "User not found!" });
-    }
-    let result = await urlSendTestOtp(mobile);
-    if (result) {
-      return res
-        .status(200)
-        .json({ success: true, result, msg: "Otp send successfully 1234" });
-    }
-  } catch (error) {
-    console.log("error on requistOtp: ", error);
-    return res
-      .status(500)
-      .json({ error: error, success: false, msg: error.message });
-  }
-};
-
-exports.verifyOtp = async (req, res) => {
-  let { sessionId, otp, whatsappNumber, role, fcmToken, currentScreen } =
-    req.body;
-  whatsappNumber = whatsappNumber?.toLowerCase();
-  try {
-    const checkUser = await User.findOne({ whatsappNumber, role });
-    if (!checkUser) {
-      return res.status(400).json({ success: false, msg: "User not found!" });
-    }
-    let result = await urlVerifyOtp(sessionId, otp);
-    if (result?.Status == "Success") {
-      if (currentScreen) checkUser.currentScreen = currentScreen?.toUpperCase();
-      checkUser.isMobileVerified = true;
-      checkUser.fcmToken = fcmToken;
-      await checkUser.save();
-      const token = await generateToken(checkUser);
-      return res.status(200).json({
-        success: true,
-        msg: "Verification successful",
-        result,
-        user: checkUser,
-        token,
-      });
-    }
-    return res.status(400).json({ success: false, msg: "Invalid OTP" });
-  } catch (error) {
-    console.log("error on verifyOtp: ", error);
-    return res
-      .status(500)
-      .json({ error: error, success: false, msg: error.message });
-  }
-};
-
-exports.login = async (req, res) => {
-  let { role, whatsappNumber, fcmToken } = req.body;
-  try {
-    role = role || "user";
-    whatsappNumber = whatsappNumber?.toLowerCase();
-    let checkUser = await User.findOne({ whatsappNumber, role });
-    let isFirst = false;
-    if (!checkUser) {
-      isFirst = true;
-      checkUser = new User({
-        whatsappNumber,
-        role,
-        uniqueId: await generateUniqueUserId(),
-        referCode: generateReferralCode(6),
-        fcmToken: fcmToken ? fcmToken : null,
-      });
-    }
-    await checkUser.save();
-    let result = await urlSendTestOtp(whatsappNumber);
-    return res.status(200).json({
-      success: true,
-      msg: "OTP sent to your mobile number successfully.",
-      isFirst,
-      result,
-      user: checkUser,
-    });
-  } catch (error) {
-    console.log("error on login: ", error);
-    return res
-      .status(500)
-      .json({ error: error, success: false, msg: error.message });
-  }
-};
-
 exports.userProfileComplete = async (req, res) => {
-  // console.log("req.boydy: ", req.body);
-
   const id = req.payload?._id;
   const name = req.body?.name;
   const email = req.body?.email;

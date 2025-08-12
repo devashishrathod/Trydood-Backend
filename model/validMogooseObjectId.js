@@ -21,13 +21,25 @@ module.exports = Object.freeze({
   subBrandField: refField("SubBrand"),
   categoryField: refField("Category"),
   subCategoryField: refField("SubCategory"),
+  dealOfCategoryField: refField("DealOfCategory"),
   locationField: refField("Location"),
   workHoursField: refField("WorkHours"),
   gstField: refField("Gst"),
   bankAccountField: refField("BankAccount"),
   subscribedField: refField("Subscribed"),
   subscriptionField: refField("Subscription"),
+  voucherField: refField("Voucher"),
   transactionField: refField("Transaction"),
+
+  vouchersField: Object.freeze({
+    type: [ObjectId],
+    ref: "Voucher",
+    validate: {
+      validator: (arr) => Array.isArray(arr) && arr.every(isValidId),
+      message: (props) =>
+        `One or more SubBrand IDs in ${props.value} are invalid`,
+    },
+  }),
 
   subBrandsField: Object.freeze({
     type: [ObjectId],
@@ -63,6 +75,16 @@ module.exports = Object.freeze({
     validate: {
       validator: (arr) => Array.isArray(arr) && arr.every(isValidId),
       message: (props) => `One or more Users IDs in ${props.value} are invalid`,
+    },
+  }),
+
+  subscribedsField: Object.freeze({
+    type: [ObjectId],
+    ref: "Subscribed",
+    validate: {
+      validator: (arr) => Array.isArray(arr) && arr.every(isValidId),
+      message: (props) =>
+        `One or more Subscribed IDs in ${props.value} are invalid`,
     },
   }),
 });

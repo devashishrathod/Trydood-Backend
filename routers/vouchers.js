@@ -17,18 +17,8 @@ router.post(
   loadBrand,
   createVoucher
 );
-router.get(
-  "/getAll",
-  verifyToken,
-  checkRole(ROLES.ADMIN, ROLES.VENDOR, ROLES.SUB_VENDOR),
-  getAllVouchers
-);
-router.get(
-  "/get/:voucherId",
-  verifyToken,
-  checkRole(ROLES.ADMIN, ROLES.VENDOR, ROLES.SUB_VENDOR),
-  getVoucher
-);
+router.get("/getAll", verifyToken, getAllVouchers);
+router.get("/get/:voucherId", verifyToken, getVoucher);
 router.put("/update/:id", verifyToken, checkRole(ROLES.VENDOR), updateVoucher);
 
 module.exports = router;

@@ -8,12 +8,26 @@ const {
   updateSubBrand,
   getAllSubBrands,
   getAllSubBrandsOfBrand,
+  createInitialSubBrandForBrand,
+  signUpSubBrandWithMobile,
 } = require("../controller/subBrands");
 
 router.post(
+  "/createInitialSubBrandForBrand/:brandId",
+  verifyToken,
+  checkRole(ROLES.VENDOR),
+  createInitialSubBrandForBrand
+);
+router.post(
+  "/signUp/:brandId",
+  verifyToken,
+  checkRole(ROLES.VENDOR),
+  signUpSubBrandWithMobile
+);
+router.post(
   "/addSubBrandByVendorOrSubBrandUser/:brandId",
   verifyToken,
-  checkRole(ROLES.VENDOR, ROLES.SUB_VENDOR),
+  checkRole(ROLES.VENDOR),
   addSubBrand
 );
 router.put(
@@ -22,12 +36,7 @@ router.put(
   checkRole(ROLES.VENDOR, ROLES.SUB_VENDOR),
   updateSubBrand
 );
-router.get(
-  "/getOne/:subBrandId",
-  verifyToken,
-  checkRole(ROLES.VENDOR, ROLES.SUB_VENDOR, ROLES.ADMIN),
-  getAllSubBrands
-);
+router.get("/getOne/:subBrandId", verifyToken, getAllSubBrands);
 router.get("/getAll", verifyToken, checkRole(ROLES.ADMIN), getAllSubBrands);
 router.get(
   "/getAllSubBrandsOfBrand/:brandId",
