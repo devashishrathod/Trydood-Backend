@@ -8,24 +8,32 @@ exports.createCode = async (payload) => {
     isDeleted: false,
   });
   if (!linkedVoucher) {
-    throw new Error("No valid voucher found for provided ID");
+    const err = new Error("No valid voucher found for provided ID");
+    err.statusCode = 404;
+    throw err;
   }
   const minVoucherStart = linkedVoucher.validFrom;
   const maxVoucherEnd = linkedVoucher.validTill;
   let finalStart = validFrom ? new Date(validFrom) : minVoucherStart;
   if (finalStart < minVoucherStart) {
-    throw new Error(
+    const err = new Error(
       `validFrom cannot be earlier than voucher start date: ${minVoucherStart.toISOString()}`
     );
+    err.statusCode = 422;
+    throw err;
   }
   let finalEnd = validTill ? new Date(validTill) : maxVoucherEnd;
   if (finalEnd > maxVoucherEnd) {
-    throw new Error(
+    const err = new Error(
       `validTill cannot be later than voucher end date: ${maxVoucherEnd.toISOString()}`
     );
+    err.statusCode = 422;
+    throw err;
   }
   if (finalStart >= finalEnd) {
-    throw new Error("validFrom must be earlier than validTill");
+    const err = new Error("validFrom must be earlier than validTill");
+    err.statusCode = 422;
+    throw err;
   }
   const now = new Date();
   const isActive = now >= finalStart && now <= finalEnd;

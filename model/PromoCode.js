@@ -13,7 +13,7 @@ const promoCodeSchema = new mongoose.Schema(
     title: { type: String },
     description: { type: String, trim: true },
     promoCode: { type: String, required: true, trim: true },
-    maxDiscount: { type: Number, required: true },
+    maxDiscountValue: { type: Number, required: true },
     userLimit: { type: Number, required: true },
     validFrom: { type: Date, required: true },
     validTill: { type: Date, required: true },

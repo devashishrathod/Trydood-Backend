@@ -18,6 +18,7 @@ exports.createPromoCode = async (req, res) => {
     return sendSuccess(res, 201, "Promo code created successfully", promoCode);
   } catch (err) {
     console.log("error on creating promoCode", err);
-    return sendError(res, 500, err.message);
+    const statusCode = err.statusCode || 500;
+    return sendError(res, statusCode, err.message);
   }
 };

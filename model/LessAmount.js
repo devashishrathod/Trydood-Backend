@@ -1,9 +1,5 @@
 const mongoose = require("mongoose");
-const {
-  userField,
-  usersField,
-  voucherField,
-} = require("./validMogooseObjectId");
+const { userField, voucherField } = require("./validMogooseObjectId");
 
 const claimedUserSchema = new mongoose.Schema(
   { userId: userField, claimedAt: { type: Date, default: Date.now } },
@@ -12,12 +8,17 @@ const claimedUserSchema = new mongoose.Schema(
 
 const lessAmountSchema = new mongoose.Schema(
   {
-    users: usersField,
+    scope: {
+      type: String,
+      enum: ["ALL_USERS", "SELECTED_USERS"],
+      default: "ALL_USERS",
+    },
+    users: { type: [userField], default: [] },
     voucher: voucherField,
     claimedUsers: { type: [claimedUserSchema], default: [] },
     title: { type: String },
     description: { type: String, trim: true },
-    maxDiscount: { type: Number, required: true },
+    maxDiscountValue: { type: Number, required: true },
     validFrom: { type: Date, required: true },
     validTill: { type: Date, required: true },
     isActive: { type: Boolean, default: true },
