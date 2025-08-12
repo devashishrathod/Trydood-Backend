@@ -1,11 +1,9 @@
 const User = require("../../model/User");
 const { ROLES } = require("../../constants");
 const { generateToken } = require("../../middleware");
-//const { urlVerifyOtp } = require("../sendOTP");
 const { verifyOtp } = require("../otpServices");
 
 exports.verifyOtpWithMobile = async ({
-  //  sessionId,
   otp,
   whatsappNumber,
   role,
@@ -17,10 +15,6 @@ exports.verifyOtpWithMobile = async ({
   if (!user) {
     throw { statusCode: 400, message: "User not found!" };
   }
-  // const result = await urlVerifyOtp(sessionId, otp);
-  // if (result?.Status !== "Success") {
-  //   throw { statusCode: 400, message: "Invalid OTP" };
-  // }
   const result = await verifyOtp(whatsappNumber, otp);
   if (!result?.ok) {
     throw { statusCode: 400, message: result?.reason };

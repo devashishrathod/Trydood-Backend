@@ -1,7 +1,6 @@
 const User = require("../../model/User");
 const { ROLES } = require("../../constants");
 const { generateReferralCode } = require("../../utils");
-// const { urlSendTestOtp } = require("../../service/sendOTP");
 const { sendOtp } = require("../../service/otpServices");
 const { generateUniqueUserId, getUserByFields } = require("../userServices");
 
@@ -48,7 +47,6 @@ exports.loginOrSignUpWithMobile = async ({
       }
     }
   }
-  // const otpResult = await urlSendTestOtp(whatsappNumber);
   const otpResult = await sendOtp(whatsappNumber);
   if (otpResult.ApiResponse == "Fail") {
     return sendError(res, 503, "Please try again! OTP service unavailable");

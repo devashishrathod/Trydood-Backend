@@ -1,4 +1,3 @@
-// const { urlVerifyOtp } = require("../../service/sendOTP");
 const { ROLES } = require("../../constants");
 const { verifyOtp } = require("../../service/otpServices");
 const { sendSuccess, sendError } = require("../../utils");
@@ -22,15 +21,8 @@ exports.verifyChangeMobile = async (req, res) => {
     if (!checkUser) {
       return sendError(res, 400, "User not found");
     }
-    let {
-      // sessionId,
-      otp,
-      role,
-      whatsappNumber,
-      subBrandId,
-      fcmToken,
-      currentScreen,
-    } = req.body;
+    let { otp, role, whatsappNumber, subBrandId, fcmToken, currentScreen } =
+      req.body;
     whatsappNumber = whatsappNumber?.toLowerCase();
     currentScreen = currentScreen?.toUpperCase();
     let updatedUser;
@@ -62,10 +54,6 @@ exports.verifyChangeMobile = async (req, res) => {
         );
       }
     }
-    // const result = await urlVerifyOtp(sessionId, otp);
-    // if (result?.Status !== "Success") {
-    //   return sendError(res, 400, "Invalid OTP", result);
-    // }
     let result = await verifyOtp(whatsappNumber, otp);
     if (!result?.ok) {
       return sendError(res, 400, result?.reason);
