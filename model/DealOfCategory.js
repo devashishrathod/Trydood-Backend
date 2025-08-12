@@ -11,6 +11,7 @@ const dealOfCategorySchema = new mongoose.Schema(
       enum: [...Object.values(PLATFORMS)],
       default: PLATFORMS.WEB,
     },
+    isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }

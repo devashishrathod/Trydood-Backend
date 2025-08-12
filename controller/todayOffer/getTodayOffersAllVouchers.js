@@ -5,8 +5,8 @@ const { sendSuccess, sendError } = require("../../utils");
 
 exports.getTodayOffersAllVouchers = async (req, res) => {
   try {
+    const categoryId = req.params.categoryId;
     const {
-      categoryId,
       page = 1,
       limit = 10,
       sortBy = "createdAt",

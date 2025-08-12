@@ -17,7 +17,7 @@ router.get(
   getTodayOfferCategories
 );
 router.get(
-  "get-all-vouchers/:categoryId",
+  "/get-all-vouchers/:categoryId",
   verifyToken,
   checkRole(ROLES.USER),
   getTodayOffersAllVouchers
