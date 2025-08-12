@@ -1,5 +1,5 @@
 require("dotenv").config();
-const APIKEY = process.env.api_key_2Factor;
+const APIKEY = process.env.TWO_FACTOR_API_KEY;
 const TwoFactor = new (require("2factor"))(APIKEY);
 var axios = require("axios");
 
