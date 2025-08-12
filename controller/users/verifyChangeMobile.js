@@ -1,4 +1,5 @@
-const { urlVerifyOtp } = require("../../service/sendOTP");
+const { ROLES } = require("../../constants");
+const { verifyOtp } = require("../../service/otpServices");
 const { sendSuccess, sendError } = require("../../utils");
 const { generateToken } = require("../../middleware/authValidation");
 const { updateBrandById } = require("../../service/brandServices");
@@ -20,18 +21,12 @@ exports.verifyChangeMobile = async (req, res) => {
     if (!checkUser) {
       return sendError(res, 400, "User not found");
     }
-    let {
-      sessionId,
-      otp,
-      role,
-      whatsappNumber,
-      subBrandId,
-      fcmToken,
-      currentScreen,
-    } = req.body;
+    let { otp, role, whatsappNumber, subBrandId, fcmToken, currentScreen } =
+      req.body;
     whatsappNumber = whatsappNumber?.toLowerCase();
     currentScreen = currentScreen?.toUpperCase();
     let updatedUser;
+    let checksubBrand;
     const existingUserWithMobile = await getUserByFields({
       whatsappNumber,
       role,
@@ -44,9 +39,10 @@ exports.verifyChangeMobile = async (req, res) => {
       );
     }
     if (subBrandId) {
-      const checksubBrand = await getSubBrandById(subBrandId);
-      if (!checksubBrand)
+      checksubBrand = await getSubBrandById(subBrandId);
+      if (!checksubBrand) {
         return sendError(res, 404, "No sub-brand/outlet found!");
+      }
       const existingSubBrandWithMobile = await getSubBrandByFields({
         whatsappNumber: whatsappNumber,
       });
@@ -58,34 +54,39 @@ exports.verifyChangeMobile = async (req, res) => {
         );
       }
     }
-    const result = await urlVerifyOtp(sessionId, otp);
-    if (result?.Status !== "Success") {
-      return sendError(res, 400, "Invalid OTP", result);
+    let result = await verifyOtp(whatsappNumber, otp);
+    if (!result?.ok) {
+      return sendError(res, 400, result?.reason);
     }
-    if (result?.Status == "Success") {
-      updatedUser = await updateUserById(userId, {
-        currentScreen: currentScreen ? currentScreen : checkUser?.currentScreen,
-        isMobileVerified: true,
-        fcmToken: fcmToken ? fcmToken : checkUser?.fcmToken,
-        whatsappNumber: whatsappNumber,
-      });
-      const updatedMobile = {
-        currentScreen: currentScreen ? currentScreen : checkUser?.currentScreen,
-        whatsappNumber: whatsappNumber,
-      };
-      if (subBrandId) {
-        await updateSubBrandById(subBrandId, updatedMobile);
-      } else {
-        await updateBrandById(checkUser?.brand, updatedMobile);
-      }
-      const token = await generateToken(updatedUser);
-      return sendSuccess(
-        res,
-        200,
-        "Verification successfully! Your mobile number changed successfully",
-        { result, user: updatedUser, token }
-      );
+    const updatedUserData = {
+      currentScreen: currentScreen ? currentScreen : checkUser?.currentScreen,
+      isMobileVerified: true,
+      fcmToken: fcmToken ? fcmToken : checkUser?.fcmToken,
+      whatsappNumber: whatsappNumber,
+    };
+    if (subBrandId) {
+      updatedUser = await updateUserById(checksubBrand?.user, updatedUserData);
+    } else {
+      updatedUser = await updateUserById(userId, updatedUserData);
     }
+    const updatedMobile = {
+      currentScreen: currentScreen ? currentScreen : checkUser?.currentScreen,
+      whatsappNumber: whatsappNumber,
+    };
+    if (subBrandId) {
+      await updateSubBrandById(subBrandId, updatedMobile);
+    } else if (role === ROLES.SUB_VENDOR) {
+      await updateSubBrandById(checkUser?.subBrand, updatedMobile);
+    } else if (role === ROLES.VENDOR) {
+      await updateBrandById(checkUser?.brand, updatedMobile);
+    }
+    const token = await generateToken(updatedUser);
+    return sendSuccess(
+      res,
+      200,
+      "Verification successfully! Your mobile number changed successfully",
+      { result, user: updatedUser, token }
+    );
   } catch (error) {
     console.log("error on verifyOtp and change mobile number: ", error);
     return sendError(res, 500, error.message);

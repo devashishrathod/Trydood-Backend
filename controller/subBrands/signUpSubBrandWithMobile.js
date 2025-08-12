@@ -1,13 +1,13 @@
 const User = require("../../model/User");
 const { getBrandById } = require("../../service/brandServices");
 const { getSubscribedById } = require("../../service/subscribedServices");
+const { sendOtp } = require("../../service/otpServices");
+const { generateReferralCode, sendError, sendSuccess } = require("../../utils");
+const { ROLES } = require("../../constants");
 const {
   generateUniqueUserId,
   getUserByFields,
 } = require("../../service/userServices");
-const { urlSendTestOtp } = require("../../service/sendOTP");
-const { generateReferralCode, sendError, sendSuccess } = require("../../utils");
-const { ROLES } = require("../../constants");
 
 exports.signUpSubBrandWithMobile = async (req, res) => {
   try {
@@ -52,7 +52,7 @@ exports.signUpSubBrandWithMobile = async (req, res) => {
         "This WhatsApp number is already registered as a Sub Vendor."
       );
     } else if (existingSubVendor && !existingSubVendor.isMobileVerified) {
-      otpResult = await urlSendTestOtp(existingSubVendor.whatsappNumber);
+      otpResult = await sendOtp(existingSubVendor.whatsappNumber);
     } else {
       existingSubVendor = new User({
         whatsappNumber,
@@ -62,7 +62,10 @@ exports.signUpSubBrandWithMobile = async (req, res) => {
       });
       await existingSubVendor.save();
     }
-    otpResult = await urlSendTestOtp(whatsappNumber);
+    otpResult = await sendOtp(whatsappNumber);
+    if (otpResult.ApiResponse == "Fail") {
+      return sendError(res, 503, "Please try again! OTP service unavailable");
+    }
     return sendSuccess(
       res,
       201,
