@@ -1,5 +1,6 @@
 const Joi = require("joi");
 const mongoose = require("mongoose");
+const { OFFERS_SCOPE } = require("../constants");
 
 const objectIdValidation = (value, helpers) => {
   if (!mongoose.Types.ObjectId.isValid(value)) {
@@ -14,7 +15,7 @@ exports.validateCreateLessAmount = (lessAmountData) => {
       "any.required": "Voucher ID is required",
     }),
     scope: Joi.string()
-      .valid("ALL_USERS", "SELECTED_USERS")
+      .valid(...Object.values(OFFERS_SCOPE))
       .required()
       .messages({
         "any.only": "Scope must be either ALL_USERS or SELECTED_USERS",
