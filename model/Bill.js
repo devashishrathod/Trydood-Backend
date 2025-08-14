@@ -1,10 +1,15 @@
 const mongoose = require("mongoose");
-const { userField, voucherField } = require("./validMogooseObjectId");
+const {
+  userField,
+  voucherField,
+  transactionField,
+} = require("./validMogooseObjectId");
 
 const BillSchema = new mongoose.Schema(
   {
     userId: userField,
     voucherId: voucherField,
+    transactionId: transactionField,
     voucherDiscountValue: { type: Number, required: true },
     billAmount: { type: Number, required: true },
     appliedOffers: [
@@ -22,6 +27,8 @@ const BillSchema = new mongoose.Schema(
     convenienceFee: { type: Number, default: 0 },
     totalDiscountValue: { type: Number, default: 0 },
     finalPayable: { type: Number, required: true },
+    isVerified: { type: Boolean, default: false },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }
 );

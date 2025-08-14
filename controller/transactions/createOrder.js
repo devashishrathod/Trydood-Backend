@@ -19,22 +19,23 @@ exports.createOrder = async (req, res) => {
     const createdUserId = req.payload?._id;
     const checkUser = await getUserById(createdUserId);
     if (!checkUser) return sendError(res, 404, "User not found!");
+
     const { amount, brandId, subscriptionId, currency, email, whatsappNumber } =
       req.body;
-    if (brandId) {
-      const checkBrand = await getBrandById(brandId);
-      if (!checkBrand) return sendError(res, 404, "Brand not found!");
-    }
-    if (subscriptionId) {
-      const checkSubscription = await getActiveSubscriptionPlanById(
-        subscriptionId
-      );
-      if (!checkSubscription)
-        return sendError(res, 404, "Subscription plan not found!");
-    }
+
+    const checkBrand = await getBrandById(brandId);
+    if (!checkBrand) return sendError(res, 404, "Brand not found!");
+
+    const checkSubscription = await getActiveSubscriptionPlanById(
+      subscriptionId
+    );
+    if (!checkSubscription)
+      return sendError(res, 404, "Subscription plan not found!");
+
     const receipt = `rcpt_${createdUserId.toString().slice(-6)}_${Date.now()
       .toString()
       .slice(-6)}`;
+
     const options = {
       amount: amount * 100,
       currency: currency ? currency : "INR",
@@ -49,11 +50,11 @@ exports.createOrder = async (req, res) => {
       );
     }
     const transactionData = {
-      brand: brandId ? brandId : undefined,
-      user: brandId ? checkBrand?.user : createdUserId,
+      brand: brandId,
+      user: checkBrand?.user,
       createdBy: createdUserId,
-      subscription: subscriptionId ? subscriptionId : undefined,
-      email: checkBrand?.companyEmail ?? email ?? undefined,
+      subscription: subscriptionId,
+      email: checkBrand?.companyEmail ? checkBrand?.companyEmail : email,
       contact: checkBrand?.whatsappNumber
         ? checkBrand?.whatsappNumber
         : whatsappNumber,
@@ -75,12 +76,8 @@ exports.createOrder = async (req, res) => {
     if (!transaction) {
       return sendError(res, 500, "Failed to create transaction order");
     }
-    if (brandId) {
-      await updateUserById(checkBrand.user, { transaction: transaction?._id });
-      await updateBrandById(brandId, { transaction: transaction?._id });
-    } else {
-      await updateUserById(createdUserId, { transaction: transaction?._id });
-    }
+    await updateUserById(checkBrand.user, { transaction: transaction?._id });
+    await updateBrandById(brandId, { transaction: transaction?._id });
     return sendSuccess(
       res,
       201,

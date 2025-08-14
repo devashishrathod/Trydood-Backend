@@ -30,6 +30,7 @@ module.exports = Object.freeze({
   subscriptionField: refField("Subscription"),
   voucherField: refField("Voucher"),
   transactionField: refField("Transaction"),
+  billField: refField("Bill"),
 
   vouchersField: Object.freeze({
     type: [ObjectId],
