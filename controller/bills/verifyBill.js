@@ -1,3 +1,6 @@
+const Voucher = require("../../model/Voucher");
+const PromoCode = require("../../model/PromoCode");
+const LessAmount = require("../../model/LessAmount");
 const Bill = require("../../model/Bill");
 const { sendError, sendSuccess } = require("../../utils");
 const { getUserById } = require("../../service/userServices");
@@ -10,6 +13,7 @@ const {
   getPaymentDetails,
   generateAndUploadInvoice,
 } = require("../../helpers/transactions");
+const { VOUCHER_STATUS } = require("../../constants");
 
 // verifyPayment and add subscription
 exports.verifyBill = async (req, res) => {
@@ -49,6 +53,14 @@ exports.verifyBill = async (req, res) => {
     });
     if (!userBill) return sendError(res, 404, "Bill not found");
 
+    const voucher = await Voucher.findOne({
+      _id: userBill?.voucherId,
+      isDeleted: false,
+      isActive: true,
+      status: VOUCHER_STATUS.ACTIVE,
+    });
+    if (!voucher) return sendError(res, 404, "Voucher not found");
+
     const generatedSignature = generateRazorpaySignature(
       razorpayOrderId,
       razorpayPaymentId
@@ -65,6 +77,8 @@ exports.verifyBill = async (req, res) => {
         "Razorpay services unavailable! Please try again later"
       );
     }
+    let finalTxn;
+    let updatedBill;
     const updatedTxnData = {
       entity: paymentDetails?.entity,
       description: paymentDetails?.description,
@@ -73,7 +87,7 @@ exports.verifyBill = async (req, res) => {
       razorpaySignature,
       verified: paymentDetails?.captured,
       paidAmount: paymentDetails?.amount / 100,
-      dueAmount: checkSubscription?.price - paymentDetails?.amount / 100,
+      dueAmount: userBill?.finalPayable - paymentDetails?.amount / 100,
       amountRefunded: (paymentDetails?.amount_refunded ?? 0) / 100,
       refundStatus: paymentDetails?.refund_status,
       isInternational: paymentDetails?.international,
@@ -99,31 +113,34 @@ exports.verifyBill = async (req, res) => {
     );
     if (!updateTxn) return sendError(res, 404, "Transaction update failed");
     if (updateTxn?.verified) {
+      const now = new Date();
       const invoiceData = {
         invoiceId: updateTxn.invoiceId,
         transaction: updateTxn._id.toString(),
-        planName: checkSubscription?.name,
+        planName: `${voucher?.title} voucher claimed`,
         price: updateTxn.paidAmount,
-        date: new Date(startDate).toLocaleDateString("en-IN"),
-        planEnd: new Date(endDate).toLocaleDateString("en-IN"),
+        date: new Date(now).toLocaleDateString("en-IN"),
+        planEnd: new Date(now).toLocaleDateString("en-IN"),
         status: updateTxn.status,
         paymentMethod: updateTxn.paymentMethod,
       };
       const invoiceUrl = await generateAndUploadInvoice(invoiceData);
       console.log("Invoice URL:", invoiceUrl);
-      const finalTxn = await updateTransactionByOrderAndUserId(
+      finalTxn = await updateTransactionByOrderAndUserId(
         { _id: transactionId, user: user, razorpayOrderId },
         { invoiceUrl }
       );
-      console.log("Final Transaction:", finalTxn);
-      const updatedBill = await Bill.findOneAndUpdate(
+      updatedBill = await Bill.findOneAndUpdate(
         { _id: bill, isDeleted: false, isVerified: false },
-        { isVerified: true }
+        { isVerified: true },
+        { new: true }
       );
       if (updatedBill) {
-        await voucher.updateOne({
-          $addToSet: { claimedUsers: { user, claimedAt: new Date() } },
-        });
+        await Voucher.findOneAndUpdate(
+          { _id: voucher?._id },
+          { $addToSet: { claimedUsers: { user, claimedAt: new Date() } } },
+          { new: true }
+        );
         if (
           Array.isArray(updatedBill?.appliedOffers) &&
           updatedBill.appliedOffers.length
@@ -156,7 +173,7 @@ exports.verifyBill = async (req, res) => {
       res,
       200,
       "Payment successful! Congratulations — your bill payment has been successfully",
-      { brand: SubscribedBrand }
+      { bill: updatedBill, transaction: finalTxn }
     );
   } catch (error) {
     console.error("Payment verification error:", error);
