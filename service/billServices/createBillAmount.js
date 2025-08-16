@@ -3,6 +3,7 @@ const Bill = require("../../model/Bill");
 const Voucher = require("../../model/Voucher");
 const PromoCode = require("../../model/PromoCode");
 const LessAmount = require("../../model/LessAmount");
+const SubBrand = require("../../model/SubBrand");
 const { getUserById, updateUserById } = require("../../service/userServices");
 const {
   createTransaction,
@@ -25,7 +26,7 @@ exports.createBillAmount = async (userId, payload) => {
     throw err;
   }
   const { email, whatsappNumber } = checkUser;
-  const { billAmount, voucherId, offer, currency } = payload;
+  const { billAmount, voucherId, subBrandId, offer, currency } = payload;
   const voucher = await Voucher.findOne({
     _id: voucherId,
     isDeleted: false,
@@ -33,13 +34,23 @@ exports.createBillAmount = async (userId, payload) => {
   });
   if (!voucher) {
     err = new Error("Invalid or inactive voucher");
-    err.statusCode = 422;
+    err.statusCode = 409;
     throw err;
   }
   if (billAmount < (voucher.minOrderAmount || 0)) {
     err = new Error(
       `Bill amount must be at least ${voucher.minOrderAmount} for this voucher`
     );
+    err.statusCode = 409;
+    throw err;
+  }
+  const subBrand = await SubBrand.findOne({
+    _id: subBrandId,
+    isDeleted: false,
+    isActive: true,
+  });
+  if (!subBrand) {
+    err = new Error("Invalid or inactive subBrand/outlet");
     err.statusCode = 409;
     throw err;
   }
@@ -89,6 +100,7 @@ exports.createBillAmount = async (userId, payload) => {
   const transactionData = {
     user: userId,
     createdBy: userId,
+    subBrand: subBrandId,
     email: email ? email : undefined,
     contact: whatsappNumber,
     entity: razorpayOrder?.entity,
@@ -115,6 +127,7 @@ exports.createBillAmount = async (userId, payload) => {
   const newBill = await Bill.create({
     userId,
     voucherId,
+    subBrandId,
     transactionId: transaction?._id,
     voucherDiscountValue,
     billAmount,
@@ -123,11 +136,9 @@ exports.createBillAmount = async (userId, payload) => {
     totalDiscountValue,
     finalPayable,
   });
-  console.log("new bill", newBill);
   const billTransaction = await updateTransactionByOrderAndUserId(
     { _id: transaction?._id },
     { bill: newBill?._id }
   );
-  console.log("bill", billTransaction);
   return { newBill, billTransaction };
 };

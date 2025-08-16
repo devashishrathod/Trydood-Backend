@@ -3,12 +3,14 @@ const {
   userField,
   voucherField,
   transactionField,
+  subBrandField,
 } = require("./validMogooseObjectId");
 
 const BillSchema = new mongoose.Schema(
   {
     userId: userField,
     voucherId: voucherField,
+    subBrandId: subBrandField,
     transactionId: transactionField,
     voucherDiscountValue: { type: Number, required: true },
     billAmount: { type: Number, required: true },

@@ -1,6 +1,7 @@
 const Voucher = require("../../model/Voucher");
 const PromoCode = require("../../model/PromoCode");
 const LessAmount = require("../../model/LessAmount");
+const SubBrand = require("../../model/SubBrand");
 const Bill = require("../../model/Bill");
 const { sendError, sendSuccess } = require("../../utils");
 const { getUserById } = require("../../service/userServices");
@@ -11,7 +12,7 @@ const {
 const {
   generateRazorpaySignature,
   getPaymentDetails,
-  generateAndUploadInvoice,
+  generateAndUploadBillInvoice,
 } = require("../../helpers/transactions");
 const { VOUCHER_STATUS } = require("../../constants");
 
@@ -38,7 +39,7 @@ exports.verifyBill = async (req, res) => {
     const checkTxn = await getTransactionById(transactionId);
     if (!checkTxn) return sendError(res, 404, "User transaction not found!");
 
-    const { user, createdBy, bill } = checkTxn;
+    const { user, createdBy, bill, subBrand } = checkTxn;
     if (createdUserId.toString() !== createdBy.toString()) {
       return sendError(
         res,
@@ -61,6 +62,17 @@ exports.verifyBill = async (req, res) => {
     });
     if (!voucher) return sendError(res, 404, "Voucher not found");
 
+    const subBrandAdd = await SubBrand.findOne({
+      _id: subBrand,
+      isDeleted: false,
+      isActive: true,
+    }).populate({
+      path: "location",
+      select: "address",
+    });
+    if (!subBrandAdd) {
+      return sendError(res, 404, "Invalid or inactive subBrand/outlet");
+    }
     const generatedSignature = generateRazorpaySignature(
       razorpayOrderId,
       razorpayPaymentId
@@ -113,40 +125,24 @@ exports.verifyBill = async (req, res) => {
     );
     if (!updateTxn) return sendError(res, 404, "Transaction update failed");
     if (updateTxn?.verified) {
-      const now = new Date();
-      const invoiceData = {
-        invoiceId: updateTxn.invoiceId,
-        transaction: updateTxn._id.toString(),
-        planName: `${voucher?.title} voucher claimed`,
-        price: updateTxn.paidAmount,
-        date: new Date(now).toLocaleDateString("en-IN"),
-        planEnd: new Date(now).toLocaleDateString("en-IN"),
-        status: updateTxn.status,
-        paymentMethod: updateTxn.paymentMethod,
-      };
-      const invoiceUrl = await generateAndUploadInvoice(invoiceData);
-      console.log("Invoice URL:", invoiceUrl);
-      finalTxn = await updateTransactionByOrderAndUserId(
-        { _id: transactionId, user: user, razorpayOrderId },
-        { invoiceUrl }
-      );
       updatedBill = await Bill.findOneAndUpdate(
         { _id: bill, isDeleted: false, isVerified: false },
         { isVerified: true },
         { new: true }
       );
+      let offerDoc = null;
       if (updatedBill) {
         await Voucher.findOneAndUpdate(
           { _id: voucher?._id },
           { $addToSet: { claimedUsers: { user, claimedAt: new Date() } } },
           { new: true }
         );
+
         if (
           Array.isArray(updatedBill?.appliedOffers) &&
           updatedBill.appliedOffers.length
         ) {
           for (const offer of updatedBill.appliedOffers) {
-            let offerDoc = null;
             if (offer.offerType === "PromoCode") {
               offerDoc = await PromoCode.findById(offer.offerId);
             } else if (offer.offerType === "LessAmount") {
@@ -162,6 +158,30 @@ exports.verifyBill = async (req, res) => {
       } else {
         return sendError(res, 400, "User bill updation failed");
       }
+      const now = new Date();
+      const invoiceData = {
+        invoiceId: updateTxn.invoiceId,
+        orderId: updateTxn.razorpayOrderId.toString(),
+        brandName: subBrandAdd?.companyName,
+        location: subBrandAdd?.location?.address,
+        dateTime: new Date(now).toLocaleString("en-IN"),
+        billAmount: updatedBill?.billAmount || 0,
+        discountText: `Discount × ${voucher?.discount || 0}`,
+        discountAmount: updatedBill?.voucherDiscountValue || 0,
+        convenienceFee: updatedBill?.convenienceFee || 0,
+        promoCodeUsed: offerDoc?.promoCode || undefined,
+        promoDiscount: offerDoc?.maxDiscountValue || undefined,
+        paymentMethod: updateTxn?.paymentMethod,
+        paymentApp: "UPI",
+        transactionId: transactionId,
+        payAmount: updateTxn?.paidAmount || 0,
+        status: updateTxn?.status,
+      };
+      const invoiceUrl = await generateAndUploadBillInvoice(invoiceData);
+      finalTxn = await updateTransactionByOrderAndUserId(
+        { _id: transactionId, user: user, razorpayOrderId },
+        { invoiceUrl }
+      );
     } else {
       return sendError(
         res,
