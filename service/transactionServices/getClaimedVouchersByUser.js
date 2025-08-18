@@ -22,7 +22,7 @@ exports.getClaimedVouchersByUser = async (userId, filter) => {
         as: "subBrand",
       },
     },
-    { $unwind: "$subBrand" },
+    { $unwind: { path: "$subBrand", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "categories",
@@ -32,6 +32,15 @@ exports.getClaimedVouchersByUser = async (userId, filter) => {
       },
     },
     { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "locations",
+        localField: "subBrand.location",
+        foreignField: "_id",
+        as: "location",
+      },
+    },
+    { $unwind: { path: "$location", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "bills",
@@ -44,20 +53,15 @@ exports.getClaimedVouchersByUser = async (userId, filter) => {
     {
       $lookup: {
         from: "vouchers",
-        localField: "bill.voucher",
+        localField: "bill.voucherId",
         foreignField: "_id",
         as: "voucher",
       },
     },
     { $unwind: { path: "$voucher", preserveNullAndEmptyArrays: true } },
+
     {
       $addFields: {
-        formattedDate: {
-          $dateToString: {
-            format: "%d - %b - %Y - %I:%M %p",
-            date: "$createdAt",
-          },
-        },
         day: {
           $let: {
             vars: {
@@ -72,15 +76,51 @@ exports.getClaimedVouchersByUser = async (userId, filter) => {
               ],
             },
             in: {
-              $arrayElemAt: ["$$daysOfWeek", { $dayOfWeek: "$createdAt" }],
+              $arrayElemAt: [
+                "$$daysOfWeek",
+                { $subtract: [{ $dayOfWeek: "$createdAt" }, 1] },
+              ],
             },
           },
+        },
+        datePart: { $dateToString: { format: "%d-%b-%Y", date: "$createdAt" } },
+        minutePart: { $dateToString: { format: "%M", date: "$createdAt" } },
+        hour24: { $hour: "$createdAt" },
+      },
+    },
+    {
+      $addFields: {
+        ampm: {
+          $cond: [{ $gte: ["$hour24", 12] }, "PM", "AM"],
+        },
+        hourFormatted: {
+          $cond: [
+            { $eq: [{ $mod: ["$hour24", 12] }, 0] },
+            12,
+            { $mod: ["$hour24", 12] },
+          ],
         },
       },
     },
     {
+      $addFields: {
+        formattedDate: {
+          $concat: [
+            "$datePart",
+            " - ",
+            { $toString: "$hourFormatted" },
+            ":",
+            "$minutePart",
+            " ",
+            "$ampm",
+          ],
+        },
+      },
+    },
+    { $sort: { createdAt: -1 } },
+    {
       $project: {
-        // _id: 0,
+        _id: 0,
         orderId: "$razorpayOrderId",
         dateTime: "$formattedDate",
         day: "$day",
@@ -89,12 +129,20 @@ exports.getClaimedVouchersByUser = async (userId, filter) => {
         price: {
           $ifNull: ["$paidAmount", "$bill.finalPayble"],
         },
-        voucherType: "$voucher.isActive",
+        voucherType: {
+          $cond: [
+            { $eq: ["$voucher.isActive", true] },
+            "In store",
+            "Out of stock",
+          ],
+        },
         claimedType: "$paymentMethod",
         transactionId: "$_id",
-        paymentStatus: "$status",
+        paymentStatus: {
+          $cond: [{ $eq: ["$status", "captured"] }, "Success", "Failed"],
+        },
         invoiceUrl: "$invoiceUrl",
-        subBrandAdd: "$subBrand.location.address",
+        subBrandAdd: "$location.address",
         brandName: "$subBrand.companyName",
       },
     },
@@ -106,15 +154,13 @@ exports.getClaimedVouchersByUser = async (userId, filter) => {
     },
     {
       $addFields: {
-        total: { $arrayElemAt: ["$totalCount.total", 0] },
-      },
-    },
-    {
-      $addFields: {
-        total: { $ifNull: ["$total", 0] },
+        total: { $ifNull: [{ $arrayElemAt: ["$totalCount.total", 0] }, 0] },
         totalPage: {
           $ceil: {
-            $divide: [{ $ifNull: ["$total", 0] }, limit],
+            $divide: [
+              { $ifNull: [{ $arrayElemAt: ["$totalCount.total", 0] }, 0] },
+              limit,
+            ],
           },
         },
         limit: limit,
@@ -123,21 +169,21 @@ exports.getClaimedVouchersByUser = async (userId, filter) => {
     },
     {
       $project: {
-        data: 1,
         total: 1,
         totalPage: 1,
         limit: 1,
         page: 1,
+        data: 1,
       },
     },
   ]);
   return (
     result[0] || {
-      data: [],
       total: 0,
       totalPage: 0,
       limit,
       page,
+      data: [],
     }
   );
 };

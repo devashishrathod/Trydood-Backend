@@ -22,8 +22,8 @@ exports.generateAndUploadBillInvoice = (invoiceData) => {
 
     // Header
     doc.fontSize(16).text("🧾  My Invoice", { align: "left" }).moveDown(0.5);
-    doc.fontSize(12).text(`You’ll Pay ₹ ${invoiceData.payAmount.toFixed(2)}`);
-    doc.text(`Order # ${invoiceData.orderId}`).moveDown(1);
+    doc.fontSize(12).text(`You’ll Pay ₹ ${invoiceData?.payAmount?.toFixed(2)}`);
+    doc.text(`Order # ${invoiceData?.orderId}`).moveDown(1);
 
     doc
       .rect(doc.x, doc.y, doc.page.width - 80, 1)
@@ -31,11 +31,11 @@ exports.generateAndUploadBillInvoice = (invoiceData) => {
       .stroke(); // green bar
 
     doc.fillColor("#000").moveDown(1);
-    doc.fontSize(14).text(invoiceData.brandName || "", { align: "center" });
+    doc.fontSize(14).text(invoiceData?.brandName || "", { align: "center" });
     doc
       .fontSize(10)
       .text(
-        `${invoiceData.location} | ${invoiceData.dateTime} | ID - ${invoiceData.billId}`,
+        `${invoiceData?.location} | ${invoiceData?.dateTime} | ID - ${invoiceData?.billId}`,
         { align: "center" }
       );
 
@@ -45,29 +45,35 @@ exports.generateAndUploadBillInvoice = (invoiceData) => {
     doc.moveDown(0.5);
     doc
       .text(`Bill Amount`, 50)
-      .text(`₹ ${invoiceData.billAmount.toFixed(2)}`, { align: "right" });
+      .text(`₹ ${invoiceData?.billAmount?.toFixed(2)}`, { align: "right" });
     doc
-      .text(`${invoiceData.discountText}`, 50)
-      .text(`- ₹ ${invoiceData.discountAmount.toFixed(2)}`, { align: "right" });
+      .text(`${invoiceData?.discountText}`, 50)
+      .text(`- ₹ ${invoiceData?.discountAmount?.toFixed(2)}`, {
+        align: "right",
+      });
     doc
       .text(`Convenience Fee`, 50)
-      .text(`₹ ${invoiceData.convenienceFee.toFixed(2)}`, { align: "right" });
+      .text(`₹ ${invoiceData?.convenienceFee?.toFixed(2)}`, { align: "right" });
     doc
-      .text(`Promo Code Used (${invoiceData.promoCodeUsed})`, 50)
-      .text(`- ₹ ${invoiceData.promoDiscount.toFixed(2)}`, { align: "right" });
+      .text(`Promo Code Used (${invoiceData?.promoCodeUsed})`, 50)
+      .text(`- ₹ ${invoiceData?.promoDiscount?.toFixed(2)}`, {
+        align: "right",
+      });
 
     doc.moveDown(1);
-    doc.text(`Payment Method: ${invoiceData.paymentMethod}`, { align: "left" });
+    doc.text(`Payment Method: ${invoiceData?.paymentMethod}`, {
+      align: "left",
+    });
 
     doc.moveDown(0.5);
-    doc.fontSize(10).text(`${invoiceData.paymentApp}`, 50);
-    doc.text(`Transaction ID : ${invoiceData.transactionId}`, 50);
+    doc.fontSize(10).text(`${invoiceData?.paymentApp}`, 50);
+    doc.text(`Transaction ID : ${invoiceData?.transactionId}`, 50);
 
     doc.moveDown(1);
     doc
       .fontSize(14)
       .fillColor("green")
-      .text(`₹ ${invoiceData.payAmount.toFixed(2)}`, { align: "right" });
+      .text(`₹ ${invoiceData?.payAmount?.toFixed(2)}`, { align: "right" });
 
     doc.end();
     writeStream.on("finish", async () => {
