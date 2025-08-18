@@ -1,9 +1,10 @@
 const mongoose = require("mongoose");
 const Transaction = require("../../model/Transaction");
 
-exports.getClaimedVouchersByUser = async (userId, filter) => {
+exports.getClaimedVouchersByUser = async (filter) => {
   const page = parseInt(filter.page) || 1;
   const limit = parseInt(filter.limit) || 10;
+  const userId = filter.userId;
   const skip = (page - 1) * limit;
 
   const result = await Transaction.aggregate([
