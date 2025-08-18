@@ -24,7 +24,7 @@ router.get(
 router.get(
   "/get-all-claimed-vouchers",
   verifyToken,
-  checkRole(ROLES.USER),
+  checkRole(ROLES.USER, ROLES.ADMIN),
   getAllClaimedTransactions
 );
 
