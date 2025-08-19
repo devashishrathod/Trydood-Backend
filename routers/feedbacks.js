@@ -3,13 +3,14 @@ const router = express.Router();
 const { ROLES } = require("../constants");
 
 const { verifyToken, checkRole } = require("../middleware");
-const { createRatingAndReview } = require("../controller/ratingAndReviews");
+const { createFeedback, getAllFeedbacks } = require("../controller/feedbacks");
 
 router.post(
   "/create-review/:brandId",
   verifyToken,
   checkRole(ROLES.USER),
-  createRatingAndReview
+  createFeedback
 );
+router.get("/getAll/reviews", verifyToken, getAllFeedbacks);
 
 module.exports = router;

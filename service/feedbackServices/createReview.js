@@ -1,7 +1,7 @@
 const CustomError = require("../../utils/CustomError");
 const Feedback = require("../../model/Feedback");
 const Image = require("../../model/Image");
-const { uploadImage } = require("../../service/uploadServices");
+const { uploadImage } = require("../uploadServices");
 
 exports.createReview = async (userId, brandId, rating, review, images) => {
   if (!rating || rating < 1 || rating > 5) {

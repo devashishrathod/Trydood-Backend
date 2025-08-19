@@ -1,7 +1,7 @@
-const { createReview } = require("../../service/ratingAndReviewServices");
+const { createReview } = require("../../service/feedbackServices");
 const { sendSuccess, sendError } = require("../../utils");
 
-exports.createRatingAndReview = async (req, res) => {
+exports.createFeedback = async (req, res) => {
   try {
     const userId = req.payload?._id;
     const brandId = req.params.brandId;
@@ -16,7 +16,7 @@ exports.createRatingAndReview = async (req, res) => {
     );
     return sendSuccess(res, 201, "Review created successfully", result);
   } catch (error) {
-    console.log("error on creating review.... ", error);
+    console.log("error on creating review.... ", error.message);
     const statusCode = error.statusCode || 500;
     return sendError(res, statusCode, error.message);
   }
