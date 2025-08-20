@@ -4,15 +4,15 @@ const {
   brandField,
   subBrandField,
   imagesField,
-  usersField,
+  voucherField,
 } = require("./validMogooseObjectId");
 
 const feedbackSchema = new mongoose.Schema(
   {
     user: userField,
     brand: brandField,
+    voucher: voucherField,
     subBrand: subBrandField,
-    likes: usersField,
     imageIds: imagesField,
     rating: { type: Number, min: 1, max: 5, required: true },
     review: { type: String, trim: true },

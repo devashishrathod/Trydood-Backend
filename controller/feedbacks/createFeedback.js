@@ -5,11 +5,12 @@ exports.createFeedback = async (req, res) => {
   try {
     const userId = req.payload?._id;
     const brandId = req.params.brandId;
-    const { rating, review } = req.body;
+    const { voucherId, rating, review } = req.body;
     const images = req.files?.images;
     const result = await createReview(
       userId,
       brandId,
+      voucherId,
       Number(rating),
       review,
       images

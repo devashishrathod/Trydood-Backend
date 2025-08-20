@@ -16,7 +16,7 @@ exports.createReview = async (userId, brandId, rating, review, images) => {
       const imageUrl = await uploadImage(image.tempFilePath);
       const imageDoc = await Image.create({
         user: userId,
-        ratingAndReview: null,
+        feedback: null,
         imageUrl,
         filename: image.name,
         size: image.size,
@@ -26,9 +26,10 @@ exports.createReview = async (userId, brandId, rating, review, images) => {
       imageIds.push(imageDoc._id);
     }
   }
-  const reviewDoc = await Feedback.create({
+  const feedback = await Feedback.create({
     user: userId,
     brand: brandId,
+    voucher: voucherId,
     rating,
     review,
     imageIds,
@@ -36,8 +37,8 @@ exports.createReview = async (userId, brandId, rating, review, images) => {
   if (imageIds.length > 0) {
     await Image.updateMany(
       { _id: { $in: imageIds } },
-      { ratingAndReview: reviewDoc._id }
+      { feedback: feedback._id }
     );
   }
-  return reviewDoc;
+  return feedback;
 };

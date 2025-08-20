@@ -3,7 +3,11 @@ const router = express.Router();
 const { ROLES } = require("../constants");
 
 const { verifyToken, checkRole } = require("../middleware");
-const { createFeedback, getAllFeedbacks } = require("../controller/feedbacks");
+const {
+  createFeedback,
+  getAllFeedbacks,
+  likeOrDislikeFeedback,
+} = require("../controller/feedbacks");
 
 router.post(
   "/create-review/:brandId",
@@ -12,5 +16,6 @@ router.post(
   createFeedback
 );
 router.get("/getAll/reviews", verifyToken, getAllFeedbacks);
+router.put("/:feedbackId/toggle-like", verifyToken, likeOrDislikeFeedback);
 
 module.exports = router;

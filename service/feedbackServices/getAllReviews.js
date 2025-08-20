@@ -9,6 +9,7 @@ exports.getAllReviews = async (query) => {
     rating,
     brand,
     subBrand,
+    voucher,
     user,
     isBlocked,
     isActive,
@@ -24,6 +25,7 @@ exports.getAllReviews = async (query) => {
   if (rating) filter.rating = parseInt(rating);
   if (brand) filter.brand = new mongoose.Types.ObjectId(brand);
   if (subBrand) filter.subBrand = new mongoose.Types.ObjectId(subBrand);
+  if (voucher) filter.voucher = new mongoose.Types.ObjectId(voucher);
   if (user) filter.user = new mongoose.Types.ObjectId(user);
   if (startDate || endDate) {
     filter.createdAt = {};
