@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Feedback = require("../../model/Feedback");
 const User = require("../../model/User");
 
@@ -21,9 +22,9 @@ exports.getAllReviews = async (query) => {
     isActive: isActive !== undefined ? isActive === "true" : true,
   };
   if (rating) filter.rating = parseInt(rating);
-  if (brand) filter.brand = brand;
-  if (subBrand) filter.subBrand = subBrand;
-  if (user) filter.user = user;
+  if (brand) filter.brand = new mongoose.Types.ObjectId(brand);
+  if (subBrand) filter.subBrand = new mongoose.Types.ObjectId(subBrand);
+  if (user) filter.user = new mongoose.Types.ObjectId(user);
   if (startDate || endDate) {
     filter.createdAt = {};
     if (startDate) filter.createdAt.$gte = new Date(startDate);
@@ -32,7 +33,7 @@ exports.getAllReviews = async (query) => {
   if (search) {
     const searchRegex = new RegExp(search, "i");
     const matchedUser = await User.findOne({ uniqueId: search });
-    if (matchedUser) {
+    if (matchedUser && !filter.user) {
       filter.user = matchedUser._id;
     } else {
       filter.$or = [{ review: { $regex: searchRegex } }];
