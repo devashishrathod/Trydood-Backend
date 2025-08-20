@@ -3,7 +3,14 @@ const Feedback = require("../../model/Feedback");
 const Image = require("../../model/Image");
 const { uploadImage } = require("../uploadServices");
 
-exports.createReview = async (userId, brandId, rating, review, images) => {
+exports.createReview = async (
+  userId,
+  brandId,
+  voucherId,
+  rating,
+  review,
+  images
+) => {
   if (!rating || rating < 1 || rating > 5) {
     throw new CustomError(400, "Rating must be between 1 and 5.");
   }
