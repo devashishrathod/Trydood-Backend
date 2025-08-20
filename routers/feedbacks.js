@@ -7,6 +7,7 @@ const {
   createFeedback,
   getAllFeedbacks,
   likeOrDislikeFeedback,
+  replyToFeedback,
 } = require("../controller/feedbacks");
 
 router.post(
@@ -17,5 +18,11 @@ router.post(
 );
 router.get("/getAll/reviews", verifyToken, getAllFeedbacks);
 router.put("/:feedbackId/toggle-like", verifyToken, likeOrDislikeFeedback);
+router.post(
+  "/:feedbackId/reply",
+  verifyToken,
+  checkRole(ROLES.VENDOR),
+  replyToFeedback
+);
 
 module.exports = router;

@@ -5,4 +5,8 @@ class CustomError extends Error {
   }
 }
 
-module.exports = CustomError;
+const throwError = (statusCode, message) => {
+  throw new CustomError(statusCode, message);
+};
+
+module.exports = { throwError, CustomError };

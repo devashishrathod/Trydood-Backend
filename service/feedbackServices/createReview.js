@@ -1,6 +1,6 @@
-const CustomError = require("../../utils/CustomError");
 const Feedback = require("../../model/Feedback");
 const Image = require("../../model/Image");
+const { throwError } = require("../../utils");
 const { uploadImage } = require("../uploadServices");
 
 exports.createReview = async (
@@ -12,12 +12,12 @@ exports.createReview = async (
   images
 ) => {
   if (!rating || rating < 1 || rating > 5) {
-    throw new CustomError(400, "Rating must be between 1 and 5.");
+    throwError(400, "Rating must be between 1 and 5.");
   }
   let imageIds = [];
   if (images && images.length > 0) {
     if (images.length > 5) {
-      throw new CustomError(400, "You can upload a maximum of 5 images.");
+      throwError(400, "You can upload a maximum of 5 images.");
     }
     for (const image of images) {
       const imageUrl = await uploadImage(image.tempFilePath);
