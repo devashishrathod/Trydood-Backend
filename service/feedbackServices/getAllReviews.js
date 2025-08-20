@@ -96,6 +96,33 @@ exports.getAllReviews = async (query) => {
       },
     },
     {
+      $lookup: {
+        from: "feedbacklikes",
+        let: { feedbackId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$feedback", "$$feedbackId"] },
+                  { $eq: ["$isDeleted", false] },
+                ],
+              },
+            },
+          },
+          { $count: "count" },
+        ],
+        as: "likesData",
+      },
+    },
+    {
+      $addFields: {
+        likedCount: {
+          $ifNull: [{ $arrayElemAt: ["$likesData.count", 0] }, 0],
+        },
+      },
+    },
+    {
       $facet: {
         data: [
           { $sort: { createdAt: -1 } },
@@ -108,6 +135,7 @@ exports.getAllReviews = async (query) => {
               createdAt: 1,
               isBlocked: 1,
               isActive: 1,
+              likedCount: 1,
               user: { name: 1, image: 1, uniqueId: 1 },
               brand: { companyName: 1 },
               brandLocation: {
@@ -136,11 +164,53 @@ exports.getAllReviews = async (query) => {
   const result = await Feedback.aggregate(aggregatePipeline);
   const data = result[0].data;
   const total = result[0].totalCount[0]?.count || 0;
+  let overallVoucherRating = null;
+  let overallBrandRating = null;
+  if (voucher) {
+    const voucherRating = await Feedback.aggregate([
+      {
+        $match: {
+          voucher: new mongoose.Types.ObjectId(voucher),
+          isDeleted: false,
+          isBlocked: false,
+          isActive: true,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          averageRating: { $avg: "$rating" },
+        },
+      },
+    ]);
+    overallVoucherRating = voucherRating[0]?.averageRating || null;
+  }
+  if (brand) {
+    const brandRating = await Feedback.aggregate([
+      {
+        $match: {
+          brand: new mongoose.Types.ObjectId(brand),
+          isDeleted: false,
+          isBlocked: false,
+          isActive: true,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          averageRating: { $avg: "$rating" },
+        },
+      },
+    ]);
+    overallBrandRating = brandRating[0]?.averageRating || null;
+  }
   return {
     total,
     totalPages: Math.ceil(total / limit),
     page: parseInt(page),
     limit: parseInt(limit),
+    overallVoucherRating,
+    overallBrandRating,
     data,
   };
 };
