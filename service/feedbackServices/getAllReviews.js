@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Feedback = require("../../model/Feedback");
 const User = require("../../model/User");
 
-exports.getAllReviews = async (query) => {
+exports.getAllReviews = async (userId, query) => {
   const {
     page = 1,
     limit = 10,
@@ -116,6 +116,36 @@ exports.getAllReviews = async (query) => {
       },
     },
     {
+      $lookup: {
+        from: "feedbacklikes",
+        let: { feedbackId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$feedback", "$$feedbackId"] },
+                  { $eq: ["$user", new mongoose.Types.ObjectId(userId)] },
+                  { $eq: ["$isDeleted", false] },
+                ],
+              },
+            },
+          },
+        ],
+        as: "userLikedData",
+      },
+    },
+    {
+      $addFields: {
+        likedCount: {
+          $ifNull: [{ $arrayElemAt: ["$likesData.count", 0] }, 0],
+        },
+        isLiked: {
+          $gt: [{ $size: "$userLikedData" }, 0],
+        },
+      },
+    },
+    {
       $addFields: {
         likedCount: {
           $ifNull: [{ $arrayElemAt: ["$likesData.count", 0] }, 0],
@@ -136,6 +166,7 @@ exports.getAllReviews = async (query) => {
               isBlocked: 1,
               isActive: 1,
               likedCount: 1,
+              isLiked: 1,
               user: { name: 1, image: 1, uniqueId: 1 },
               brand: { companyName: 1 },
               brandLocation: {

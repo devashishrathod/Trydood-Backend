@@ -3,7 +3,8 @@ const { getAllReviews } = require("../../service/feedbackServices");
 
 exports.getAllFeedbacks = async (req, res) => {
   try {
-    const result = await getAllReviews(req.query);
+    const userId = req.payload?._id;
+    const result = await getAllReviews(userId, req.query);
     if (!result || !result?.data?.length) {
       return sendError(res, 404, "No any feedback / reviewed yet");
     }
