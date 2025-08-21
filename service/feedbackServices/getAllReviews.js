@@ -153,6 +153,49 @@ exports.getAllReviews = async (userId, query) => {
       },
     },
     {
+      $lookup: {
+        from: "feedbackreplies",
+        let: { feedbackId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$feedback", "$$feedbackId"] },
+                  { $eq: ["$isDeleted", false] },
+                  { $eq: ["$isBlocked", false] },
+                ],
+              },
+            },
+          },
+          {
+            $lookup: {
+              from: "brands",
+              localField: "brand",
+              foreignField: "_id",
+              as: "brand",
+            },
+          },
+          { $unwind: { path: "$brand", preserveNullAndEmptyArrays: true } },
+          {
+            $project: {
+              _id: 1,
+              reply: 1,
+              createdAt: 1,
+              updatedAt: 1,
+              "brand.companyName": 1,
+            },
+          },
+        ],
+        as: "replies",
+      },
+    },
+    {
+      $addFields: {
+        replyCount: { $size: "$replies" },
+      },
+    },
+    {
       $facet: {
         data: [
           { $sort: { createdAt: -1 } },
@@ -167,6 +210,8 @@ exports.getAllReviews = async (userId, query) => {
               isActive: 1,
               likedCount: 1,
               isLiked: 1,
+              replyCount: 1,
+              replies: 1,
               user: { name: 1, image: 1, uniqueId: 1 },
               brand: { companyName: 1 },
               brandLocation: {
@@ -189,12 +234,21 @@ exports.getAllReviews = async (userId, query) => {
           },
         ],
         totalCount: [{ $count: "count" }],
+        totalReplyCount: [
+          {
+            $group: {
+              _id: null,
+              totalReplies: { $sum: { $size: "$replies" } },
+            },
+          },
+        ],
       },
     },
   ];
   const result = await Feedback.aggregate(aggregatePipeline);
   const data = result[0].data;
-  const total = result[0].totalCount[0]?.count || 0;
+  const totalFeedbacks = result[0].totalCount[0]?.count || 0;
+  const totalReplies = result[0].totalReplyCount[0]?.totalReplies || 0;
   let overallVoucherRating = null;
   let overallBrandRating = null;
   if (voucher) {
@@ -236,8 +290,9 @@ exports.getAllReviews = async (userId, query) => {
     overallBrandRating = brandRating[0]?.averageRating || null;
   }
   return {
-    total,
-    totalPages: Math.ceil(total / limit),
+    totalFeedbacks,
+    totalReplies,
+    totalPages: Math.ceil(totalFeedbacks / limit),
     page: parseInt(page),
     limit: parseInt(limit),
     overallVoucherRating,

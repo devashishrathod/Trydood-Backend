@@ -1,7 +1,7 @@
 const { asyncWrapper, sendSuccess } = require("../../utils");
 const { replyToFeedbackByVendor } = require("../../service/feedbackServices");
 
-exports.replyToFeedback = asyncWrapper(async (req, res) => {
+exports.replyToFeedback = asyncWrapper(async (req, res, next) => {
   const vendorId = req.payload._id;
   const { feedbackId } = req.params;
   const { reply } = req.body;
