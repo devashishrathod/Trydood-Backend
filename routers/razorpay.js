@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const txnRouter = express.Router();
+//const txnRouter = express.Router();
 
 const { verifyToken, checkRole } = require("../middleware/authValidation");
 const {
   createOrder,
   verifyTransaction,
-  getAllTransactions,
-  getCurrentTransaction,
+  //  getAllTransactions,
+  //  getCurrentTransaction,
 } = require("../controller/transactions");
 const { ROLES } = require("../constants");
 
@@ -23,23 +23,23 @@ router.put(
   checkRole(ROLES.ADMIN, ROLES.VENDOR),
   verifyTransaction
 );
-txnRouter.get(
-  "/getAll",
-  verifyToken,
-  checkRole(ROLES.ADMIN, ROLES.VENDOR),
-  getAllTransactions
-);
-txnRouter.get(
-  "/getCurrent",
-  verifyToken,
-  checkRole(ROLES.ADMIN, ROLES.VENDOR),
-  getCurrentTransaction
-);
+// txnRouter.get(
+//   "/getAll",
+//   verifyToken,
+//   checkRole(ROLES.ADMIN, ROLES.VENDOR),
+//   getAllTransactions
+// );
+// txnRouter.get(
+//   "/getCurrent",
+//   verifyToken,
+//   checkRole(ROLES.ADMIN, ROLES.VENDOR),
+//   getCurrentTransaction
+// );
 
 module.exports = {
   router,
   //routePrefix: "/razorpay", // default
-  extraRoutes: [
-    { path: "/transaction", router: txnRouter }, // mount /api/transaction/*
-  ],
+  //  extraRoutes: [
+  // { path: "/transaction", router: txnRouter }, // mount /api/transaction/*
+  //  ],
 };

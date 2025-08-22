@@ -11,7 +11,7 @@ exports.getAllTodayOfferCategories = async () => {
   });
   return await DealOfCategory.find({
     _id: { $in: categoryIds },
-    isActive: true,
+    //  isActive: true,
     isDeleted: false,
   });
 };

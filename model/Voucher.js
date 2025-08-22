@@ -8,6 +8,11 @@ const {
   subCategoryField,
 } = require("./validMogooseObjectId");
 
+const claimedUserSchema = new mongoose.Schema(
+  { userId: userField, claimedAt: { type: Date, default: Date.now } },
+  { _id: false }
+);
+
 const voucherSchema = new mongoose.Schema(
   {
     user: userField,
@@ -16,6 +21,7 @@ const voucherSchema = new mongoose.Schema(
     createdBy: userField,
     category: categoryField,
     subCategory: subCategoryField,
+    claimedUsers: { type: [claimedUserSchema], default: [] },
     title: { type: String },
     description: { type: String, trim: true },
     type: {

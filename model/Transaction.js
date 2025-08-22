@@ -5,6 +5,8 @@ const {
   userField,
   subscriptionField,
   brandField,
+  subBrandField,
+  billField,
 } = require("./validMogooseObjectId");
 const {
   PAYMENT_STATUS,
@@ -16,7 +18,9 @@ const transactionSchema = new mongoose.Schema(
   {
     user: userField,
     brand: brandField,
+    subBrand: subBrandField,
     subscription: subscriptionField,
+    bill: billField,
     createdBy: userField,
     entity: { type: String },
     amount: { type: Number, required: true },

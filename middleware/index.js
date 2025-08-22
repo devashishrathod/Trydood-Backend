@@ -2,6 +2,7 @@ const { loadBrand } = require("./loadBrand");
 const { generateToken, verifyToken, checkRole } = require("./authValidation");
 const { isFirst } = require("./isFirst");
 const { validateObjectIds } = require("./validateObjectIds");
+const { errorHandler } = require("./errorHandler");
 
 module.exports = {
   loadBrand,
@@ -10,4 +11,5 @@ module.exports = {
   verifyToken,
   checkRole,
   validateObjectIds,
+  errorHandler,
 };

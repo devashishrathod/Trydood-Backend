@@ -81,6 +81,7 @@ const brandSchema = new mongoose.Schema(
     menu: imagesField,
     subBrandsLimit: { type: Number },
     subBrandsUsed: { type: Number },
+    followersCount: { type: Number, default: 0 },
     joinedDate: { type: Date, default: Date.now },
     referMarketId: { type: String },
     referMarketMobile: { type: String },

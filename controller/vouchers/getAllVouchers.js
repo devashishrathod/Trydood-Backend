@@ -1,13 +1,8 @@
 const { getVouchers } = require("../../service/voucherServices");
-const { sendSuccess, sendError } = require("../../utils");
+const { sendSuccess, asyncWrapper } = require("../../utils");
 
-exports.getAllVouchers = async (req, res) => {
-  try {
-    const filters = req.query;
-    const result = await getVouchers(filters);
-    return sendSuccess(res, 200, "Vouchers fetched successfully", result);
-  } catch (error) {
-    console.error("Get All Vouchers Error:", error);
-    return sendError(res, 500, error);
-  }
-};
+exports.getAllVouchers = asyncWrapper(async (req, res) => {
+  const userId = req.payload?._id;
+  const result = await getVouchers(userId, req.query);
+  return sendSuccess(res, 200, "Vouchers fetched successfully", result);
+});

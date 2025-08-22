@@ -6,6 +6,7 @@ const {
   subBrandField,
   categoryField,
   subCategoryField,
+  feedbackField,
 } = require("./validMogooseObjectId");
 
 const imageSchema = new mongoose.Schema(
@@ -15,6 +16,7 @@ const imageSchema = new mongoose.Schema(
     subBrand: subBrandField,
     category: categoryField,
     subCategory: subCategoryField,
+    feedback: feedbackField,
     imageUrl: { type: String, required: true },
     filename: { type: String, required: true },
     size: { type: Number, required: true },
