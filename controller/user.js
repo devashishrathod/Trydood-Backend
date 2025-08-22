@@ -2,34 +2,37 @@ const { generateToken } = require("../middleware/authValidation");
 const User = require("../model/User");
 const { uploadToCloudinary } = require("../service/uploadImage");
 const bcrypt = require("bcryptjs");
-const { generateReferralCode, sendError } = require("../utils");
+const { generateReferralCode } = require("../utils");
 const Location = require("../model/Location");
-const { sendOtp, verifyOtp } = require("../service/otpServices");
 const { calculateProfileCompletion } = require("../utils/utils");
 const { generateUniqueUserId } = require("../service/userServices");
-const { ROLES } = require("../constants");
 let salt = 10;
 
 exports.userProfile = async (req, res) => {
   const id = req.payload?._id;
+  const { userId } = req.query;
   try {
-    const result = await User.findById(id)
-      .select("-password -__v -role")
-      .populate("location")
-      .populate("bankAccount");
-
-    const completion = calculateProfileCompletion(result);
-    if (result) {
-      return res
-        .status(200)
-        .json({ success: true, msg: "User details", result, completion });
+    let userIdToFetch = userId || id;
+    let user = await User.findById(userIdToFetch)
+      .select("+email +dob +whatsappNumber +transaction +address")
+      .populate("location bankAccount");
+    if (!user) {
+      return res.status(404).json({ success: false, msg: "User not found" });
     }
-    return res.status(404).json({ msg: "User not found", success: false });
+    const completion = calculateProfileCompletion(user);
+    return res.status(200).json({
+      success: true,
+      msg: "User details",
+      user,
+      completion,
+    });
   } catch (error) {
     console.log("error on userProfile: ", error);
-    return res
-      .status(500)
-      .json({ error: error, success: false, msg: error.message });
+    return res.status(500).json({
+      success: false,
+      msg: error.message,
+      error,
+    });
   }
 };
 
@@ -55,12 +58,6 @@ exports.registorUser = async (req, res) => {
         .status(400)
         .json({ success: false, msg: "Failed to register!" });
     }
-
-    /* if (role) {
-            if (role === "admin") {
-                return res.status(400).json({ success: false, msg: "Admin role is not allowed" });
-            }
-        } */
     const uniqueId = await generateUniqueUserId();
     const user = new User({
       name,
@@ -72,7 +69,6 @@ exports.registorUser = async (req, res) => {
       uniqueId,
       referCode: generateReferralCode(6),
     });
-
     if (image) {
       let imageUrl = await uploadToCloudinary(image.tempFilePath);
       user.image = imageUrl;
