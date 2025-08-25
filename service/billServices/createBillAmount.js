@@ -100,6 +100,7 @@ exports.createBillAmount = async (userId, payload) => {
   const transactionData = {
     user: userId,
     createdBy: userId,
+    brand: subBrand?.brand,
     subBrand: subBrandId,
     email: email ? email : undefined,
     contact: whatsappNumber,

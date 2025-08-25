@@ -2,19 +2,35 @@ const mongoose = require("mongoose");
 const Transaction = require("../../model/Transaction");
 
 exports.getClaimedVouchersByUser = async (filter) => {
-  const page = parseInt(filter.page) || 1;
-  const limit = parseInt(filter.limit) || 10;
-  const userId = filter.userId;
+  let { page, limit, userId, brandId, subBrandId } = filter;
+  page = page ? parseInt(page) : 1;
+  limit = limit ? parseInt(limit) : 10;
   const skip = (page - 1) * limit;
+  const matchData = { isDeleted: false, isActive: true };
+  if (userId) matchData.user = new mongoose.Types.ObjectId(userId);
+  if (brandId) matchData.brand = new mongoose.Types.ObjectId(brandId);
+  if (subBrandId) matchData.subBrand = new mongoose.Types.ObjectId(subBrandId);
 
   const result = await Transaction.aggregate([
+    { $match: matchData },
     {
-      $match: {
-        user: new mongoose.Types.ObjectId(userId),
-        isDeleted: false,
-        isActive: true,
+      $lookup: {
+        from: "users",
+        localField: "user",
+        foreignField: "_id",
+        as: "user",
       },
     },
+    { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "brands",
+        localField: "brand",
+        foreignField: "_id",
+        as: "brand",
+      },
+    },
+    { $unwind: { path: "$brand", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "subbrands",
@@ -122,6 +138,8 @@ exports.getClaimedVouchersByUser = async (filter) => {
     {
       $project: {
         _id: 0,
+        userName: "$user.name",
+        userProfilePic: "$user.image",
         orderId: "$razorpayOrderId",
         dateTime: "$formattedDate",
         day: "$day",
@@ -142,11 +160,14 @@ exports.getClaimedVouchersByUser = async (filter) => {
         paymentStatus: {
           $cond: [{ $eq: ["$status", "captured"] }, "Success", "Failed"],
         },
+        invoiceId: "$invoiceId",
         invoiceUrl: "$invoiceUrl",
         subBrandAdd: "$location.address",
         subBrandShopNumber: "$location.shopOrBuildingNumber",
         subBrandCity: "$location.city",
         brandName: "$subBrand.companyName",
+        brandUniqueId: "$brand.uniqueId",
+        subBrandUniqueId: "$subBrand.uniqueId",
         billSummary: {
           voucherDiscountValue: "$bill.voucherDiscountValue",
           billAmount: "$bill.billAmount",

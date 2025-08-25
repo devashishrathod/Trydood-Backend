@@ -68,14 +68,20 @@ exports.getOne = async (req, res) => {
 };
 
 exports.addHomeApplication = async (req, res) => {
-  // console.log("req.body: ", req.body);
   const image = req.files?.image;
   const title = req.body?.title;
   const header = req.body?.header;
   const description = req.body?.description;
   const type = req.body?.type;
+  const colourCode = req.body?.colourCode;
   try {
-    const home = new ApplicationHome({ title, header, description, type });
+    const home = new ApplicationHome({
+      title,
+      header,
+      description,
+      type,
+      colourCode,
+    });
     if (image) {
       let imageUrl = await uploadToCloudinary(image.tempFilePath);
       home.image = imageUrl;
@@ -96,14 +102,12 @@ exports.updateHomeApplication = async (req, res) => {
   // console.log(" ======================== updateHomeApplication ======================== ");
 
   const id = req.params?.id;
-  // console.log("req.files: ", req.files);
-
-  // console.log("req.body: ", req.body);
   const image = req.files?.image;
   const title = req.body?.title;
   const header = req.body?.header;
   const description = req.body?.description;
   const type = req.body?.type;
+  const colourCode = req.body?.colourCode;
   try {
     const checkHome = await ApplicationHome.findById(id);
     if (!checkHome) {
@@ -115,6 +119,7 @@ exports.updateHomeApplication = async (req, res) => {
     if (header) checkHome.header = header;
     if (description) checkHome.description = description;
     if (type) checkHome.type = type;
+    if (colourCode) checkHome.colourCode = colourCode;
     if (image) {
       let imageUrl = await uploadToCloudinary(image.tempFilePath);
       if (checkHome?.image) {
