@@ -47,20 +47,18 @@ exports.getOne = async (req, res) => {
   const type = req.query?.type;
   try {
     const filter = {};
-    if (type) {
-      filter.type = type;
-    }
+    if (type) filter.type = type;
     const result = await ApplicationHome.findOne(filter).sort({
       createdAt: -1,
     });
-    if (result) {
+    if (!result) {
       return res
-        .status(200)
-        .json({ success: true, msg: "Home Application details", result });
+        .status(404)
+        .json({ msg: "Home Application not found", success: false });
     }
     return res
-      .status(404)
-      .json({ msg: "Home Application not found", success: false });
+      .status(200)
+      .json({ success: true, msg: "Home Application details", result });
   } catch (error) {
     console.log("error on getOne: ", error);
     return res.status(500).json({ success: false, msg: error.message });
