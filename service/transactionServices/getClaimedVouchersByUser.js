@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 const Transaction = require("../../model/Transaction");
 
 exports.getClaimedVouchersByUser = async (filter) => {
-  let { page, limit, userId, brandId, subBrandId } = filter;
+  let { page, limit, userId, brandId, subBrandId, startDate, endDate, date } =
+    filter;
   page = page ? parseInt(page) : 1;
   limit = limit ? parseInt(limit) : 10;
   const skip = (page - 1) * limit;
@@ -10,7 +11,17 @@ exports.getClaimedVouchersByUser = async (filter) => {
   if (userId) matchData.user = new mongoose.Types.ObjectId(userId);
   if (brandId) matchData.brand = new mongoose.Types.ObjectId(brandId);
   if (subBrandId) matchData.subBrand = new mongoose.Types.ObjectId(subBrandId);
-
+  if (startDate && endDate) {
+    matchData.createdAt = {
+      $gte: new Date(new Date(startDate).setHours(0, 0, 0, 0)),
+      $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)),
+    };
+  } else if (date) {
+    matchData.createdAt = {
+      $gte: new Date(new Date(date).setHours(0, 0, 0, 0)),
+      $lte: new Date(new Date(date).setHours(23, 59, 59, 999)),
+    };
+  }
   const result = await Transaction.aggregate([
     { $match: matchData },
     {
@@ -76,7 +87,6 @@ exports.getClaimedVouchersByUser = async (filter) => {
       },
     },
     { $unwind: { path: "$voucher", preserveNullAndEmptyArrays: true } },
-
     {
       $addFields: {
         day: {
@@ -107,9 +117,7 @@ exports.getClaimedVouchersByUser = async (filter) => {
     },
     {
       $addFields: {
-        ampm: {
-          $cond: [{ $gte: ["$hour24", 12] }, "PM", "AM"],
-        },
+        ampm: { $cond: [{ $gte: ["$hour24", 12] }, "PM", "AM"] },
         hourFormatted: {
           $cond: [
             { $eq: [{ $mod: ["$hour24", 12] }, 0] },
@@ -145,9 +153,7 @@ exports.getClaimedVouchersByUser = async (filter) => {
         day: "$day",
         category: "$category.name",
         percentage: "$voucher.discount",
-        price: {
-          $ifNull: ["$paidAmount", "$bill.finalPayble"],
-        },
+        price: { $ifNull: ["$paidAmount", "$bill.finalPayble"] },
         voucherType: {
           $cond: [
             { $eq: ["$voucher.isActive", true] },
@@ -203,13 +209,7 @@ exports.getClaimedVouchersByUser = async (filter) => {
       },
     },
     {
-      $project: {
-        total: 1,
-        totalPage: 1,
-        limit: 1,
-        page: 1,
-        data: 1,
-      },
+      $project: { total: 1, totalPage: 1, limit: 1, page: 1, data: 1 },
     },
   ]);
   return (
