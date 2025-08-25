@@ -83,6 +83,7 @@ const transactionSchema = new mongoose.Schema(
     createdAtRaw: { type: Number },
     updatedAtRaw: { type: Number },
     isActive: { type: Boolean, default: true },
+    isRemoved: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }

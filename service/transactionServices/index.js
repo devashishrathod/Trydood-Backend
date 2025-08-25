@@ -5,6 +5,7 @@ const {
   updateTransactionByOrderAndUserId,
 } = require("./updateTransactionByOrderAndUserId");
 const { getClaimedVouchersByUser } = require("./getClaimedVouchersByUser");
+const { removeTransactionFromUser } = require("./removeTransactionFromUser");
 
 module.exports = {
   createTransaction,
@@ -12,4 +13,5 @@ module.exports = {
   generateUniqueInvoiceId,
   updateTransactionByOrderAndUserId,
   getClaimedVouchersByUser,
+  removeTransactionFromUser,
 };

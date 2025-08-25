@@ -5,7 +5,13 @@ const { sendSuccess, sendError } = require("../../utils");
 
 exports.getAllClaimedTransactions = async (req, res) => {
   try {
-    const data = await getClaimedVouchersByUser(req.query);
+    const tokenUserId = req.payload?._id;
+    const userRole = req.payload?.role;
+    const data = await getClaimedVouchersByUser(
+      userRole,
+      tokenUserId,
+      req.query
+    );
     if (!data || !data?.data?.length) {
       return sendError(res, 404, "No any voucher claimed yet");
     }

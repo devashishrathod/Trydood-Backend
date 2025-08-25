@@ -7,6 +7,7 @@ const {
   getAllTransactions,
   getCurrentTransaction,
   getAllClaimedTransactions,
+  removeTransaction,
 } = require("../controller/transactions");
 
 router.get(
@@ -26,6 +27,12 @@ router.get(
   verifyToken,
   checkRole(ROLES.USER, ROLES.ADMIN),
   getAllClaimedTransactions
+);
+router.put(
+  "/:transactionId/remove",
+  verifyToken,
+  checkRole(ROLES.USER),
+  removeTransaction
 );
 
 module.exports = router;

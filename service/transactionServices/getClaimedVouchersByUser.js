@@ -1,14 +1,22 @@
 const mongoose = require("mongoose");
 const Transaction = require("../../model/Transaction");
+const { ROLES } = require("../../constants");
 
-exports.getClaimedVouchersByUser = async (filter) => {
+exports.getClaimedVouchersByUser = async (role, tokenUserId, filter) => {
   let { page, limit, userId, brandId, subBrandId, startDate, endDate, date } =
     filter;
   page = page ? parseInt(page) : 1;
   limit = limit ? parseInt(limit) : 10;
   const skip = (page - 1) * limit;
   const matchData = { isDeleted: false, isActive: true };
-  if (userId) matchData.user = new mongoose.Types.ObjectId(userId);
+  if (
+    userId &&
+    ROLES.USER === role &&
+    userId?.toString() === tokenUserId?.toString()
+  ) {
+    matchData.user = new mongoose.Types.ObjectId(userId);
+    matchData.isRemoved = false;
+  } else if (userId) matchData.user = new mongoose.Types.ObjectId(userId);
   if (brandId) matchData.brand = new mongoose.Types.ObjectId(brandId);
   if (subBrandId) matchData.subBrand = new mongoose.Types.ObjectId(subBrandId);
   if (startDate && endDate) {

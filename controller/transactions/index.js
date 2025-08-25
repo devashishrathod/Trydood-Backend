@@ -3,6 +3,7 @@ const { verifyTransaction } = require("./verifyTransaction");
 const { getAllTransactions } = require("./getAllTransactions");
 const { getCurrentTransaction } = require("./getCurrentTransaction");
 const { getAllClaimedTransactions } = require("./getAllClaimedTransactions");
+const { removeTransaction } = require("./removeTransaction");
 
 module.exports = {
   createOrder,
@@ -10,4 +11,5 @@ module.exports = {
   getAllTransactions,
   getCurrentTransaction,
   getAllClaimedTransactions,
+  removeTransaction,
 };
