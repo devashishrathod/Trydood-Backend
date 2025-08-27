@@ -14,6 +14,7 @@ exports.createReview = async (
   if (!rating || rating < 1 || rating > 5) {
     throwError(400, "Rating must be between 1 and 5.");
   }
+  images = images ? (Array.isArray(images) ? images : [images]) : [];
   let imageIds = [];
   if (images && images.length > 0) {
     if (images.length > 5) {

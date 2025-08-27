@@ -6,11 +6,33 @@ const {
   voucherField,
 } = require("./validMogooseObjectId");
 
+const stateSchema = new mongoose.Schema(
+  {
+    code: { type: String, required: true, trim: true },
+    countryCode: { type: String, required: true, trim: true },
+    name: { type: String, required: true, trim: true },
+    type: { type: String, enum: ["state"], default: "state" },
+  },
+  { _id: false }
+);
+
+const citySchema = new mongoose.Schema(
+  {
+    countryCode: { type: String, required: true, trim: true },
+    stateCode: { type: String, required: true, trim: true },
+    name: { type: String, required: true, trim: true },
+    type: { type: String, enum: ["district", "city"], default: "district" },
+  },
+  { _id: false }
+);
+
 const suggestionSchema = new mongoose.Schema(
   {
     users: usersField,
     voucher: voucherField,
     images: imagesField,
+    states: { type: [stateSchema], required: true },
+    cities: { type: [citySchema], required: true },
     scope: {
       type: String,
       enum: [...Object.values(OFFERS_SCOPE)],
@@ -29,37 +51,7 @@ const suggestionSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
-    locations: [
-      {
-        stateId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "State",
-          required: true,
-        },
-        stateName: { type: String, required: true },
-        districts: [
-          {
-            districtId: {
-              type: mongoose.Schema.Types.ObjectId,
-              ref: "District",
-              required: true,
-            },
-            districtName: { type: String, required: true },
-            cities: [
-              {
-                cityId: {
-                  type: mongoose.Schema.Types.ObjectId,
-                  ref: "City",
-                  required: true,
-                },
-                cityName: { type: String, required: true },
-              },
-            ],
-          },
-        ],
-      },
-    ],
-    discount: { type: Number },
+    discountTitle: { type: String },
     originalPrice: {
       type: Number,
       required: true,
