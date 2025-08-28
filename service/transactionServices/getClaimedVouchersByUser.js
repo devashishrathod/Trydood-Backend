@@ -181,6 +181,7 @@ exports.getClaimedVouchersByUser = async (role, tokenUserId, filter) => {
         subBrandCity: "$location.city",
         brandName: "$subBrand.companyName",
         brandUniqueId: "$brand.uniqueId",
+        brandLogo: "$brand.logo",
         subBrandUniqueId: "$subBrand.uniqueId",
         billSummary: {
           voucherDiscountValue: "$bill.voucherDiscountValue",

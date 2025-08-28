@@ -22,12 +22,7 @@ router.get(
   checkRole(ROLES.ADMIN, ROLES.VENDOR),
   getCurrentTransaction
 );
-router.get(
-  "/get-all-claimed-vouchers",
-  verifyToken,
-  checkRole(ROLES.USER, ROLES.ADMIN),
-  getAllClaimedTransactions
-);
+router.get("/get-all-claimed-vouchers", verifyToken, getAllClaimedTransactions);
 router.put(
   "/:transactionId/remove",
   verifyToken,
