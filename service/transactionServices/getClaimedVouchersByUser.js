@@ -3,12 +3,83 @@ const Transaction = require("../../model/Transaction");
 const { ROLES } = require("../../constants");
 
 exports.getClaimedVouchersByUser = async (role, tokenUserId, filter) => {
-  let { page, limit, userId, brandId, subBrandId, startDate, endDate, date } =
-    filter;
+  let {
+    page,
+    limit,
+    userId,
+    brandId,
+    subBrandId,
+    categoryId,
+    startDate,
+    endDate,
+    date,
+    paymentMethod,
+    isRefunded,
+    voucherType,
+    minAmount,
+    maxAmount,
+    rating,
+    discount,
+    sortBy,
+    sortOrder,
+  } = filter;
   page = page ? parseInt(page) : 1;
   limit = limit ? parseInt(limit) : 10;
   const skip = (page - 1) * limit;
   const matchData = { isDeleted: false, isActive: true };
+  if (paymentMethod) matchData.paymentMethod = paymentMethod;
+  if (isRefunded) matchData.isRefunded = isRefunded;
+  if (voucherType) matchData.voucherType = voucherType;
+  if (discount) matchData["voucher.discount"] = { $gte: parseInt(discount) };
+  if (rating) matchData["feedback.rating"] = rating;
+  if (minAmount !== undefined && maxAmount !== undefined) {
+    matchData.paidAmount = { $gte: minAmount, $lte: maxAmount };
+  } else if (minAmount !== undefined) {
+    matchData.paidAmount = { $gte: minAmount };
+  } else if (maxAmount !== undefined) {
+    matchData.paidAmount = { $lte: maxAmount };
+  }
+  let sortStage = { createdAt: -1 };
+  if (Array.isArray(sortBy)) {
+    sortStage = {};
+    sortBy.forEach((field, idx) => {
+      let order = sortOrder && sortOrder[idx] === "asc" ? 1 : -1;
+      switch (field) {
+        case "rating":
+          sortStage["feedback.rating"] = order;
+          break;
+        case "offer":
+          sortStage["voucher.discount"] = order;
+          break;
+        case "feedback":
+          sortStage["feedback.rating"] = order;
+          break;
+        case "price":
+          sortStage["paidAmount"] = order;
+          break;
+        default:
+          sortStage.createdAt = -1;
+      }
+    });
+  } else if (sortBy) {
+    let order = sortOrder === "asc" ? 1 : -1;
+    switch (sortBy) {
+      case "rating":
+        sortStage = { "feedback.rating": order };
+        break;
+      case "offer":
+        sortStage = { "voucher.discount": order };
+        break;
+      case "feedback":
+        sortStage = { "feedback.rating": order };
+        break;
+      case "price":
+        sortStage = { paidAmount: order };
+        break;
+      default:
+        sortStage = { createdAt: -1 };
+    }
+  }
   if (
     userId &&
     ROLES.USER === role &&
@@ -19,6 +90,9 @@ exports.getClaimedVouchersByUser = async (role, tokenUserId, filter) => {
   } else if (userId) matchData.user = new mongoose.Types.ObjectId(userId);
   if (brandId) matchData.brand = new mongoose.Types.ObjectId(brandId);
   if (subBrandId) matchData.subBrand = new mongoose.Types.ObjectId(subBrandId);
+  if (categoryId) {
+    matchData["subBrand.category"] = new mongoose.Types.ObjectId(categoryId);
+  }
   if (startDate && endDate) {
     matchData.createdAt = {
       $gte: new Date(new Date(startDate).setHours(0, 0, 0, 0)),
@@ -96,6 +170,15 @@ exports.getClaimedVouchersByUser = async (role, tokenUserId, filter) => {
     },
     { $unwind: { path: "$voucher", preserveNullAndEmptyArrays: true } },
     {
+      $lookup: {
+        from: "feedbacks",
+        localField: "voucher.brand",
+        foreignField: "brand",
+        as: "feedback",
+      },
+    },
+    { $unwind: { path: "$feedback", preserveNullAndEmptyArrays: true } },
+    {
       $addFields: {
         day: {
           $let: {
@@ -150,7 +233,31 @@ exports.getClaimedVouchersByUser = async (role, tokenUserId, filter) => {
         },
       },
     },
-    { $sort: { createdAt: -1 } },
+    {
+      $addFields: {
+        voucherType: {
+          $switch: {
+            branches: [
+              { case: { $eq: ["$voucher.isActive", true] }, then: "In store" },
+              {
+                case: { $eq: ["$voucher.isActive", false] },
+                then: "Out of stock",
+              },
+              {
+                case: { $lte: ["$paidAmount", 1000] },
+                then: "Very Low Price",
+              },
+              {
+                case: { $gte: ["$paidAmount", 100000] },
+                then: "Very High Price",
+              },
+            ],
+            default: "In store",
+          },
+        },
+      },
+    },
+    { $sort: sortStage },
     {
       $project: {
         _id: 0,
