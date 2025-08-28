@@ -119,7 +119,10 @@ function projectStage() {
       proximityScore: 1,
       brandName: "$brandData.name",
       brandLogo: "$brandData.logo",
-      location: "$brandLocation.city",
+      city: "$brandLocation.city",
+      shopOrBuildingNumber: "$brandLocation.shopOrBuildingNumber",
+      address: "$brandLocation.address",
+      street: "$brandLocation.street",
       isActive: 1,
     },
   };
