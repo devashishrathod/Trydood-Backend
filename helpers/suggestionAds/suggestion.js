@@ -105,20 +105,22 @@ function projectStage() {
   return {
     $project: {
       title: 1,
-      description: 1,
       discountTitle: 1,
       scope: 1,
-      images: 1,
+      image: 1,
       states: 1,
       cities: 1,
       originalPrice: 1,
       discountPrice: 1,
       publishedDate: 1,
       endDate: 1,
-      valueOfAmount: 1,
       voucher: 1,
       createdAt: 1,
       proximityScore: 1,
+      brandName: "$brandData.name",
+      brandLogo: "$brandData.logo",
+      location: "$brandLocation.city",
+      isActive: 1,
     },
   };
 }

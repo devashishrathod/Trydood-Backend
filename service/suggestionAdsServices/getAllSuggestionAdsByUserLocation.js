@@ -83,6 +83,35 @@ exports.getAllSuggestionAdsByUserLocation = async (userId, query) => {
     pipeline.push({ $sort: sort });
   }
   pipeline.push(
+    {
+      $lookup: {
+        from: "vouchers",
+        localField: "voucher",
+        foreignField: "_id",
+        as: "voucherData",
+      },
+    },
+    { $unwind: { path: "$voucherData", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "brands",
+        localField: "voucherData.brand",
+        foreignField: "_id",
+        as: "brandData",
+      },
+    },
+    { $unwind: { path: "$brandData", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "locations",
+        localField: "brandData.location",
+        foreignField: "_id",
+        as: "brandLocation",
+      },
+    },
+    { $unwind: { path: "$brandLocation", preserveNullAndEmptyArrays: true } }
+  );
+  pipeline.push(
     projectStage(),
     {
       $facet: {
