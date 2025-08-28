@@ -1,10 +1,6 @@
 const mongoose = require("mongoose");
 const { OFFERS_SCOPE } = require("../constants");
-const {
-  imagesField,
-  usersField,
-  voucherField,
-} = require("./validMogooseObjectId");
+const { usersField, voucherField } = require("./validMogooseObjectId");
 
 const stateSchema = new mongoose.Schema(
   {
@@ -30,7 +26,6 @@ const suggestionSchema = new mongoose.Schema(
   {
     users: usersField,
     voucher: voucherField,
-    images: imagesField,
     states: { type: [stateSchema], required: true },
     cities: { type: [citySchema], required: true },
     scope: {
@@ -38,6 +33,7 @@ const suggestionSchema = new mongoose.Schema(
       enum: [...Object.values(OFFERS_SCOPE)],
       default: OFFERS_SCOPE.ALL_USERS,
     },
+    image: { type: String, required: true },
     title: {
       type: String,
       required: [true, "Suggestion title is required"],
@@ -80,6 +76,7 @@ const suggestionSchema = new mongoose.Schema(
       },
     },
     valueOfAmount: { type: Number, min: 0 },
+    isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }
