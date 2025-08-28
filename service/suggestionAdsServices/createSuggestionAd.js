@@ -5,8 +5,16 @@ const { OFFERS_SCOPE } = require("../../constants");
 const { uploadImage } = require("../uploadServices");
 
 exports.createSuggestionAd = async (voucherId, image, payload) => {
-  let { scope, users, states, cities, title, description, discountTitle } =
-    payload;
+  let {
+    scope,
+    status,
+    users,
+    states,
+    cities,
+    title,
+    description,
+    discountTitle,
+  } = payload;
 
   const linkedVoucher = await Voucher.findById(voucherId);
   if (!linkedVoucher) throwError(404, "Voucher not found");
@@ -37,6 +45,7 @@ exports.createSuggestionAd = async (voucherId, image, payload) => {
     states: states,
     cities: cities,
     scope,
+    status,
     title,
     description,
     discountTitle: discountTitle || `Upto ${linkedVoucher.discount}% OFF`,

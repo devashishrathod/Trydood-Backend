@@ -1,6 +1,6 @@
 const Suggestion = require("../../model/SuggestionAds");
 const Location = require("../../model/Location");
-const { ROLES, OFFERS_SCOPE } = require("../../constants");
+const { ROLES, OFFERS_SCOPE, VOUCHER_STATUS } = require("../../constants");
 const { getUserById } = require("../userServices");
 const { throwError } = require("../../utils");
 const {
@@ -29,6 +29,7 @@ exports.getAllSuggestionAdsByUserLocation = async (userId, query) => {
     search,
     voucherId,
     scope,
+    status,
     activeOnly,
     page = 1,
     limit = 10,
@@ -57,6 +58,9 @@ exports.getAllSuggestionAdsByUserLocation = async (userId, query) => {
   }
   if (voucherId) match.voucher = voucherId;
   if (scope && Object.values(OFFERS_SCOPE).includes(scope)) match.scope = scope;
+  if (status && Object.values(VOUCHER_STATUS).includes(status)) {
+    match.status = status ? status : VOUCHER_STATUS.ACTIVE;
+  }
   if (activeOnly === "true" || activeOnly === true) {
     const now = new Date();
     match.publishedDate = { $lte: now };
