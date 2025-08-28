@@ -1,3 +1,6 @@
 const { createSuggestionAd } = require("./createSuggestionAd");
+const {
+  getAllSuggestionAdsByUserLocation,
+} = require("./getAllSuggestionAdsByUserLocation");
 
-module.exports = { createSuggestionAd };
+module.exports = { createSuggestionAd, getAllSuggestionAdsByUserLocation };

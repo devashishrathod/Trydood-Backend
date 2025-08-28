@@ -80,8 +80,15 @@ const suggestionSchema = new mongoose.Schema(
       },
     },
     valueOfAmount: { type: Number, min: 0 },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }
 );
+
+suggestionSchema.index({ "states.name": 1 });
+suggestionSchema.index({ "states.code": 1 });
+suggestionSchema.index({ "cities.name": 1 });
+suggestionSchema.index({ "cities.stateCode": 1 });
+suggestionSchema.index({ publishedDate: -1, createdAt: -1 });
 
 module.exports = mongoose.model("Suggestion", suggestionSchema);
