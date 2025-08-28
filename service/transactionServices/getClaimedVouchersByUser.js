@@ -25,6 +25,10 @@ exports.getClaimedVouchersByUser = async (role, tokenUserId, filter) => {
   } = filter;
   page = page ? parseInt(page) : 1;
   limit = limit ? parseInt(limit) : 10;
+  minAmount = minAmount ? parseInt(minAmount) : undefined;
+  maxAmount = maxAmount ? parseInt(maxAmount) : undefined;
+  rating = rating ? parseInt(rating) : undefined;
+  discount = discount ? parseInt(discount) : undefined;
   const skip = (page - 1) * limit;
   const matchData = { isDeleted: false, isActive: true };
   if (paymentMethod) matchData.paymentMethod = paymentMethod;
@@ -172,8 +176,12 @@ exports.getClaimedVouchersByUser = async (role, tokenUserId, filter) => {
     {
       $lookup: {
         from: "feedbacks",
-        localField: "voucher.brand",
-        foreignField: "brand",
+        let: { brandId: "$voucher.brand" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$brand", "$$brandId"] } } },
+          { $sort: { createdAt: -1 } },
+          { $limit: 1 },
+        ],
         as: "feedback",
       },
     },
