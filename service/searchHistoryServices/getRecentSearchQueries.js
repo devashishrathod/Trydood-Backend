@@ -18,7 +18,9 @@ exports.getRecentSearchQueries = async (tokenUserId, userId, page, limit) => {
     if (!result || result.length === 0) {
       throwError(404, "No search queries found");
     }
-    return result;
+    const total = await SearchHistory.countDocuments(query);
+    const totalPages = Math.ceil(total / limit);
+    return { total, totalPages, page, limit, result };
   } catch (error) {
     console.error("Error fetching recent search queries:", error);
     throwError(400, error.message);
