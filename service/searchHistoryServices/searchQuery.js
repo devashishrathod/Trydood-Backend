@@ -10,73 +10,93 @@ const Categories = require("../../model/Category");
 const SubCategories = require("../../model/SubCategory");
 const SearchHistory = require("../../model/SearchHistory");
 
-exports.searchQuery = async (q, userId, page = 1, limit = 10) => {
-  page = page ? parseInt(page) : 1;
-  limit = limit ? parseInt(limit) : 10;
-  if (page < 1) page = 1;
-  if (limit < 1) limit = 10;
-  const regex = new RegExp(q, "i");
-  const skip = (page - 1) * limit;
-  const [
-    todaysDeals,
-    offers,
-    vouchers,
-    brands,
-    subBrands,
-    locations,
-    promoCodes,
-    suggestionAds,
-    categories,
-    subCategories,
-  ] = await Promise.all([
-    Deals.find({ title: regex }).limit(limit).skip(skip),
-    Offers.find({ title: regex }).limit(limit).skip(skip),
-    Vouchers.find({ title: regex }).limit(limit).skip(skip),
-    Brands.find({ name: regex, companyName: regex }).limit(limit).skip(skip),
-    SubBrands.find({ companyName: regex }).limit(limit).skip(skip),
-    Location.find({
-      city: regex,
-      state: regex,
-      shopOrBuildingNumber: regex,
-      street: regex,
-      zipCode: regex,
-      country: regex,
-    })
-      .limit(limit)
-      .skip(skip),
-    PromoCode.find({ title: regex, promoCode: regex }).limit(limit).skip(skip),
-    SuggestionAds.find({ title: regex }).limit(limit).skip(skip),
-    Categories.find({ name: regex }).limit(limit).skip(skip),
-    SubCategories.find({ name: regex }).limit(limit).skip(skip),
-  ]);
-  if (userId) await SearchHistory.create({ userId, query: q });
-  const recentSearches = userId
-    ? await SearchHistory.find({ userId }).sort({ createdAt: -1 }).limit(10)
-    : [];
-  const results = {
-    todaysDeals,
-    offers,
-    vouchers,
-    brands,
-    subBrands,
-    locations,
-    promoCodes,
-    suggestionAds,
-    categories,
-    subCategories,
-  };
-  if (!results || Object.values(results).every((arr) => arr.length === 0)) {
+exports.searchQuery = async (tokenUserId, userId, q, page = 1, limit = 10) => {
+  try {
+    page = page ? parseInt(page) : 1;
+    limit = limit ? parseInt(limit) : 10;
+    if (page < 1) page = 1;
+    if (limit < 1) limit = 10;
+    const regex = new RegExp(q, "i");
+    const skip = (page - 1) * limit;
+    const [
+      todaysDeals,
+      offers,
+      vouchers,
+      brands,
+      subBrands,
+      locations,
+      promoCodes,
+      suggestionAds,
+      categories,
+      subCategories,
+    ] = await Promise.all([
+      Deals.find({ title: regex }).limit(limit).skip(skip),
+      Offers.find({ title: regex }).limit(limit).skip(skip),
+      Vouchers.find({ title: regex }).limit(limit).skip(skip),
+      Brands.find({
+        $or: [{ name: regex }, { companyName: regex }],
+      })
+        .limit(limit)
+        .skip(skip),
+      SubBrands.find({
+        $or: [{ name: regex }, { companyName: regex }],
+      })
+        .limit(limit)
+        .skip(skip),
+      Location.find({
+        $or: [
+          { city: regex },
+          { state: regex },
+          { shopOrBuildingNumber: regex },
+          { street: regex },
+          { zipCode: regex },
+          { country: regex },
+        ],
+      })
+        .limit(limit)
+        .skip(skip),
+      PromoCode.find({
+        $or: [{ title: regex }, { promoCode: regex }],
+      })
+        .limit(limit)
+        .skip(skip),
+      SuggestionAds.find({ title: regex }).limit(limit).skip(skip),
+      Categories.find({ name: regex }).limit(limit).skip(skip),
+      SubCategories.find({ name: regex }).limit(limit).skip(skip),
+    ]);
+    const userIdToUse = userId || tokenUserId;
+    await SearchHistory.create({ userId: userIdToUse, query: q });
+    const recentSearches = await SearchHistory.find({ userId: userIdToUse })
+      .sort({ createdAt: -1 })
+      .limit(10);
+    const results = {
+      todaysDeals,
+      offers,
+      vouchers,
+      brands,
+      subBrands,
+      locations,
+      promoCodes,
+      suggestionAds,
+      categories,
+      subCategories,
+    };
+    if (Object.values(results).every((arr) => arr.length === 0)) {
+      return {
+        query: q,
+        results: [],
+        recentSearches: recentSearches.map((r) => r.query),
+      };
+    }
     return {
       query: q,
-      results: [],
+      results: Object.entries(results)
+        .filter(([_, arr]) => arr.length > 0)
+        .map(([key, arr]) => ({ [key]: arr })),
       recentSearches: recentSearches.map((r) => r.query),
     };
+  } catch (err) {
+    console.error("Error in global search:", err);
+    throwError(400, err);
   }
-  return {
-    query: q,
-    results: Object.entries(results)
-      .filter(([_, arr]) => arr.length > 0)
-      .map(([key, arr]) => ({ [key]: arr })),
-    recentSearches: recentSearches.map((r) => r.query),
-  };
 };
