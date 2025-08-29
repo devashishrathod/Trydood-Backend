@@ -204,4 +204,9 @@ router.delete(
   deleteLegal
 );
 
+// ======================================= search history ===============================
+const { globalSearch } = require("../controller/searchHistory");
+
+router.get("/global-search", verifyToken, globalSearch);
+
 module.exports = { router, routePrefix: "/settings" };
