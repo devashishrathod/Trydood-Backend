@@ -11,7 +11,7 @@ exports.getRecentSearchQueries = async (tokenUserId, userId, page, limit) => {
     const userIdToUse = userId || tokenUserId;
     const query = { userId: userIdToUse, isDeleted: false };
     const result = await SearchHistory.find(query)
-      .select("-_id query createdAt")
+      .select("query createdAt")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
