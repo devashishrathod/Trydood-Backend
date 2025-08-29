@@ -16,8 +16,10 @@ exports.searchQuery = async (tokenUserId, userId, q, page = 1, limit = 10) => {
     limit = limit ? parseInt(limit) : 10;
     if (page < 1) page = 1;
     if (limit < 1) limit = 10;
+
     const regex = new RegExp(q, "i");
     const skip = (page - 1) * limit;
+
     const [
       todaysDeals,
       offers,
@@ -33,14 +35,10 @@ exports.searchQuery = async (tokenUserId, userId, q, page = 1, limit = 10) => {
       Deals.find({ title: regex }).limit(limit).skip(skip),
       Offers.find({ title: regex }).limit(limit).skip(skip),
       Vouchers.find({ title: regex }).limit(limit).skip(skip),
-      Brands.find({
-        $or: [{ name: regex }, { companyName: regex }],
-      })
+      Brands.find({ $or: [{ name: regex }, { companyName: regex }] })
         .limit(limit)
         .skip(skip),
-      SubBrands.find({
-        $or: [{ name: regex }, { companyName: regex }],
-      })
+      SubBrands.find({ $or: [{ name: regex }, { companyName: regex }] })
         .limit(limit)
         .skip(skip),
       Location.find({
@@ -55,20 +53,21 @@ exports.searchQuery = async (tokenUserId, userId, q, page = 1, limit = 10) => {
       })
         .limit(limit)
         .skip(skip),
-      PromoCode.find({
-        $or: [{ title: regex }, { promoCode: regex }],
-      })
+      PromoCode.find({ $or: [{ title: regex }, { promoCode: regex }] })
         .limit(limit)
         .skip(skip),
       SuggestionAds.find({ title: regex }).limit(limit).skip(skip),
       Categories.find({ name: regex }).limit(limit).skip(skip),
       SubCategories.find({ name: regex }).limit(limit).skip(skip),
     ]);
+
     const userIdToUse = userId || tokenUserId;
     await SearchHistory.create({ userId: userIdToUse, query: q });
+
     const recentSearches = await SearchHistory.find({ userId: userIdToUse })
       .sort({ createdAt: -1 })
       .limit(10);
+
     const results = {
       todaysDeals,
       offers,
@@ -81,18 +80,9 @@ exports.searchQuery = async (tokenUserId, userId, q, page = 1, limit = 10) => {
       categories,
       subCategories,
     };
-    if (Object.values(results).every((arr) => arr.length === 0)) {
-      return {
-        query: q,
-        results: [],
-        recentSearches: recentSearches.map((r) => r.query),
-      };
-    }
     return {
       query: q,
-      results: Object.entries(results)
-        .filter(([_, arr]) => arr.length > 0)
-        .map(([key, arr]) => ({ [key]: arr })),
+      results,
       recentSearches: recentSearches.map((r) => r.query),
     };
   } catch (err) {
