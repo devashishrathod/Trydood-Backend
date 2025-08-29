@@ -205,8 +205,12 @@ router.delete(
 );
 
 // ======================================= search history ===============================
-const { globalSearch } = require("../controller/searchHistory");
+const {
+  globalSearch,
+  getRecentSearchHistory,
+} = require("../controller/searchHistory");
 
 router.get("/global-search", verifyToken, globalSearch);
+router.get("/recent-search", verifyToken, getRecentSearchHistory);
 
 module.exports = { router, routePrefix: "/settings" };
