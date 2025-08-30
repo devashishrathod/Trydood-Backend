@@ -6,6 +6,7 @@ const {
   subscriptionField,
   brandField,
   subBrandField,
+  voucherField,
   billField,
 } = require("./validMogooseObjectId");
 const {
@@ -20,6 +21,7 @@ const transactionSchema = new mongoose.Schema(
     brand: brandField,
     subBrand: subBrandField,
     subscription: subscriptionField,
+    voucher: voucherField,
     bill: billField,
     createdBy: userField,
     entity: { type: String },

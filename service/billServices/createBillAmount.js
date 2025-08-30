@@ -102,6 +102,7 @@ exports.createBillAmount = async (userId, payload) => {
     createdBy: userId,
     brand: subBrand?.brand,
     subBrand: subBrandId,
+    voucher: voucherId,
     email: email ? email : undefined,
     contact: whatsappNumber,
     entity: razorpayOrder?.entity,

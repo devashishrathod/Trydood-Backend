@@ -277,6 +277,7 @@ exports.getClaimedVouchersByUser = async (role, tokenUserId, filter) => {
         category: "$category.name",
         percentage: "$voucher.discount",
         price: { $ifNull: ["$paidAmount", "$bill.finalPayble"] },
+        voucherId: "$voucher._id",
         voucherType: {
           $cond: [
             { $eq: ["$voucher.isActive", true] },

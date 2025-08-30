@@ -40,13 +40,12 @@ exports.createRefundRequest = async (userId, data) => {
   if (refundAmount > txn.paidAmount) {
     throwError(400, "Refund amount cannot exceed paid amount");
   }
-  if (voucherId) {
-    const voucherDoc = await Voucher.findOne({
-      _id: voucherId,
-      isDeleted: false,
-    });
-    if (!voucherDoc) throwError(404, "Invalid or mismatched voucher details");
-  }
+  voucherId = voucherId || txn.voucher;
+  const voucherDoc = await Voucher.findOne({
+    _id: voucherId,
+    isDeleted: false,
+  });
+  if (!voucherDoc) throwError(404, "Invalid or mismatched voucher details");
   let bankAccount;
   const isValidAccount = isValidAccountNumber(accountNumber);
   if (!isValidAccount) throwError(422, "Invalid account number");
