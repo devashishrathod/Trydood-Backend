@@ -9,7 +9,7 @@ const { isSameDay } = require("../../helpers/transactions");
 const { isValidAccountNumber } = require("../../validator/common");
 
 exports.createRefundRequest = async (userId, data) => {
-  const {
+  let {
     transactionId,
     voucherId,
     refundAmount,

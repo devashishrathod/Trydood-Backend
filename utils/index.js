@@ -3,6 +3,7 @@ const { sendSuccess, sendError } = require("./response");
 const { generateReferralCode } = require("./generateReferralCode");
 const { generateNumericOtp, hashOtp } = require("./generateAndHashOtp");
 const { throwError, CustomError } = require("./CustomError");
+const { pagination } = require("./pagination");
 
 module.exports = {
   asyncWrapper,
@@ -13,4 +14,5 @@ module.exports = {
   hashOtp,
   throwError,
   CustomError,
+  pagination,
 };

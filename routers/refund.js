@@ -3,7 +3,7 @@ const router = express.Router();
 const { ROLES } = require("../constants");
 
 const { verifyToken, checkRole } = require("../middleware");
-const { raiseRefundRequest } = require("../controller/refunds");
+const { raiseRefundRequest, getAllRefunds } = require("../controller/refunds");
 
 router.post(
   "/raise-refund-request",
@@ -11,5 +11,6 @@ router.post(
   checkRole(ROLES.USER),
   raiseRefundRequest
 );
+router.get("/get-all-refunds", verifyToken, getAllRefunds);
 
 module.exports = router;
