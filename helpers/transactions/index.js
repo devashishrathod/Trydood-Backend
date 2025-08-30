@@ -4,10 +4,12 @@ const { generateAndUploadInvoice } = require("./generateAndUploadInvoice");
 const {
   generateAndUploadBillInvoice,
 } = require("./generateAndUploadBillInvoice");
+const { isSameDay } = require("./isSameDay");
 
 module.exports = {
   getPaymentDetails,
   generateRazorpaySignature,
   generateAndUploadInvoice,
   generateAndUploadBillInvoice,
+  isSameDay,
 };

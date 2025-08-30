@@ -87,6 +87,18 @@ module.exports = {
     DELETED: "deleted",
   }),
 
+  REFUND_STATUS: Object.freeze({
+    DRAFT: "DRAFT",
+    SUBMITTED: "SUBMITTED",
+    UNDER_REVIEW: "UNDER_REVIEW",
+    APPROVED: "APPROVED",
+    REJECTED: "REJECTED",
+    PROCESSING: "PROCESSING",
+    REFUNDED: "REFUNDED",
+    FAILED: "FAILED",
+    CANCELLED: "CANCELLED",
+  }),
+
   ZIP_CODE_REGEX_MAP: Object.freeze({
     IN: /^[1-9][0-9]{5}$/, // India (6 digits)
     US: /^\d{5}(-\d{4})?$/, // USA (ZIP or ZIP+4)
