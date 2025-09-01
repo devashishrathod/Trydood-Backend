@@ -14,7 +14,6 @@ exports.getAllRefundRequests = async (query) => {
     subBrand,
     voucher,
   } = query;
-  console.log(query);
   page = page ? parseInt(page) : 1;
   limit = limit ? parseInt(limit) : 10;
   if (page < 1) page = 1;
@@ -40,7 +39,6 @@ exports.getAllRefundRequests = async (query) => {
       $lte: new Date(endDate),
     };
   }
-  console.log("match", match);
   const pipeline = [
     { $match: match },
     {

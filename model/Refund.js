@@ -17,6 +17,8 @@ const refundSchema = new mongoose.Schema(
     voucher: voucherField,
     transaction: transactionField,
     bankAccount: bankAccountField,
+    actionBy: userField,
+    actionAt: { type: Date },
     refundAmount: { type: Number, required: true },
     reason: { type: String, trim: true },
     status: {

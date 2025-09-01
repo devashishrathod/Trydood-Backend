@@ -88,15 +88,9 @@ module.exports = {
   }),
 
   REFUND_STATUS: Object.freeze({
-    DRAFT: "DRAFT",
     SUBMITTED: "SUBMITTED",
-    UNDER_REVIEW: "UNDER_REVIEW",
     APPROVED: "APPROVED",
     REJECTED: "REJECTED",
-    PROCESSING: "PROCESSING",
-    REFUNDED: "REFUNDED",
-    FAILED: "FAILED",
-    CANCELLED: "CANCELLED",
   }),
 
   ZIP_CODE_REGEX_MAP: Object.freeze({
