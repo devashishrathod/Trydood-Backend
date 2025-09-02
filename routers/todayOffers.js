@@ -4,6 +4,7 @@ const { ROLES } = require("../constants");
 
 const {
   addTodayOffer,
+  getAllOffers,
   getTodayOfferCategories,
   getTodayOffersAllVouchers,
 } = require("../controller/todayOffer");
@@ -21,6 +22,12 @@ router.get(
   verifyToken,
   checkRole(ROLES.USER, ROLES.ADMIN),
   getTodayOffersAllVouchers
+);
+router.get(
+  "/get-all-offers",
+  verifyToken,
+  checkRole(ROLES.ADMIN),
+  getAllOffers
 );
 
 module.exports = router;

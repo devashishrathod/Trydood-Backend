@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { OFFERS_SCOPE, VOUCHER_STATUS } = require("../constants");
+const { OFFERS_SCOPE, SUGGESTION_STATUS } = require("../constants");
 const { usersField, voucherField } = require("./validMogooseObjectId");
 
 const stateSchema = new mongoose.Schema(
@@ -35,7 +35,7 @@ const suggestionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: [...Object.values(VOUCHER_STATUS)],
+      enum: [...Object.values(SUGGESTION_STATUS)],
       required: true,
     },
     image: { type: String, required: true },
@@ -81,6 +81,7 @@ const suggestionSchema = new mongoose.Schema(
       },
     },
     valueOfAmount: { type: Number, min: 0 },
+    uniqueId: { type: String, required: true, unique: true },
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
   },

@@ -12,6 +12,7 @@ const todayOfferSchema = new mongoose.Schema(
     description: { type: String, trim: true },
     validFrom: { type: Date, required: true },
     validTill: { type: Date, required: true },
+    uniqueId: { type: String, unique: true, required: true },
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
   },

@@ -3,6 +3,7 @@ const Voucher = require("../../model/Voucher");
 const { throwError } = require("../../utils");
 const { OFFERS_SCOPE } = require("../../constants");
 const { uploadImage } = require("../uploadServices");
+const { generateUniqueSuggestionId } = require("./generateUniqueSuggestionId");
 
 exports.createSuggestionAd = async (voucherId, image, payload) => {
   let {
@@ -54,6 +55,7 @@ exports.createSuggestionAd = async (voucherId, image, payload) => {
     publishedDate,
     endDate,
     valueOfAmount: linkedVoucher.discount,
+    uniqueId: await generateUniqueSuggestionId(),
     image: imageUrl,
     isActive,
   };

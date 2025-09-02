@@ -87,6 +87,12 @@ module.exports = {
     DELETED: "deleted",
   }),
 
+  SUGGESTION_STATUS: Object.freeze({
+    DRAFT: "draft",
+    ACTIVE: "active",
+    DELETED: "deleted",
+  }),
+
   REFUND_STATUS: Object.freeze({
     SUBMITTED: "SUBMITTED",
     APPROVED: "APPROVED",

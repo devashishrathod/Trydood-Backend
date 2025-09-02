@@ -1,4 +1,5 @@
 const TodayOffer = require("../../model/TodayOffer");
+const { generateUniqueTodayOfferId } = require("./generateUniqueTodayOfferId");
 
 exports.createTodayOffer = async (data) => {
   let { dealOfCategory, vouchers, title, description, validFrom, validTill } =
@@ -23,6 +24,7 @@ exports.createTodayOffer = async (data) => {
     description,
     validFrom: from,
     validTill: till,
+    uniqueId: await generateUniqueTodayOfferId(),
   });
   return newOffer;
 };

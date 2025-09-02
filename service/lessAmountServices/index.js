@@ -1,3 +1,4 @@
 const { createLessAmount } = require("./createLessAmount");
+const { generateUniqueLessAmountId } = require("./generateUniqueLessAmountId");
 
-module.exports = { createLessAmount };
+module.exports = { createLessAmount, generateUniqueLessAmountId };
