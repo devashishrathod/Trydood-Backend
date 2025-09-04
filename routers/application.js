@@ -219,4 +219,13 @@ router.delete(
   deleteSearchHistory
 );
 
+// ================================= dashboard analytics ===============================
+const { getDashboardReport } = require("../controller/application/index");
+router.get(
+  "/dashboard-analytics",
+  verifyToken,
+  checkRole(ROLES.ADMIN, ROLES.SUB_VENDOR, ROLES.VENDOR),
+  getDashboardReport
+);
+
 module.exports = { router, routePrefix: "/settings" };
