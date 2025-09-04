@@ -9,24 +9,35 @@ const Voucher = require("../../model/Voucher");
 const { REFUND_STATUS } = require("../../constants");
 
 const buildMatchQuery = ({ brandId, subBrandId, startDate, endDate, date }) => {
-  const match = { isDeleted: { $ne: true } };
-  if (brandId) match.brandId = brandId;
-  if (subBrandId) match.subBrandId = subBrandId;
+  const match = {};
+  const billMatch = {};
+  if (brandId) {
+    match.brand = brandId;
+    billMatch.brandId = brandId;
+  }
+  if (subBrandId) {
+    match.subBrand = subBrandId;
+    billMatch.subBrandId = subBrandId;
+  }
   if (date) {
-    match.createdAt = {
+    const createdAt = {
       $gte: new Date(date),
       $lt: new Date(new Date(date).setDate(new Date(date).getDate() + 1)),
     };
+    match.createdAt = createdAt;
+    billMatch.createdAt = createdAt;
   } else if (startDate && endDate) {
-    match.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
+    const createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
+    match.createdAt = createdAt;
+    billMatch.createdAt = createdAt;
   }
-  return match;
+  return { match, billMatch };
 };
 
 exports.getDashboardAnalytics = async (filters = {}) => {
-  const matchQuery = buildMatchQuery(filters);
+  const { match, billMatch } = buildMatchQuery(filters);
   const billAgg = await Bill.aggregate([
-    { $match: matchQuery },
+    { $match: billMatch },
     {
       $group: {
         _id: null,
@@ -40,7 +51,7 @@ exports.getDashboardAnalytics = async (filters = {}) => {
   const refundAgg = await Refund.aggregate([
     {
       $match: {
-        ...matchQuery,
+        ...match,
         status: REFUND_STATUS.APPROVED,
         isApproved: true,
       },
@@ -56,7 +67,7 @@ exports.getDashboardAnalytics = async (filters = {}) => {
   const txnAgg = await Transaction.aggregate([
     {
       $match: {
-        ...matchQuery,
+        ...match,
         bill: { $exists: true, $ne: null },
       },
     },
@@ -69,14 +80,20 @@ exports.getDashboardAnalytics = async (filters = {}) => {
   ]);
   const [overallUsers, brands, subBrands, vouchers, subscriptionAgg] =
     await Promise.all([
-      User.countDocuments(),
-      Brand.countDocuments(),
+      User.countDocuments({ role: "user" }),
+      Brand.countDocuments(filters.brandId ? { _id: filters.brandId } : {}),
       SubBrand.countDocuments(
-        filters.brandId ? { brandId: filters.brandId } : {}
+        filters.brandId ? { brand: filters.brandId } : {}
       ),
-      Voucher.countDocuments(),
+      Voucher.countDocuments(
+        filters.subBrandId
+          ? { subBrands: filters.subBrandId }
+          : filters.brandId
+          ? { brand: filters.brandId }
+          : {}
+      ),
       Subscribed.aggregate([
-        { $match: filters.brandId ? { brandId: filters.brandId } : {} },
+        { $match: filters.brandId ? { brand: filters.brandId } : {} },
         { $group: { _id: null, subscriptionAmount: { $sum: "$price" } } },
       ]),
     ]);

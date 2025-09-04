@@ -10,6 +10,7 @@ const BillSchema = new mongoose.Schema(
   {
     userId: userField,
     voucherId: voucherField,
+    brandId: subBrandField,
     subBrandId: subBrandField,
     transactionId: transactionField,
     voucherDiscountValue: { type: Number, required: true },

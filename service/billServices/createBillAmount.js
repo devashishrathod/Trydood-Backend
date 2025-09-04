@@ -129,6 +129,7 @@ exports.createBillAmount = async (userId, payload) => {
   const newBill = await Bill.create({
     userId,
     voucherId,
+    brandId: subBrand?.brand,
     subBrandId,
     transactionId: transaction?._id,
     voucherDiscountValue,
