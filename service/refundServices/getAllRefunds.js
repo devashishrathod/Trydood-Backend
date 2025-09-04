@@ -19,7 +19,11 @@ exports.getAllRefundRequests = async (query) => {
   if (page < 1) page = 1;
   if (limit < 1) limit = 10;
   const match = { isDeleted: false };
-  if (status) match.status = status;
+  if (status) {
+    const statusArray = status.split(",").map((s) => s.trim());
+    match.status =
+      statusArray.length > 1 ? { $in: statusArray } : statusArray[0];
+  }
   if (typeof isApproved !== "undefined") {
     if (isApproved === "true" || isApproved === true) match.isApproved = true;
     else if (isApproved === "false" || isApproved === false)
@@ -50,6 +54,24 @@ exports.getAllRefundRequests = async (query) => {
       },
     },
     { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "brands",
+        localField: "brand",
+        foreignField: "_id",
+        as: "brand",
+      },
+    },
+    { $unwind: { path: "$brand", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "locations",
+        localField: "brand.location",
+        foreignField: "_id",
+        as: "location",
+      },
+    },
+    { $unwind: { path: "$location", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "vouchers",
@@ -88,6 +110,15 @@ exports.getAllRefundRequests = async (query) => {
         userId: "$user._id",
         userName: "$user.name",
         userImage: "$user.image",
+        brandId: "$brand._id",
+        brandName: "$brand.name",
+        brandLogo: "$brand.logo",
+        brandShopOrBuildingNo: "$location.shopOrBuildingNo",
+        brandAddress: "$location.address",
+        brandStreet: "$location.street",
+        brandCity: "$location.city",
+        brandState: "$location.state",
+        brandArea: "$location.area",
         voucherId: "$voucher._id",
         voucherUniqueId: "$voucher.uniqueId",
         voucherTitle: "$voucher.title",
