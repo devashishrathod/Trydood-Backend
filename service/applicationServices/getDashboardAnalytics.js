@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Bill = require("../../model/Bill");
 const Refund = require("../../model/Refund");
 const Transaction = require("../../model/Transaction");
@@ -12,12 +13,12 @@ const buildMatchQuery = ({ brandId, subBrandId, startDate, endDate, date }) => {
   const match = {};
   const billMatch = {};
   if (brandId) {
-    match.brand = brandId;
-    billMatch.brandId = brandId;
+    match.brand = new mongoose.Types.ObjectId(brandId);
+    billMatch.brandId = new mongoose.Types.ObjectId(brandId);
   }
   if (subBrandId) {
-    match.subBrand = subBrandId;
-    billMatch.subBrandId = subBrandId;
+    match.subBrand = new mongoose.Types.ObjectId(subBrandId);
+    billMatch.subBrandId = new mongoose.Types.ObjectId(subBrandId);
   }
   if (date) {
     const createdAt = {
@@ -50,17 +51,37 @@ exports.getDashboardAnalytics = async (filters = {}) => {
   ]);
   const refundAgg = await Refund.aggregate([
     {
-      $match: {
-        ...match,
-        status: REFUND_STATUS.APPROVED,
-        isApproved: true,
+      $facet: {
+        refundValue: [
+          {
+            $match: {
+              ...match,
+              status: REFUND_STATUS.APPROVED,
+              isApproved: true,
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              refundValue: { $sum: "$refundAmount" },
+            },
+          },
+        ],
+        refundCount: [
+          { $match: { ...match } },
+          {
+            $group: {
+              _id: null,
+              refundCount: { $sum: 1 },
+            },
+          },
+        ],
       },
     },
     {
-      $group: {
-        _id: null,
-        refundValue: { $sum: "$refundAmount" },
-        refundCount: { $sum: 1 },
+      $project: {
+        refundValue: { $arrayElemAt: ["$refundValue.refundValue", 0] },
+        refundCount: { $arrayElemAt: ["$refundCount.refundCount", 0] },
       },
     },
   ]);
@@ -81,19 +102,29 @@ exports.getDashboardAnalytics = async (filters = {}) => {
   const [overallUsers, brands, subBrands, vouchers, subscriptionAgg] =
     await Promise.all([
       User.countDocuments({ role: "user" }),
-      Brand.countDocuments(filters.brandId ? { _id: filters.brandId } : {}),
+      Brand.countDocuments(
+        filters.brandId
+          ? { _id: new mongoose.Types.ObjectId(filters.brandId) }
+          : {}
+      ),
       SubBrand.countDocuments(
-        filters.brandId ? { brand: filters.brandId } : {}
+        filters.brandId
+          ? { brand: new mongoose.Types.ObjectId(filters.brandId) }
+          : {}
       ),
       Voucher.countDocuments(
         filters.subBrandId
-          ? { subBrands: filters.subBrandId }
+          ? { subBrands: new mongoose.Types.ObjectId(filters.brandId) }
           : filters.brandId
-          ? { brand: filters.brandId }
+          ? { brand: new mongoose.Types.ObjectId(filters.brandId) }
           : {}
       ),
       Subscribed.aggregate([
-        { $match: filters.brandId ? { brand: filters.brandId } : {} },
+        {
+          $match: filters.brandId
+            ? { brand: new mongoose.Types.ObjectId(filters.brandId) }
+            : {},
+        },
         { $group: { _id: null, subscriptionAmount: { $sum: "$price" } } },
       ]),
     ]);
