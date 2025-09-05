@@ -18,6 +18,7 @@ const locationSchema = new mongoose.Schema(
     landMark: { type: String },
     state: { type: String },
     city: { type: String },
+    district: { type: String },
     country: { type: String },
     street: { type: String },
     formattedAddress: { type: String },
