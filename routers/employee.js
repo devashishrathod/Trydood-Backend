@@ -6,6 +6,7 @@ const {
   addEmployee,
   deleteEmployee,
   toggleActiveDeactive,
+  getAllEmployees,
 } = require("../controller/employees");
 const { verifyToken, checkRole } = require("../middleware");
 
@@ -22,5 +23,6 @@ router.put(
   checkRole(ROLES.ADMIN),
   toggleActiveDeactive
 );
+router.get("/get-all", verifyToken, checkRole(ROLES.ADMIN), getAllEmployees);
 
 module.exports = router;
