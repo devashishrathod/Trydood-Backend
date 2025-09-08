@@ -204,4 +204,28 @@ router.delete(
   deleteLegal
 );
 
+// ======================================= search history ===============================
+const {
+  globalSearch,
+  getRecentSearchHistory,
+  deleteSearchHistory,
+} = require("../controller/searchHistory");
+
+router.get("/global-search", verifyToken, globalSearch);
+router.get("/recent-search", verifyToken, getRecentSearchHistory);
+router.delete(
+  "/:queryId/delete-search-history",
+  verifyToken,
+  deleteSearchHistory
+);
+
+// ================================= dashboard analytics ===============================
+const { getDashboardReport } = require("../controller/application/index");
+router.get(
+  "/dashboard-analytics",
+  verifyToken,
+  checkRole(ROLES.ADMIN, ROLES.SUB_VENDOR, ROLES.VENDOR),
+  getDashboardReport
+);
+
 module.exports = { router, routePrefix: "/settings" };

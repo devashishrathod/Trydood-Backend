@@ -7,11 +7,13 @@ const applicationHomeSchema = new mongoose.Schema(
     title: { type: String },
     header: { type: String },
     description: { type: String },
+    colourCode: { type: String },
     type: {
       type: String,
       enum: [...Object.values(PLATFORMS)],
       default: PLATFORMS.WEB,
     },
+    isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }

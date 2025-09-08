@@ -14,6 +14,10 @@ exports.getTodayOffersByCategory = async (
   }).populate({
     path: "vouchers",
     match: { isActive: true, isDeleted: false },
+    populate: [
+      { path: "brand", populate: { path: "location" } },
+      { path: "subBrands" },
+    ],
   });
   const allVouchers = offers.flatMap((offer) => offer.vouchers || []);
   const uniqueVouchersMap = new Map();

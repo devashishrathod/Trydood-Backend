@@ -47,20 +47,18 @@ exports.getOne = async (req, res) => {
   const type = req.query?.type;
   try {
     const filter = {};
-    if (type) {
-      filter.type = type;
-    }
+    if (type) filter.type = type;
     const result = await ApplicationHome.findOne(filter).sort({
       createdAt: -1,
     });
-    if (result) {
+    if (!result) {
       return res
-        .status(200)
-        .json({ success: true, msg: "Home Application details", result });
+        .status(404)
+        .json({ msg: "Home Application not found", success: false });
     }
     return res
-      .status(404)
-      .json({ msg: "Home Application not found", success: false });
+      .status(200)
+      .json({ success: true, msg: "Home Application details", result });
   } catch (error) {
     console.log("error on getOne: ", error);
     return res.status(500).json({ success: false, msg: error.message });
@@ -68,14 +66,20 @@ exports.getOne = async (req, res) => {
 };
 
 exports.addHomeApplication = async (req, res) => {
-  // console.log("req.body: ", req.body);
   const image = req.files?.image;
   const title = req.body?.title;
   const header = req.body?.header;
   const description = req.body?.description;
   const type = req.body?.type;
+  const colourCode = req.body?.colourCode;
   try {
-    const home = new ApplicationHome({ title, header, description, type });
+    const home = new ApplicationHome({
+      title,
+      header,
+      description,
+      type,
+      colourCode,
+    });
     if (image) {
       let imageUrl = await uploadToCloudinary(image.tempFilePath);
       home.image = imageUrl;
@@ -96,14 +100,12 @@ exports.updateHomeApplication = async (req, res) => {
   // console.log(" ======================== updateHomeApplication ======================== ");
 
   const id = req.params?.id;
-  // console.log("req.files: ", req.files);
-
-  // console.log("req.body: ", req.body);
   const image = req.files?.image;
   const title = req.body?.title;
   const header = req.body?.header;
   const description = req.body?.description;
   const type = req.body?.type;
+  const colourCode = req.body?.colourCode;
   try {
     const checkHome = await ApplicationHome.findById(id);
     if (!checkHome) {
@@ -115,6 +117,7 @@ exports.updateHomeApplication = async (req, res) => {
     if (header) checkHome.header = header;
     if (description) checkHome.description = description;
     if (type) checkHome.type = type;
+    if (colourCode) checkHome.colourCode = colourCode;
     if (image) {
       let imageUrl = await uploadToCloudinary(image.tempFilePath);
       if (checkHome?.image) {

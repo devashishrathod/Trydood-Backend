@@ -19,6 +19,7 @@ const {
   // logout,
   changeLoginMobileNumber,
   verifyChangeMobile,
+  getAllUsers,
 } = require("../controller/users");
 
 router.post("/register", registorUser);
@@ -52,6 +53,7 @@ router.put("/userProfileComplete", [verifyToken, isFirst], userProfileComplete);
   [verifyToken, isFirst],
   userProfileComplete
 );*/
+router.get("/getAll", verifyToken, getAllUsers);
 
 module.exports = {
   router,

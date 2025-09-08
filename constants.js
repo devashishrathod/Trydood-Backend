@@ -66,6 +66,11 @@ module.exports = {
     FREE_COOLING_PLAN_ID: "687e2313c56b90a60d345a94",
   }),
 
+  OFFERS_SCOPE: Object.freeze({
+    ALL_USERS: "ALL_USERS",
+    SELECTED_USERS: "SELECTED_USERS",
+  }),
+
   VOUCHER_TYPES: Object.freeze({
     PERCENTAGE: "percentage",
     FLAT: "flat",
@@ -80,6 +85,18 @@ module.exports = {
     USED_UP: "used_up",
     UPCOMING: "upcoming",
     DELETED: "deleted",
+  }),
+
+  SUGGESTION_STATUS: Object.freeze({
+    DRAFT: "draft",
+    ACTIVE: "active",
+    DELETED: "deleted",
+  }),
+
+  REFUND_STATUS: Object.freeze({
+    SUBMITTED: "SUBMITTED",
+    APPROVED: "APPROVED",
+    REJECTED: "REJECTED",
   }),
 
   ZIP_CODE_REGEX_MAP: Object.freeze({

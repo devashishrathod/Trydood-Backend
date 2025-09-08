@@ -1,5 +1,6 @@
 const PromoCode = require("../../model/PromoCode");
 const Voucher = require("../../model/Voucher");
+const { generateUniquePromoCodeId } = require("./generateUniquePromoCodeId");
 
 exports.createCode = async (payload) => {
   const { voucher, validFrom, validTill } = payload;
@@ -42,6 +43,7 @@ exports.createCode = async (payload) => {
     claimedUsers: payload.claimedUsers || [],
     validFrom: finalStart,
     validTill: finalEnd,
+    uniqueId: await generateUniquePromoCodeId(),
     isActive,
   });
   return newPromoCode;

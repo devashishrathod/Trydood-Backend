@@ -5,6 +5,9 @@ const {
   userField,
   subscriptionField,
   brandField,
+  subBrandField,
+  voucherField,
+  billField,
 } = require("./validMogooseObjectId");
 const {
   PAYMENT_STATUS,
@@ -16,7 +19,10 @@ const transactionSchema = new mongoose.Schema(
   {
     user: userField,
     brand: brandField,
+    subBrand: subBrandField,
     subscription: subscriptionField,
+    voucher: voucherField,
+    bill: billField,
     createdBy: userField,
     entity: { type: String },
     amount: { type: Number, required: true },
@@ -78,7 +84,9 @@ const transactionSchema = new mongoose.Schema(
     },
     createdAtRaw: { type: Number },
     updatedAtRaw: { type: Number },
+    isRefunded: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+    isRemoved: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }

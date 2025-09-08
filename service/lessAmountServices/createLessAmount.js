@@ -1,5 +1,7 @@
+const { OFFERS_SCOPE } = require("../../constants");
 const LessAmount = require("../../model/LessAmount");
 const Voucher = require("../../model/Voucher");
+const { generateUniqueLessAmountId } = require("./generateUniqueLessAmountId");
 
 exports.createLessAmount = async (data) => {
   let { voucher, validFrom, validTill, isActive, scope, users } = data;
@@ -21,7 +23,7 @@ exports.createLessAmount = async (data) => {
   }
   const now = new Date();
   isActive = now >= new Date(data.validFrom) && now <= new Date(data.validTill);
-  const finalUsers = scope === "ALL_USERS" ? [] : users;
+  const finalUsers = scope === OFFERS_SCOPE.ALL_USERS ? [] : users;
 
   const payload = {
     voucher,
@@ -30,6 +32,7 @@ exports.createLessAmount = async (data) => {
     isActive,
     scope,
     users: finalUsers,
+    uniqueId: await generateUniqueLessAmountId(),
     ...data,
   };
   return await LessAmount.create(payload);

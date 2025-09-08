@@ -5,9 +5,15 @@ const { ROLES } = require("../constants");
 const { verifyToken, checkRole } = require("../middleware/authValidation");
 const { getAllBrand, pagination } = require("../controller/brand");
 const { addBrand, updateBrand } = require("../controller/vendors");
+const {
+  followOrUnFollowBrand,
+  getAllFollowBrands,
+} = require("../controller/follows");
 
 router.post("/addBrand", verifyToken, checkRole(ROLES.VENDOR), addBrand);
 router.put("/update/:id", verifyToken, checkRole(ROLES.VENDOR), updateBrand);
+router.put("/:brandId/toggle-follow", verifyToken, followOrUnFollowBrand);
+router.get("/me/followed-brands", verifyToken, getAllFollowBrands);
 router.get("/getAll", getAllBrand);
 router.get("/getOne/:id", verifyToken, getAllBrand);
 router.get("/pagination", pagination);
