@@ -1,3 +1,5 @@
+const Employee = require("../../model/Employee");
+const EmployeeReferral = require("../../model/EmployeeReferral");
 const { ROLES } = require("../../constants");
 const { sendError, sendSuccess } = require("../../utils/response");
 const { getUserByPan, updateUserById } = require("../../service/userServices");
@@ -51,7 +53,23 @@ exports.addBrand = async (req, res) => {
     name = name?.toLowerCase();
     const checkBrand = await getBrandByName(name);
     if (checkBrand) return sendError(res, 409, "Brand already exists");
-
+    let referredEmployee = null;
+    if (referMarketId || referMarketMobile) {
+      if (!referMarketId || !referMarketMobile) {
+        return sendError(
+          res,
+          400,
+          "Both referMarketId and referMarketMobile are required together"
+        );
+      }
+      referredEmployee = await Employee.findOne({
+        referCode: referMarketId,
+        whatsappNumber: referMarketMobile,
+      });
+      if (!referredEmployee) {
+        return sendError(res, 400, "Invalid referral details");
+      }
+    }
     panNumber = panNumber?.toUpperCase();
     gstNumber = gstNumber?.toUpperCase();
     let brandGst = null;
@@ -86,8 +104,10 @@ exports.addBrand = async (req, res) => {
       whatsappNumber: brandVendor.whatsappNumber,
       panNumber,
       gst: brandGst ? brandGst._id : null,
-      referMarketId,
-      referMarketMobile,
+      referMarketId: referredEmployee ? referredEmployee?.referCode : null,
+      referMarketMobile: referredEmployee
+        ? referredEmployee?.whatsappNumber
+        : null,
       user: brandVendor._id,
       uniqueId: await generateUniqueBrandId(),
       currentScreen: currentScreen?.toUpperCase(),
@@ -103,6 +123,16 @@ exports.addBrand = async (req, res) => {
       isSignUpCompleted: true,
     });
     if (brandGst) await updateGstByNumber(gstNumber, { brand: newBrand._id });
+    if (referredEmployee) {
+      await EmployeeReferral.create({
+        employee: referredEmployee._id,
+        user: newBrand?.user,
+        brand: newBrand?._id,
+        referCodeUsed: referredEmployee?.referCode,
+        referMobile: referredEmployee?.whatsappNumber,
+        isSubscribed: false,
+      });
+    }
     const updatedBrand = await getBrandWithAllDetails(newBrand._id);
     return sendSuccess(res, 201, "Brand added successfully", {
       brand: updatedBrand,

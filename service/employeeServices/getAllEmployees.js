@@ -29,6 +29,64 @@ exports.getAllEmployees = async (filters) => {
   pipeline.push({ $match: matchStage });
   pipeline.push({
     $lookup: {
+      from: "employeereferrals",
+      let: { empId: "$_id" },
+      pipeline: [
+        {
+          $match: {
+            $expr: { $eq: ["$employee", "$$empId"] },
+            isDeleted: false,
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            noOfCoolingPeriod: { $sum: "$subscriptionCount.noOfCoolingPeriod" },
+            noOfStarterPlan: { $sum: "$subscriptionCount.noOfStarterPlan" },
+            noOfProfessionalPlan: {
+              $sum: "$subscriptionCount.noOfProfessionalPlan",
+            },
+            noOfEntrepreneurPlan: {
+              $sum: "$subscriptionCount.noOfEntrepreneurPlan",
+            },
+          },
+        },
+      ],
+      as: "referralCounts",
+    },
+  });
+  pipeline.push({
+    $addFields: {
+      subscriptionCount: {
+        noOfCoolingPeriod: {
+          $ifNull: [
+            { $arrayElemAt: ["$referralCounts.noOfCoolingPeriod", 0] },
+            0,
+          ],
+        },
+        noOfStarterPlan: {
+          $ifNull: [
+            { $arrayElemAt: ["$referralCounts.noOfStarterPlan", 0] },
+            0,
+          ],
+        },
+        noOfProfessionalPlan: {
+          $ifNull: [
+            { $arrayElemAt: ["$referralCounts.noOfProfessionalPlan", 0] },
+            0,
+          ],
+        },
+        noOfEntrepreneurPlan: {
+          $ifNull: [
+            { $arrayElemAt: ["$referralCounts.noOfEntrepreneurPlan", 0] },
+            0,
+          ],
+        },
+      },
+    },
+  });
+  pipeline.push({
+    $lookup: {
       from: "bankaccounts",
       localField: "bankAccount",
       foreignField: "_id",
@@ -61,6 +119,7 @@ exports.getAllEmployees = async (filters) => {
       uniqueId: 1,
       isActive: 1,
       createdAt: 1,
+      subscriptionCount: 1,
       bankAccount: {
         bankName: 1,
         branchName: 1,

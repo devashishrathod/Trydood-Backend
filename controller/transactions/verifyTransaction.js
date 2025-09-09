@@ -1,3 +1,4 @@
+const EmployeeReferral = require("../../model/EmployeeReferral");
 const { sendError, sendSuccess } = require("../../utils");
 const { getUserById, updateUserById } = require("../../service/userServices");
 const {
@@ -230,6 +231,36 @@ exports.verifyTransaction = async (req, res) => {
       };
       await updateUserById(user, updateBrandAndUserData);
       await updateBrandById(brand, updateBrandAndUserData);
+      const referral = await EmployeeReferral.findOne({
+        brand: brand,
+        user: user,
+      });
+      if (referral && checkSubscription?.name) {
+        let incField = null;
+        switch (checkSubscription.name) {
+          case "Starter":
+            incField = "subscriptionCount.noOfStarterPlan";
+            break;
+          case "Professional":
+            incField = "subscriptionCount.noOfProfessionalPlan";
+            break;
+          case "Enterprise":
+            incField = "subscriptionCount.noOfEntrepreneurPlan";
+            break;
+          default:
+            incField = null;
+        }
+        if (incField) {
+          await EmployeeReferral.findOneAndUpdate(
+            { brand: brand, user: user },
+            {
+              $inc: { [incField]: 1 },
+              $set: { isSubscribed: true },
+            },
+            { new: true }
+          );
+        }
+      }
       SubscribedBrand = await getBrandWithAllDetails(brand);
     } else {
       return sendError(
