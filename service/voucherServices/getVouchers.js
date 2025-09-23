@@ -1,5 +1,7 @@
 // const mongoose = require("mongoose");
 // const Voucher = require("../../model/Voucher");
+// const Location = require("../../model/Location");
+// const { throwError } = require("../../utils");
 
 // exports.getVouchers = async (userId, query) => {
 //   const {
@@ -17,6 +19,15 @@
 //     sortBy = "createdAt",
 //     sortOrder = "desc",
 //     onlyLiked = false,
+//     userLat,
+//     userLng,
+//     minRating,
+//     maxRating,
+//     minOffer,
+//     maxOffer,
+//     minPrice,
+//     maxPrice,
+//     maxDistance, // km
 //   } = query;
 //   const filter = { isDeleted: false };
 //   if (brandId && mongoose.isValidObjectId(brandId)) {
@@ -39,10 +50,72 @@
 //     if (validFrom) filter.validFrom.$gte = new Date(validFrom);
 //     if (validTill) filter.validFrom.$lte = new Date(validTill);
 //   }
-//   const sortOption = { [sortBy]: sortOrder === "asc" ? 1 : -1 };
+//   if (minOffer || maxOffer) filter.discount = {};
+//   if (minOffer) filter.discount.$gte = Number(minOffer);
+//   if (maxOffer) filter.discount.$lte = Number(maxOffer);
+//   if (minPrice || maxPrice) filter.minOrderAmount = {};
+//   if (minPrice) filter.minOrderAmount.$gte = Number(minPrice);
+//   if (maxPrice) filter.minOrderAmount.$lte = Number(maxPrice);
 //   const skip = (parseInt(page) - 1) * parseInt(limit);
-//   const pipeline = [
+//   const pipeline = [];
+//   if (userLat && userLng) {
+//     // Start with geoNear on Location
+//     pipeline.push({
+//       $geoNear: {
+//         near: {
+//           type: "Point",
+//           coordinates: [parseFloat(userLng), parseFloat(userLat)],
+//         },
+//         distanceField: "distance",
+//         spherical: true,
+//         ...(maxDistance && { maxDistance: parseFloat(maxDistance) * 1000 }), // km -> meters
+//         query: { isDeleted: false },
+//       },
+//     });
+//     // Join subBrand
+//     pipeline.push({
+//       $lookup: {
+//         from: "subbrands",
+//         localField: "subBrand",
+//         foreignField: "_id",
+//         as: "subBrand",
+//       },
+//     });
+//     pipeline.push({ $unwind: "$subBrand" });
+
+//     // Join voucher
+//     pipeline.push({
+//       $lookup: {
+//         from: "vouchers",
+//         localField: "subBrand._id",
+//         foreignField: "subBrands",
+//         as: "voucher",
+//       },
+//     });
+//     pipeline.push({ $unwind: "$voucher" });
+//     // Add distance at voucher level
+//     pipeline.push({
+//       $group: {
+//         _id: "$voucher._id",
+//         doc: { $first: "$voucher" },
+//         nearestDistance: { $min: "$distance" },
+//       },
+//     });
+//     pipeline.push({
+//       $replaceRoot: {
+//         newRoot: {
+//           $mergeObjects: ["$doc", { distance: "$nearestDistance" }],
+//         },
+//       },
+//     });
+//   } else {
+//     // No geo filter, just vouchers
+//     pipeline.push({ $match: filter });
+//   }
+//   // Now enrich vouchers (same as your original pipeline)
+//   pipeline.push(
 //     { $match: filter },
+//     // Check if user liked
 //     {
 //       $lookup: {
 //         from: "favoritevouchers",
@@ -71,6 +144,7 @@
 //       },
 //     },
 //     ...(onlyLiked === "true" ? [{ $match: { isLiked: true } }] : []),
+//     // Join brand
 //     {
 //       $lookup: {
 //         from: "brands",
@@ -88,14 +162,165 @@
 //         as: "brand.location",
 //       },
 //     },
+//     // Join subBrands again with stats
 //     {
 //       $lookup: {
 //         from: "subbrands",
-//         localField: "subBrands",
-//         foreignField: "_id",
+//         let: { subBrandIds: "$subBrands" },
+//         pipeline: [
+//           { $match: { $expr: { $in: ["$_id", "$$subBrandIds"] } } },
+//           {
+//             $lookup: {
+//               from: "locations",
+//               localField: "location",
+//               foreignField: "_id",
+//               as: "location",
+//             },
+//           },
+//           {
+//             $lookup: {
+//               from: "bills",
+//               let: { sbId: "$_id" },
+//               pipeline: [
+//                 { $match: { $expr: { $eq: ["$subBrandId", "$$sbId"] } } },
+//                 {
+//                   $group: {
+//                     _id: null,
+//                     billValues: { $sum: "$billAmount" },
+//                     earnValues: { $sum: "$finalPayable" },
+//                   },
+//                 },
+//               ],
+//               as: "billStats",
+//             },
+//           },
+//           {
+//             $addFields: {
+//               billValues: {
+//                 $ifNull: [{ $arrayElemAt: ["$billStats.billValues", 0] }, 0],
+//               },
+//               earnValues: {
+//                 $ifNull: [{ $arrayElemAt: ["$billStats.earnValues", 0] }, 0],
+//               },
+//             },
+//           },
+//           {
+//             $lookup: {
+//               from: "refunds",
+//               let: { sbId: "$_id" },
+//               pipeline: [
+//                 {
+//                   $match: {
+//                     $expr: {
+//                       $and: [
+//                         { $eq: ["$subBrand", "$$sbId"] },
+//                         { $eq: ["$status", "APPROVED"] },
+//                         { $eq: ["$isDeleted", false] },
+//                       ],
+//                     },
+//                   },
+//                 },
+//                 {
+//                   $group: {
+//                     _id: null,
+//                     refundValues: { $sum: "$refundAmount" },
+//                   },
+//                 },
+//               ],
+//               as: "refundStats",
+//             },
+//           },
+//           {
+//             $addFields: {
+//               refundValues: {
+//                 $ifNull: [
+//                   { $arrayElemAt: ["$refundStats.refundValues", 0] },
+//                   0,
+//                 ],
+//               },
+//             },
+//           },
+//         ],
 //         as: "subBrands",
 //       },
 //     },
+//     // Voucher level bills
+//     {
+//       $lookup: {
+//         from: "bills",
+//         let: { vId: "$_id" },
+//         pipeline: [
+//           { $match: { $expr: { $eq: ["$voucherId", "$$vId"] } } },
+//           {
+//             $group: {
+//               _id: null,
+//               invoices: { $sum: 1 },
+//               billValues: { $sum: "$billAmount" },
+//               earnValues: { $sum: "$finalPayable" },
+//             },
+//           },
+//         ],
+//         as: "voucherBillStats",
+//       },
+//     },
+//     {
+//       $addFields: {
+//         invoices: {
+//           $ifNull: [{ $arrayElemAt: ["$voucherBillStats.invoices", 0] }, 0],
+//         },
+//         billValues: {
+//           $ifNull: [{ $arrayElemAt: ["$voucherBillStats.billValues", 0] }, 0],
+//         },
+//         earnValues: {
+//           $ifNull: [{ $arrayElemAt: ["$voucherBillStats.earnValues", 0] }, 0],
+//         },
+//         outlets: { $size: "$subBrands" },
+//       },
+//     },
+//     // Voucher refunds
+//     {
+//       $lookup: {
+//         from: "refunds",
+//         let: { vId: "$_id" },
+//         pipeline: [
+//           {
+//             $match: {
+//               $expr: {
+//                 $and: [
+//                   { $eq: ["$voucher", "$$vId"] },
+//                   { $eq: ["$status", "APPROVED"] },
+//                   { $eq: ["$isDeleted", false] },
+//                 ],
+//               },
+//             },
+//           },
+//           { $group: { _id: null, refundValues: { $sum: "$refundAmount" } } },
+//         ],
+//         as: "voucherRefundStats",
+//       },
+//     },
+//     {
+//       $addFields: {
+//         refundValues: {
+//           $ifNull: [
+//             { $arrayElemAt: ["$voucherRefundStats.refundValues", 0] },
+//             0,
+//           ],
+//         },
+//       },
+//     }
+//   );
+//   // Sorting
+//   const sortOption = {};
+//   if (sortBy === "rating") sortOption.avgRating = sortOrder === "asc" ? 1 : -1;
+//   else if (sortBy === "offer")
+//     sortOption.discount = sortOrder === "asc" ? 1 : -1;
+//   else if (sortBy === "price")
+//     sortOption.minOrderAmount = sortOrder === "asc" ? 1 : -1;
+//   else if (sortBy === "distance")
+//     sortOption.distance = sortOrder === "asc" ? 1 : -1;
+//   else sortOption[sortBy] = sortOrder === "asc" ? 1 : -1;
+//   pipeline.push(
 //     { $sort: sortOption },
 //     {
 //       $facet: {
@@ -107,9 +332,14 @@
 //       $addFields: {
 //         total: { $ifNull: [{ $arrayElemAt: ["$totalCount.count", 0] }, 0] },
 //       },
-//     },
-//   ];
-//   const result = await Voucher.aggregate(pipeline);
+//     }
+//   );
+//   // IMPORTANT: run on Location if geoNear, otherwise Voucher
+//   const result =
+//     userLat && userLng
+//       ? await Location.aggregate(pipeline)
+//       : await Voucher.aggregate(pipeline);
+//   if (result[0]?.total === 0) throwError(404, "Sorry! vouchers not found");
 //   return {
 //     total: result[0]?.total || 0,
 //     page: parseInt(page),
@@ -120,6 +350,8 @@
 
 const mongoose = require("mongoose");
 const Voucher = require("../../model/Voucher");
+const Location = require("../../model/Location");
+const { throwError } = require("../../utils");
 
 exports.getVouchers = async (userId, query) => {
   const {
@@ -137,6 +369,19 @@ exports.getVouchers = async (userId, query) => {
     sortBy = "createdAt",
     sortOrder = "desc",
     onlyLiked = false,
+    voucherType,
+    userLat,
+    userLng,
+    minRating,
+    maxRating,
+    exactRating,
+    minOffer,
+    maxOffer,
+    exactOffer,
+    minPrice,
+    maxPrice,
+    exactPrice,
+    maxDistance, // km
   } = query;
   const filter = { isDeleted: false };
   if (brandId && mongoose.isValidObjectId(brandId)) {
@@ -159,9 +404,66 @@ exports.getVouchers = async (userId, query) => {
     if (validFrom) filter.validFrom.$gte = new Date(validFrom);
     if (validTill) filter.validFrom.$lte = new Date(validTill);
   }
-  const sortOption = { [sortBy]: sortOrder === "asc" ? 1 : -1 };
+  if (minOffer || maxOffer) filter.discount = {};
+  if (minOffer) filter.discount.$gte = Number(minOffer);
+  if (maxOffer) filter.discount.$lte = Number(maxOffer);
+  if (minPrice || maxPrice || voucherType) filter.minOrderAmount = {};
+  if (minPrice) filter.minOrderAmount.$gte = Number(minPrice);
+  if (maxPrice) filter.minOrderAmount.$lte = Number(maxPrice);
+  if (voucherType === "Very Low") filter.minOrderAmount.$lte = 5000;
+  if (voucherType === "Very High") filter.minOrderAmount.$gte = 50000;
   const skip = (parseInt(page) - 1) * parseInt(limit);
-  const pipeline = [
+  const pipeline = [];
+  if (userLat && userLng) {
+    pipeline.push({
+      $geoNear: {
+        near: {
+          type: "Point",
+          coordinates: [parseFloat(userLng), parseFloat(userLat)],
+        },
+        distanceField: "distance",
+        spherical: true,
+        ...(maxDistance && { maxDistance: parseFloat(maxDistance) * 1000 }), // km -> meters
+        query: { isDeleted: false },
+      },
+    });
+    pipeline.push({
+      $lookup: {
+        from: "subbrands",
+        localField: "_id", // location._id -> subbrand.location
+        foreignField: "location",
+        as: "subBrand",
+      },
+    });
+    pipeline.push({ $unwind: "$subBrand" });
+    pipeline.push({
+      $lookup: {
+        from: "vouchers",
+        localField: "subBrand._id",
+        foreignField: "subBrands",
+        as: "voucher",
+      },
+    });
+    pipeline.push({ $unwind: "$voucher" });
+    pipeline.push({
+      $group: {
+        _id: "$voucher._id",
+        doc: { $first: "$voucher" },
+        nearestDistance: { $min: "$distance" },
+      },
+    });
+    pipeline.push({
+      $replaceRoot: {
+        newRoot: {
+          $mergeObjects: ["$doc", { distance: "$nearestDistance" }],
+        },
+      },
+    });
+    pipeline.push({ $match: filter });
+  } else {
+    pipeline.push({ $match: filter });
+  }
+  pipeline.push(
     { $match: filter },
     {
       $lookup: {
@@ -190,7 +492,66 @@ exports.getVouchers = async (userId, query) => {
         },
       },
     },
-    ...(onlyLiked === "true" ? [{ $match: { isLiked: true } }] : []),
+    ...(onlyLiked === "true" ? [{ $match: { isLiked: true } }] : [])
+  );
+  pipeline.push(
+    {
+      $lookup: {
+        from: "feedbacks",
+        let: { vId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$voucher", "$$vId"] },
+                  { $eq: ["$isDeleted", false] },
+                  { $eq: ["$isBlocked", false] },
+                ],
+              },
+            },
+          },
+          {
+            $group: {
+              _id: "$voucher",
+              avgRating: { $avg: "$rating" },
+              totalReviews: { $sum: 1 },
+            },
+          },
+        ],
+        as: "ratingStats",
+      },
+    },
+    {
+      $addFields: {
+        avgRating: {
+          $ifNull: [{ $arrayElemAt: ["$ratingStats.avgRating", 0] }, 0],
+        },
+        totalReviews: {
+          $ifNull: [{ $arrayElemAt: ["$ratingStats.totalReviews", 0] }, 0],
+        },
+      },
+    }
+  );
+  if (exactRating !== undefined && exactRating !== null && exactRating !== "") {
+    pipeline.push({ $match: { avgRating: Number(exactRating) } });
+  } else if (minRating || maxRating) {
+    const ratingMatch = {};
+    if (minRating) ratingMatch.$gte = Number(minRating);
+    if (maxRating) ratingMatch.$lte = Number(maxRating);
+    pipeline.push({ $match: { avgRating: ratingMatch } });
+  }
+  const exactMatch = {};
+  if (exactPrice !== undefined && exactPrice !== null && exactPrice !== "") {
+    exactMatch.minOrderAmount = Number(exactPrice);
+  }
+  if (exactOffer !== undefined && exactOffer !== null && exactOffer !== "") {
+    exactMatch.discount = Number(exactOffer);
+  }
+  if (Object.keys(exactMatch).length) {
+    pipeline.push({ $match: exactMatch });
+  }
+  pipeline.push(
     {
       $lookup: {
         from: "brands",
@@ -207,92 +568,84 @@ exports.getVouchers = async (userId, query) => {
         foreignField: "_id",
         as: "brand.location",
       },
+    }
+  );
+  pipeline.push({
+    $lookup: {
+      from: "subbrands",
+      let: { subBrandIds: "$subBrands" },
+      pipeline: [
+        { $match: { $expr: { $in: ["$_id", "$$subBrandIds"] } } },
+        {
+          $lookup: {
+            from: "locations",
+            localField: "location",
+            foreignField: "_id",
+            as: "location",
+          },
+        },
+        {
+          $lookup: {
+            from: "bills",
+            let: { sbId: "$_id" },
+            pipeline: [
+              { $match: { $expr: { $eq: ["$subBrandId", "$$sbId"] } } },
+              {
+                $group: {
+                  _id: null,
+                  billValues: { $sum: "$billAmount" },
+                  earnValues: { $sum: "$finalPayable" },
+                },
+              },
+            ],
+            as: "billStats",
+          },
+        },
+        {
+          $addFields: {
+            billValues: {
+              $ifNull: [{ $arrayElemAt: ["$billStats.billValues", 0] }, 0],
+            },
+            earnValues: {
+              $ifNull: [{ $arrayElemAt: ["$billStats.earnValues", 0] }, 0],
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: "refunds",
+            let: { sbId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$subBrand", "$$sbId"] },
+                      { $eq: ["$status", "APPROVED"] },
+                      { $eq: ["$isDeleted", false] },
+                    ],
+                  },
+                },
+              },
+              {
+                $group: { _id: null, refundValues: { $sum: "$refundAmount" } },
+              },
+            ],
+            as: "refundStats",
+          },
+        },
+        {
+          $addFields: {
+            refundValues: {
+              $ifNull: [{ $arrayElemAt: ["$refundStats.refundValues", 0] }, 0],
+            },
+          },
+        },
+      ],
+      as: "subBrands",
     },
-    {
-      $lookup: {
-        from: "subbrands",
-        let: { subBrandIds: "$subBrands" },
-        pipeline: [
-          { $match: { $expr: { $in: ["$_id", "$$subBrandIds"] } } },
-          {
-            $lookup: {
-              from: "locations",
-              localField: "location",
-              foreignField: "_id",
-              as: "location",
-            },
-          },
-          {
-            $lookup: {
-              from: "bills",
-              let: { sbId: "$_id" },
-              pipeline: [
-                { $match: { $expr: { $eq: ["$subBrandId", "$$sbId"] } } },
-                {
-                  $group: {
-                    _id: null,
-                    billValues: { $sum: "$billAmount" },
-                    earnValues: { $sum: "$finalPayable" },
-                  },
-                },
-              ],
-              as: "billStats",
-            },
-          },
-          {
-            $addFields: {
-              billValues: {
-                $ifNull: [{ $arrayElemAt: ["$billStats.billValues", 0] }, 0],
-              },
-            },
-          },
-          {
-            $addFields: {
-              earnValues: {
-                $ifNull: [{ $arrayElemAt: ["$billStats.earnValues", 0] }, 0],
-              },
-            },
-          },
-          {
-            $lookup: {
-              from: "refunds",
-              let: { sbId: "$_id" },
-              pipeline: [
-                {
-                  $match: {
-                    $expr: {
-                      $and: [
-                        { $eq: ["$subBrand", "$$sbId"] },
-                        { $eq: ["$status", "APPROVED"] },
-                        { $eq: ["$isDeleted", false] },
-                      ],
-                    },
-                  },
-                },
-                {
-                  $group: {
-                    _id: null,
-                    refundValues: { $sum: "$refundAmount" },
-                  },
-                },
-              ],
-              as: "refundStats",
-            },
-          },
-          {
-            $addFields: {
-              refundValues: {
-                $ifNull: [
-                  { $arrayElemAt: ["$refundStats.refundValues", 0] },
-                  0,
-                ],
-              },
-            },
-          },
-        ],
-        as: "subBrands",
-      },
-    },
+  });
+  pipeline.push(
     {
       $lookup: {
         from: "bills",
@@ -355,11 +708,22 @@ exports.getVouchers = async (userId, query) => {
           ],
         },
       },
-    },
+    }
+  );
+  const sortOption = {};
+  if (sortBy === "rating") sortOption.avgRating = sortOrder === "asc" ? 1 : -1;
+  else if (sortBy === "offer")
+    sortOption.discount = sortOrder === "asc" ? 1 : -1;
+  else if (sortBy === "price")
+    sortOption.minOrderAmount = sortOrder === "asc" ? 1 : -1;
+  else if (sortBy === "distance")
+    sortOption.distance = sortOrder === "asc" ? 1 : -1;
+  else sortOption[sortBy] = sortOrder === "asc" ? 1 : -1;
+  pipeline.push(
     { $sort: sortOption },
     {
       $facet: {
-        vouchers: [{ $skip: skip }, { $limit: parseInt(limit) }],
+        vouchers: [{ $skip: skip }, { $limit: parseInt(limit, 10) }],
         totalCount: [{ $count: "count" }],
       },
     },
@@ -367,13 +731,19 @@ exports.getVouchers = async (userId, query) => {
       $addFields: {
         total: { $ifNull: [{ $arrayElemAt: ["$totalCount.count", 0] }, 0] },
       },
-    },
-  ];
-  const result = await Voucher.aggregate(pipeline);
+    }
+  );
+  const result =
+    userLat && userLng
+      ? await Location.aggregate(pipeline)
+      : await Voucher.aggregate(pipeline);
+  const totalCount = result[0]?.total || 0;
+  if (totalCount === 0) throwError(404, "Sorry! No any vouchers not found");
   return {
-    total: result[0]?.total || 0,
-    page: parseInt(page),
-    limit: parseInt(limit),
+    total: totalCount,
+    totalPages: Math.ceil(totalCount / limit),
+    page: parseInt(page, 10),
+    limit: parseInt(limit, 10),
     vouchers: result[0]?.vouchers || [],
   };
 };
