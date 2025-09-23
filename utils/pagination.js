@@ -1,12 +1,14 @@
 const { throwError } = require("./CustomError");
 
 exports.pagination = async (model, pipeline, page = 1, limit = 10) => {
+  page = parseInt(page, 10);
+  limit = parseInt(limit, 10);
   const skip = (page - 1) * limit;
   const facetPipeline = [
     ...pipeline,
     {
       $facet: {
-        data: [{ $skip: skip }, { $limit: parseInt(limit) }],
+        data: [{ $skip: skip }, { $limit: limit }],
         totalCount: [{ $count: "count" }],
       },
     },
@@ -23,8 +25,8 @@ exports.pagination = async (model, pipeline, page = 1, limit = 10) => {
   return {
     total: totalCount,
     totalPages: Math.ceil(totalCount / limit),
-    page: parseInt(page),
-    limit: parseInt(limit),
+    page,
+    limit,
     data,
   };
 };

@@ -1,3 +1,4 @@
+const EmployeeReferral = require("../../model/EmployeeReferral");
 const { sendSuccess, sendError } = require("../../utils");
 const { getUserById, updateUserById } = require("../../service/userServices");
 const {
@@ -21,10 +22,8 @@ exports.subscribeToCoolingPlan = async (req, res) => {
     const userId = req.payload?._id;
     const user = await getUserById(userId);
     if (!user) return sendError(res, 404, "User not found");
-
     const brand = await getBrandById(user?.brand);
     if (!brand) return sendError(res, 404, "Associated brand not found");
-
     const userSubscriptions = await getAllSubscribedByUserId(userId);
     if (userSubscriptions && userSubscriptions.length > 0) {
       return sendError(
@@ -87,6 +86,14 @@ exports.subscribeToCoolingPlan = async (req, res) => {
     };
     await updateUserById(userId, updateData);
     await updateBrandById(brand._id, updateData);
+    await EmployeeReferral.findOneAndUpdate(
+      { brand: brand?._id, user: brand?.user },
+      {
+        $inc: { "subscriptionCount.noOfCoolingPeriod": 1 },
+        $set: { isSubscribed: true },
+      },
+      { new: true }
+    );
     const SubscribedBrand = await getBrandWithAllDetails(brand);
     return sendSuccess(res, 200, "Cooling plan activated successfully", {
       brand: SubscribedBrand,
