@@ -34,6 +34,7 @@ module.exports = Object.freeze({
   feedbackField: refField("Feedback"),
   employeeField: refField("Employee"),
   employeeReferralField: refField("EmployeeReferral"),
+  pushNotificationField: refField("PushNotification"),
 
   vouchersField: Object.freeze({
     type: [ObjectId],

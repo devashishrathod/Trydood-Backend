@@ -1,11 +1,14 @@
 const PushNotification = require("../../model/PushNotification");
 const Voucher = require("../../model/Voucher");
 const { throwError } = require("../../utils");
-const { OFFERS_SCOPE } = require("../../constants");
+const { OFFERS_SCOPE, SUGGESTION_STATUS } = require("../../constants");
 const { uploadImage } = require("../uploadServices");
 const {
   generateUniquePushNotificationId,
 } = require("./generateUniquePushNotificationId");
+const {
+  sendPushNotificationsBasedOnScope,
+} = require("../userNotificationServices");
 
 exports.createPushNotification = async (voucherId, image, payload) => {
   let { scope, status, users, states, cities, title, description } = payload;
@@ -36,5 +39,9 @@ exports.createPushNotification = async (voucherId, image, payload) => {
     image: imageUrl,
     isActive,
   };
-  return await PushNotification.create(notificationData);
+  const pushNotification = await PushNotification.create(notificationData);
+  if (status === SUGGESTION_STATUS.ACTIVE) {
+    sendPushNotificationsBasedOnScope(pushNotification);
+  }
+  return pushNotification;
 };
