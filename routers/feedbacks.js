@@ -8,6 +8,8 @@ const {
   getAllFeedbacks,
   likeOrDislikeFeedback,
   replyToFeedback,
+  deleteFeedback,
+  deleteFeedbackReply,
 } = require("../controller/feedbacks");
 
 router.post(
@@ -23,6 +25,18 @@ router.post(
   verifyToken,
   checkRole(ROLES.VENDOR),
   replyToFeedback
+);
+router.delete(
+  "/delete/:feedbackId",
+  verifyToken,
+  checkRole(ROLES.ADMIN, ROLES.VENDOR, ROLES.USER),
+  deleteFeedback
+);
+router.delete(
+  "/reply/:feedbackReplyId/delete",
+  verifyToken,
+  checkRole(ROLES.ADMIN, ROLES.VENDOR, ROLES.USER),
+  deleteFeedbackReply
 );
 
 module.exports = router;
