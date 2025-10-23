@@ -18,6 +18,10 @@ app.use(morgan("dev"));
 app.use("/api/v1/", allRoutes);
 app.use(errorHandler);
 
+app.get("/", (req, res) => {
+  res.send("Welcome to Trydood server🚀♨️");
+});
+
 app.use((req, res, next) => {
   return res.status(404).json({
     success: false,
