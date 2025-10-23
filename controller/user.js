@@ -44,7 +44,6 @@ exports.registorUser = async (req, res) => {
   const role = req.body?.role;
   const address = req.body?.address;
   const image = req.files?.image;
-
   try {
     const checkUser = await User.findOne({ $or: [{ email }, { mobile }] });
     if (checkUser) {
@@ -74,7 +73,6 @@ exports.registorUser = async (req, res) => {
       user.image = imageUrl;
     }
     const result = await user.save();
-    // let result = "ok"
     if (result) {
       const token = await generateToken(result);
       return res.status(200).json({
