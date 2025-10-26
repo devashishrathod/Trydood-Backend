@@ -8,6 +8,7 @@ const { addSubBrandsToBrand } = require("./addSubBrandsToBrand");
 const { getBrandWithAllDetails } = require("./getBrandWithAllDetails");
 const { toggleBrandFollow } = require("./toggleBrandFollow");
 const { getUserFollowedBrands } = require("./getUserFollowedBrands");
+const { toggleBrandStatus } = require("./toggleBrandStatus");
 
 module.exports = {
   getBrandById,
@@ -19,5 +20,6 @@ module.exports = {
   addSubBrandsToBrand,
   getBrandWithAllDetails,
   toggleBrandFollow,
+  toggleBrandStatus,
   getUserFollowedBrands,
 };
