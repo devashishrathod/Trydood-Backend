@@ -26,7 +26,11 @@ exports.getAllBrand = async (req, res) => {
       }
       return res.status(404).json({ msg: "Brand not found", success: false });
     }
-    let result = await Brand.find({ isDeleted: false })
+    const filter = { isDeleted: false };
+    if (req?.query?.isActive !== undefined) {
+      filter.isActive = req?.query?.isActive;
+    }
+    let result = await Brand.find(filter)
       .sort({ createdAt: -1 })
       .populate("user")
       .populate("category")
@@ -68,11 +72,15 @@ exports.getAllBrand = async (req, res) => {
 };
 
 exports.pagination = async (req, res) => {
-  const page = parseInt(req?.query?.page);
-  const limit = parseInt(req?.query?.limit);
+  const page = parseInt(req?.query?.page) || 1;
+  const limit = parseInt(req?.query?.limit) || 10;
   const skip = (page - 1) * limit;
   try {
-    const result = await Brand.find()
+    const filter = { isDeleted: false };
+    if (req?.query?.isActive !== undefined) {
+      filter.isActive = req?.query?.isActive;
+    }
+    const result = await Brand.find(filter)
       .limit(limit)
       .skip(skip)
       .sort({ createdAt: -1 })
@@ -85,15 +93,14 @@ exports.pagination = async (req, res) => {
       .populate("bankAccount")
       .populate("transaction")
       .populate("subscribed");
-    const totalDocuments = await Brand.countDocuments();
+    const totalDocuments = await Brand.countDocuments(filter);
     const totalPages = Math.ceil(totalDocuments / limit);
-
     if (result) {
       return res.status(200).json({
         success: true,
         msg: "Brand details",
-        result,
         pagination: { totalDocuments, totalPages, currentPage: page, limit },
+        result,
       });
     }
     return res.status(404).json({ msg: "Brand not found", success: false });
