@@ -8,6 +8,7 @@ const {
   getCurrentTransaction,
   getAllClaimedTransactions,
   removeTransaction,
+  getOverallPerDayTransaction,
 } = require("../controller/transactions");
 
 router.get(
@@ -23,6 +24,12 @@ router.get(
   getCurrentTransaction
 );
 router.get("/get-all-claimed-vouchers", verifyToken, getAllClaimedTransactions);
+router.get(
+  "/get-overall-per-day",
+  verifyToken,
+  checkRole(ROLES.ADMIN),
+  getOverallPerDayTransaction
+);
 router.put(
   "/:transactionId/remove",
   verifyToken,
