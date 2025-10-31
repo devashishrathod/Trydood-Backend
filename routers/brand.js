@@ -18,7 +18,7 @@ router.post("/addBrand", verifyToken, checkRole(ROLES.VENDOR), addBrand);
 router.put("/update/:id", verifyToken, checkRole(ROLES.VENDOR), updateBrand);
 router.put("/:brandId/toggle-follow", verifyToken, followOrUnFollowBrand);
 router.put(
-  "/:brandId/tpggle-active",
+  "/:brandId/toggle-active",
   verifyToken,
   checkRole(ROLES.ADMIN, ROLES.VENDOR),
   activeOrInactiveBrand
