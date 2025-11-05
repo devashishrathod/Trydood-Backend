@@ -7,8 +7,6 @@ exports.generateUniqueSuggestionId = async () => {
     const randomNumber = Math.floor(100000 + Math.random() * 900000);
     const uniqueId = `${prefix}${randomNumber}`;
     const existingSuggestion = await findOne(SuggestionAd, { uniqueId });
-    if (!existingSuggestion) {
-      return uniqueId;
-    }
+    if (!existingSuggestion) return uniqueId;
   }
 };

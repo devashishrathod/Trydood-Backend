@@ -7,8 +7,6 @@ exports.generateUniqueTodayOfferId = async () => {
     const randomNumber = Math.floor(100000 + Math.random() * 900000);
     const uniqueId = `${prefix}${randomNumber}`;
     const existingTodayOffer = await findOne(TodayOffer, { uniqueId });
-    if (!existingTodayOffer) {
-      return uniqueId;
-    }
+    if (!existingTodayOffer) return uniqueId;
   }
 };

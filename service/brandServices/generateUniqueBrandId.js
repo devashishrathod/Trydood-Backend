@@ -7,8 +7,6 @@ exports.generateUniqueBrandId = async () => {
     const randomNumber = Math.floor(100000 + Math.random() * 900000);
     const uniqueId = `${prefix}${randomNumber}`;
     const existingBrand = await findOne(Brand, { uniqueId });
-    if (!existingBrand) {
-      return uniqueId;
-    }
+    if (!existingBrand) return uniqueId;
   }
 };

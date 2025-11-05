@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Transaction = require("../../model/Transaction");
 const { ROLES } = require("../../constants");
+const { throwError } = require("../../utils");
 
 exports.getClaimedVouchersByUser = async (role, tokenUserId, filter) => {
   let {
@@ -30,7 +31,11 @@ exports.getClaimedVouchersByUser = async (role, tokenUserId, filter) => {
   rating = rating ? parseInt(rating) : undefined;
   discount = discount ? parseInt(discount) : undefined;
   const skip = (page - 1) * limit;
-  const matchData = { isDeleted: false, isActive: true };
+  const matchData = {
+    isDeleted: false,
+    isActive: true,
+    subscription: { $exists: false },
+  };
   if (paymentMethod) matchData.paymentMethod = paymentMethod;
   if (isRefunded) matchData.isRefunded = isRefunded;
   if (voucherType) matchData.voucherType = voucherType;
@@ -338,13 +343,15 @@ exports.getClaimedVouchersByUser = async (role, tokenUserId, filter) => {
       $project: { total: 1, totalPage: 1, limit: 1, page: 1, data: 1 },
     },
   ]);
-  return (
-    result[0] || {
-      total: 0,
-      totalPage: 0,
-      limit,
-      page,
-      data: [],
-    }
-  );
+  const { data, total, totalPage } = result[0] || {};
+  if (!data || data.length === 0) {
+    throwError(404, "No any voucher claimed yet");
+  }
+  return {
+    total,
+    totalPage,
+    page,
+    limit,
+    data,
+  };
 };
