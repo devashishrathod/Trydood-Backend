@@ -3,6 +3,7 @@ const Transaction = require("../../model/Transaction");
 const BankAccount = require("../../model/BankAccount");
 const Voucher = require("../../model/Voucher");
 const { getBankByAccountNumber } = require("../bankAccountServices");
+const { generateUniqueRefundId } = require("./generateUniqueRefundId");
 const { BANK_ACCOUNT_TYPES, REFUND_STATUS } = require("../../constants");
 const { throwError } = require("../../utils");
 const { isSameDay } = require("../../helpers/transactions");
@@ -65,7 +66,7 @@ exports.createRefundRequest = async (userId, data) => {
       accountType: BANK_ACCOUNT_TYPES.SAVINGS,
     });
   }
-  const refund = await Refund.create({
+  return await Refund.create({
     user: userId,
     brand: txn?.brand,
     subBrand: txn?.subBrand,
@@ -75,7 +76,7 @@ exports.createRefundRequest = async (userId, data) => {
     refundAmount,
     reason,
     status: REFUND_STATUS.SUBMITTED,
+    uniqueId: await generateUniqueRefundId(),
     isApproved: false,
   });
-  return refund;
 };

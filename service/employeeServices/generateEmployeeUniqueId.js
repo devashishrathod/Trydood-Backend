@@ -7,8 +7,6 @@ exports.generateEmployeeUniqueId = async () => {
     const randomNumber = Math.floor(100000 + Math.random() * 900000);
     const uniqueId = `${prefix}${randomNumber}`;
     const existingEmployee = await findOne(Employee, { uniqueId });
-    if (!existingEmployee) {
-      return uniqueId;
-    }
+    if (!existingEmployee) return uniqueId;
   }
 };

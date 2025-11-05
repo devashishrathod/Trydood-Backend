@@ -7,8 +7,6 @@ exports.generateUniqueInvoiceId = async () => {
     const randomNumber = Math.floor(10000 + Math.random() * 90000);
     const invoiceId = `${prefix}${randomNumber}`;
     const existingTransaction = await findOne(Transaction, { invoiceId });
-    if (!existingTransaction) {
-      return invoiceId;
-    }
+    if (!existingTransaction) return invoiceId;
   }
 };

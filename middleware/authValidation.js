@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
+const { throwError } = require("../utils");
 const { getUserById } = require("../service/userServices");
 
 exports.generateToken = async (checkUser) => {
@@ -18,29 +19,39 @@ exports.generateToken = async (checkUser) => {
 };
 
 exports.verifyToken = async (req, res, next) => {
-  let token = req.headers["authorization"];
   try {
+    const token = req.headers["authorization"];
     if (!token) {
-      return res.status(401).json({ msg: "Access Denied!", success: false });
+      throwError(401, "Access Denied! No token provided.");
     }
-    let splitToken = token.split(" ")[1];
+    const splitToken = token.split(" ")[1];
     if (!splitToken) {
-      return res.status(401).json({ msg: "Access Denied!", success: false });
+      throwError(401, "Access Denied! Invalid token format.");
     }
     const decodedToken = jwt.verify(splitToken, process.env.SECRET_KEY);
     if (!decodedToken) {
-      return res.status(401).json({ msg: "Access Denied!", success: false });
+      throwError(401, "Access Denied! Invalid token.");
     }
     const checkUser = await getUserById(decodedToken?._id);
-    if (checkUser) {
-      req.payload = checkUser;
-      next();
-    } else {
-      return res.status(401).json({ msg: "Access Denied!", success: false });
+    if (!checkUser) {
+      throwError(401, "Access Denied! User not found.");
     }
+    req.payload = checkUser;
+    next();
   } catch (error) {
-    console.log("error on auth: ", error);
-    return res.status(500).json({ err: error.message, error, success: false });
+    console.log("error on auth:", error);
+    if (error.name === "TokenExpiredError") {
+      return next(throwError(401, "Session expired. Please log in again."));
+    }
+    if (error.name === "JsonWebTokenError") {
+      return next(throwError(401, "Invalid token. Please log in again."));
+    }
+    if (error.name === "NotBeforeError") {
+      return next(
+        throwError(401, "Token not active yet. Please try again later.")
+      );
+    }
+    return next(throwError(500, error.message || "Internal Server Error"));
   }
 };
 
@@ -48,11 +59,12 @@ exports.checkRole = (...allowedRoles) => {
   return (req, res, next) => {
     const user = req.payload;
     if (!user || !allowedRoles.includes(user.role)) {
-      return res.status(403).json({
-        success: false,
-        message:
-          "Forbidden: You do not have permission to perform this action.",
-      });
+      return next(
+        throwError(
+          403,
+          "Forbidden: You do not have permission to perform this action."
+        )
+      );
     }
     next();
   };

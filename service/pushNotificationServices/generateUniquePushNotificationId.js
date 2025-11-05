@@ -9,8 +9,6 @@ exports.generateUniquePushNotificationId = async () => {
     const existingPushNotification = await findOne(PushNotification, {
       uniqueId,
     });
-    if (!existingPushNotification) {
-      return uniqueId;
-    }
+    if (!existingPushNotification) return uniqueId;
   }
 };

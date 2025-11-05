@@ -7,8 +7,6 @@ exports.generateUniquePromoCodeId = async () => {
     const randomNumber = Math.floor(100000 + Math.random() * 900000);
     const uniqueId = `${prefix}${randomNumber}`;
     const existingPromoCode = await findOne(PromoCode, { uniqueId });
-    if (!existingPromoCode) {
-      return uniqueId;
-    }
+    if (!existingPromoCode) return uniqueId;
   }
 };

@@ -7,8 +7,6 @@ exports.generateUniqueUserId = async () => {
     const randomNumber = Math.floor(10000 + Math.random() * 90000);
     const uniqueId = `${prefix}${randomNumber}`;
     const existingUser = await findOne(User, { uniqueId });
-    if (!existingUser) {
-      return uniqueId;
-    }
+    if (!existingUser) return uniqueId;
   }
 };
