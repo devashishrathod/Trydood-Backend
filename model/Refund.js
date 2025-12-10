@@ -28,6 +28,7 @@ const refundSchema = new mongoose.Schema(
     },
     uniqueId: { type: String, required: true, unique: true },
     isApproved: { type: Boolean, default: false },
+    isPaid: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
   },

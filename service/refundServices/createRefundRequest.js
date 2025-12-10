@@ -30,8 +30,9 @@ exports.createRefundRequest = async (userId, data) => {
     transaction: txn._id,
     isDeleted: false,
   });
-  if (existingRefund)
+  if (existingRefund) {
     throwError(400, "Refund request already raised for this transaction");
+  }
   if (!isSameDay(new Date(), txn.createdAt)) {
     throwError(
       400,
@@ -66,7 +67,7 @@ exports.createRefundRequest = async (userId, data) => {
       accountType: BANK_ACCOUNT_TYPES.SAVINGS,
     });
   }
-  return await Refund.create({
+  const result = await Refund.create({
     user: userId,
     brand: txn?.brand,
     subBrand: txn?.subBrand,
@@ -79,4 +80,8 @@ exports.createRefundRequest = async (userId, data) => {
     uniqueId: await generateUniqueRefundId(),
     isApproved: false,
   });
+  txn.refund = result?._id;
+  txn.isRefundRequested = true;
+  await txn.save();
+  return result;
 };

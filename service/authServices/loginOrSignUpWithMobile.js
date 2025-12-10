@@ -1,6 +1,6 @@
 const User = require("../../model/User");
 const { ROLES } = require("../../constants");
-const { generateReferralCode } = require("../../utils");
+const { generateReferralCode, throwError } = require("../../utils");
 const { sendOtp } = require("../../service/otpServices");
 const { generateUniqueUserId, getUserByFields } = require("../userServices");
 
@@ -13,13 +13,17 @@ exports.loginOrSignUpWithMobile = async ({
   whatsappNumber = whatsappNumber?.toLowerCase();
   let isFirst = false;
   let user = await getUserByFields({ whatsappNumber, role });
-
+  let subVendorUser = await getUserByFields({
+    whatsappNumber,
+    role: ROLES.SUB_VENDOR,
+  });
   if (role === ROLES.SUB_VENDOR && !user) {
-    const error = {
-      statusCode: 404,
-      message: "Sub Vendor not found! Please contact brand's vendor.",
-    };
-    throw error;
+    throwError(404, "Sub Vendor not found! Please contact brand's vendor.");
+  } else if (role === ROLES.VENDOR && subVendorUser && !user) {
+    throwError(
+      409,
+      "You are already exists as another sub vendor with this whatsApp number."
+    );
   }
   if (!user) {
     isFirst = true;
@@ -49,7 +53,7 @@ exports.loginOrSignUpWithMobile = async ({
   }
   const otpResult = await sendOtp(whatsappNumber);
   if (otpResult.ApiResponse == "Fail") {
-    return sendError(res, 503, "Please try again! OTP service unavailable");
+    throwError(503, "Please try again! OTP service unavailable");
   }
   return {
     isFirst,
