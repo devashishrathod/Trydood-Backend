@@ -1,360 +1,13 @@
-// const mongoose = require("mongoose");
-// const Voucher = require("../../model/Voucher");
-// const Location = require("../../model/Location");
-// const { throwError } = require("../../utils");
-
-// exports.getVouchers = async (userId, query) => {
-//   const {
-//     brandId,
-//     subBrandId,
-//     categoryId,
-//     subCategoryId,
-//     status,
-//     isPublished,
-//     isActive,
-//     validFrom,
-//     validTill,
-//     page = 1,
-//     limit = 10,
-//     sortBy = "createdAt",
-//     sortOrder = "desc",
-//     onlyLiked = false,
-//     userLat,
-//     userLng,
-//     minRating,
-//     maxRating,
-//     minOffer,
-//     maxOffer,
-//     minPrice,
-//     maxPrice,
-//     maxDistance, // km
-//   } = query;
-//   const filter = { isDeleted: false };
-//   if (brandId && mongoose.isValidObjectId(brandId)) {
-//     filter.brand = new mongoose.Types.ObjectId(brandId);
-//   }
-//   if (subBrandId && mongoose.isValidObjectId(subBrandId)) {
-//     filter.subBrands = new mongoose.Types.ObjectId(subBrandId);
-//   }
-//   if (categoryId && mongoose.isValidObjectId(categoryId)) {
-//     filter.category = new mongoose.Types.ObjectId(categoryId);
-//   }
-//   if (subCategoryId && mongoose.isValidObjectId(subCategoryId)) {
-//     filter.subCategory = new mongoose.Types.ObjectId(subCategoryId);
-//   }
-//   if (status) filter.status = status;
-//   if (isPublished !== undefined) filter.isPublished = isPublished === "true";
-//   if (isActive !== undefined) filter.isActive = isActive === "true";
-//   if (validFrom || validTill) {
-//     filter.validFrom = {};
-//     if (validFrom) filter.validFrom.$gte = new Date(validFrom);
-//     if (validTill) filter.validFrom.$lte = new Date(validTill);
-//   }
-//   if (minOffer || maxOffer) filter.discount = {};
-//   if (minOffer) filter.discount.$gte = Number(minOffer);
-//   if (maxOffer) filter.discount.$lte = Number(maxOffer);
-//   if (minPrice || maxPrice) filter.minOrderAmount = {};
-//   if (minPrice) filter.minOrderAmount.$gte = Number(minPrice);
-//   if (maxPrice) filter.minOrderAmount.$lte = Number(maxPrice);
-//   const skip = (parseInt(page) - 1) * parseInt(limit);
-//   const pipeline = [];
-//   if (userLat && userLng) {
-//     // Start with geoNear on Location
-//     pipeline.push({
-//       $geoNear: {
-//         near: {
-//           type: "Point",
-//           coordinates: [parseFloat(userLng), parseFloat(userLat)],
-//         },
-//         distanceField: "distance",
-//         spherical: true,
-//         ...(maxDistance && { maxDistance: parseFloat(maxDistance) * 1000 }), // km -> meters
-//         query: { isDeleted: false },
-//       },
-//     });
-//     // Join subBrand
-//     pipeline.push({
-//       $lookup: {
-//         from: "subbrands",
-//         localField: "subBrand",
-//         foreignField: "_id",
-//         as: "subBrand",
-//       },
-//     });
-//     pipeline.push({ $unwind: "$subBrand" });
-
-//     // Join voucher
-//     pipeline.push({
-//       $lookup: {
-//         from: "vouchers",
-//         localField: "subBrand._id",
-//         foreignField: "subBrands",
-//         as: "voucher",
-//       },
-//     });
-//     pipeline.push({ $unwind: "$voucher" });
-//     // Add distance at voucher level
-//     pipeline.push({
-//       $group: {
-//         _id: "$voucher._id",
-//         doc: { $first: "$voucher" },
-//         nearestDistance: { $min: "$distance" },
-//       },
-//     });
-//     pipeline.push({
-//       $replaceRoot: {
-//         newRoot: {
-//           $mergeObjects: ["$doc", { distance: "$nearestDistance" }],
-//         },
-//       },
-//     });
-//   } else {
-//     // No geo filter, just vouchers
-//     pipeline.push({ $match: filter });
-//   }
-//   // Now enrich vouchers (same as your original pipeline)
-//   pipeline.push(
-//     { $match: filter },
-//     // Check if user liked
-//     {
-//       $lookup: {
-//         from: "favoritevouchers",
-//         let: { voucherId: "$_id" },
-//         pipeline: [
-//           {
-//             $match: {
-//               $expr: {
-//                 $and: [
-//                   { $eq: ["$voucher", "$$voucherId"] },
-//                   { $eq: ["$user", new mongoose.Types.ObjectId(userId)] },
-//                   { $eq: ["$isDeleted", false] },
-//                 ],
-//               },
-//             },
-//           },
-//         ],
-//         as: "userLiked",
-//       },
-//     },
-//     {
-//       $addFields: {
-//         isLiked: {
-//           $cond: [{ $gt: [{ $size: "$userLiked" }, 0] }, true, false],
-//         },
-//       },
-//     },
-//     ...(onlyLiked === "true" ? [{ $match: { isLiked: true } }] : []),
-//     // Join brand
-//     {
-//       $lookup: {
-//         from: "brands",
-//         localField: "brand",
-//         foreignField: "_id",
-//         as: "brand",
-//       },
-//     },
-//     { $unwind: { path: "$brand", preserveNullAndEmptyArrays: true } },
-//     {
-//       $lookup: {
-//         from: "locations",
-//         localField: "brand.location",
-//         foreignField: "_id",
-//         as: "brand.location",
-//       },
-//     },
-//     // Join subBrands again with stats
-//     {
-//       $lookup: {
-//         from: "subbrands",
-//         let: { subBrandIds: "$subBrands" },
-//         pipeline: [
-//           { $match: { $expr: { $in: ["$_id", "$$subBrandIds"] } } },
-//           {
-//             $lookup: {
-//               from: "locations",
-//               localField: "location",
-//               foreignField: "_id",
-//               as: "location",
-//             },
-//           },
-//           {
-//             $lookup: {
-//               from: "bills",
-//               let: { sbId: "$_id" },
-//               pipeline: [
-//                 { $match: { $expr: { $eq: ["$subBrandId", "$$sbId"] } } },
-//                 {
-//                   $group: {
-//                     _id: null,
-//                     billValues: { $sum: "$billAmount" },
-//                     earnValues: { $sum: "$finalPayable" },
-//                   },
-//                 },
-//               ],
-//               as: "billStats",
-//             },
-//           },
-//           {
-//             $addFields: {
-//               billValues: {
-//                 $ifNull: [{ $arrayElemAt: ["$billStats.billValues", 0] }, 0],
-//               },
-//               earnValues: {
-//                 $ifNull: [{ $arrayElemAt: ["$billStats.earnValues", 0] }, 0],
-//               },
-//             },
-//           },
-//           {
-//             $lookup: {
-//               from: "refunds",
-//               let: { sbId: "$_id" },
-//               pipeline: [
-//                 {
-//                   $match: {
-//                     $expr: {
-//                       $and: [
-//                         { $eq: ["$subBrand", "$$sbId"] },
-//                         { $eq: ["$status", "APPROVED"] },
-//                         { $eq: ["$isDeleted", false] },
-//                       ],
-//                     },
-//                   },
-//                 },
-//                 {
-//                   $group: {
-//                     _id: null,
-//                     refundValues: { $sum: "$refundAmount" },
-//                   },
-//                 },
-//               ],
-//               as: "refundStats",
-//             },
-//           },
-//           {
-//             $addFields: {
-//               refundValues: {
-//                 $ifNull: [
-//                   { $arrayElemAt: ["$refundStats.refundValues", 0] },
-//                   0,
-//                 ],
-//               },
-//             },
-//           },
-//         ],
-//         as: "subBrands",
-//       },
-//     },
-//     // Voucher level bills
-//     {
-//       $lookup: {
-//         from: "bills",
-//         let: { vId: "$_id" },
-//         pipeline: [
-//           { $match: { $expr: { $eq: ["$voucherId", "$$vId"] } } },
-//           {
-//             $group: {
-//               _id: null,
-//               invoices: { $sum: 1 },
-//               billValues: { $sum: "$billAmount" },
-//               earnValues: { $sum: "$finalPayable" },
-//             },
-//           },
-//         ],
-//         as: "voucherBillStats",
-//       },
-//     },
-//     {
-//       $addFields: {
-//         invoices: {
-//           $ifNull: [{ $arrayElemAt: ["$voucherBillStats.invoices", 0] }, 0],
-//         },
-//         billValues: {
-//           $ifNull: [{ $arrayElemAt: ["$voucherBillStats.billValues", 0] }, 0],
-//         },
-//         earnValues: {
-//           $ifNull: [{ $arrayElemAt: ["$voucherBillStats.earnValues", 0] }, 0],
-//         },
-//         outlets: { $size: "$subBrands" },
-//       },
-//     },
-//     // Voucher refunds
-//     {
-//       $lookup: {
-//         from: "refunds",
-//         let: { vId: "$_id" },
-//         pipeline: [
-//           {
-//             $match: {
-//               $expr: {
-//                 $and: [
-//                   { $eq: ["$voucher", "$$vId"] },
-//                   { $eq: ["$status", "APPROVED"] },
-//                   { $eq: ["$isDeleted", false] },
-//                 ],
-//               },
-//             },
-//           },
-//           { $group: { _id: null, refundValues: { $sum: "$refundAmount" } } },
-//         ],
-//         as: "voucherRefundStats",
-//       },
-//     },
-//     {
-//       $addFields: {
-//         refundValues: {
-//           $ifNull: [
-//             { $arrayElemAt: ["$voucherRefundStats.refundValues", 0] },
-//             0,
-//           ],
-//         },
-//       },
-//     }
-//   );
-//   // Sorting
-//   const sortOption = {};
-//   if (sortBy === "rating") sortOption.avgRating = sortOrder === "asc" ? 1 : -1;
-//   else if (sortBy === "offer")
-//     sortOption.discount = sortOrder === "asc" ? 1 : -1;
-//   else if (sortBy === "price")
-//     sortOption.minOrderAmount = sortOrder === "asc" ? 1 : -1;
-//   else if (sortBy === "distance")
-//     sortOption.distance = sortOrder === "asc" ? 1 : -1;
-//   else sortOption[sortBy] = sortOrder === "asc" ? 1 : -1;
-//   pipeline.push(
-//     { $sort: sortOption },
-//     {
-//       $facet: {
-//         vouchers: [{ $skip: skip }, { $limit: parseInt(limit) }],
-//         totalCount: [{ $count: "count" }],
-//       },
-//     },
-//     {
-//       $addFields: {
-//         total: { $ifNull: [{ $arrayElemAt: ["$totalCount.count", 0] }, 0] },
-//       },
-//     }
-//   );
-//   // IMPORTANT: run on Location if geoNear, otherwise Voucher
-//   const result =
-//     userLat && userLng
-//       ? await Location.aggregate(pipeline)
-//       : await Voucher.aggregate(pipeline);
-//   if (result[0]?.total === 0) throwError(404, "Sorry! vouchers not found");
-//   return {
-//     total: result[0]?.total || 0,
-//     page: parseInt(page),
-//     limit: parseInt(limit),
-//     vouchers: result[0]?.vouchers || [],
-//   };
-// };
-
 const mongoose = require("mongoose");
+const User = require("../../model/User");
 const Voucher = require("../../model/Voucher");
 const Location = require("../../model/Location");
 const { throwError } = require("../../utils");
 
 exports.getVouchers = async (userId, query) => {
-  const {
+  const user = await User.findById(userId);
+  if (!user) throwError(404, "User not found");
+  let {
     brandId,
     subBrandId,
     categoryId,
@@ -414,6 +67,22 @@ exports.getVouchers = async (userId, query) => {
   if (voucherType === "Very High") filter.minOrderAmount.$gte = 50000;
   const skip = (parseInt(page) - 1) * parseInt(limit);
   const pipeline = [];
+  if (user?.location) {
+    const userLocation = await Location.findById(user.location).select(
+      "location.coordinates"
+    );
+    const coords = userLocation?.location?.coordinates;
+    if (
+      Array.isArray(coords) &&
+      coords.length === 2 &&
+      Number.isFinite(coords[0]) &&
+      Number.isFinite(coords[1]) &&
+      !(coords[0] === 0 && coords[1] === 0)
+    ) {
+      userLng = coords[0]; // longitude
+      userLat = coords[1]; // latitude
+    }
+  }
   if (userLat && userLng) {
     pipeline.push({
       $geoNear: {
@@ -719,6 +388,13 @@ exports.getVouchers = async (userId, query) => {
   else if (sortBy === "distance")
     sortOption.distance = sortOrder === "asc" ? 1 : -1;
   else sortOption[sortBy] = sortOrder === "asc" ? 1 : -1;
+
+  pipeline.push({
+    $addFields: {
+      distance: { $ifNull: ["$distance", null] }, // or 0 if you prefer
+    },
+  });
+
   pipeline.push(
     { $sort: sortOption },
     {

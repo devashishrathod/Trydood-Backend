@@ -97,6 +97,20 @@ module.exports = {
     SUBMITTED: "SUBMITTED",
     APPROVED: "APPROVED",
     REJECTED: "REJECTED",
+    COMPLETED: "COMPLETED",
+  }),
+
+  DAILY_PAYMENT_TYPES: Object.freeze({
+    VENDOR: "VENDOR",
+    REFUND_CUSTOMER: "REFUND_CUSTOMER",
+  }),
+
+  DAILY_PAYMENT_METHODS: Object.freeze({
+    CASH: "CASH",
+    BANK_TRANSFER: "BANK_TRANSFER",
+    UPI: "UPI",
+    WALLET: "WALLET",
+    CASH_DEPOSIT: "CASH_DEPOSIT",
   }),
 
   ZIP_CODE_REGEX_MAP: Object.freeze({

@@ -35,6 +35,7 @@ module.exports = Object.freeze({
   employeeField: refField("Employee"),
   employeeReferralField: refField("EmployeeReferral"),
   pushNotificationField: refField("PushNotification"),
+  refundField: refField("Refund"),
 
   vouchersField: Object.freeze({
     type: [ObjectId],
@@ -42,7 +43,7 @@ module.exports = Object.freeze({
     validate: {
       validator: (arr) => Array.isArray(arr) && arr.every(isValidId),
       message: (props) =>
-        `One or more SubBrand IDs in ${props.value} are invalid`,
+        `One or more Voucher IDs in ${props.value} are invalid`,
     },
   }),
 
@@ -70,16 +71,8 @@ module.exports = Object.freeze({
     ref: "Image",
     validate: {
       validator: (arr) => Array.isArray(arr) && arr.every(isValidId),
-      message: (props) => `One or more Users IDs in ${props.value} are invalid`,
-    },
-  }),
-
-  vouchersField: Object.freeze({
-    type: [ObjectId],
-    ref: "Voucher",
-    validate: {
-      validator: (arr) => Array.isArray(arr) && arr.every(isValidId),
-      message: (props) => `One or more Users IDs in ${props.value} are invalid`,
+      message: (props) =>
+        `One or more Images IDs in ${props.value} are invalid`,
     },
   }),
 

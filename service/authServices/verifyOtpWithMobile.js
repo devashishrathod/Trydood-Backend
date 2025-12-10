@@ -2,6 +2,7 @@ const User = require("../../model/User");
 const { ROLES } = require("../../constants");
 const { generateToken } = require("../../middleware");
 const { verifyOtp } = require("../otpServices");
+const { throwError } = require("../../utils");
 
 exports.verifyOtpWithMobile = async ({
   otp,
@@ -12,13 +13,9 @@ exports.verifyOtpWithMobile = async ({
 }) => {
   whatsappNumber = whatsappNumber?.toLowerCase();
   const user = await User.findOne({ whatsappNumber, role, isDeleted: false });
-  if (!user) {
-    throw { statusCode: 400, message: "User not found!" };
-  }
+  if (!user) throwError(404, "User not found!");
   const result = await verifyOtp(whatsappNumber, otp);
-  if (!result?.ok) {
-    throw { statusCode: 400, message: result?.reason };
-  }
+  if (!result?.ok) throwError(400, result?.reason);
   user.isMobileVerified = true;
   if (fcmToken) user.fcmToken = fcmToken;
   if (currentScreen) user.currentScreen = currentScreen.toUpperCase();
