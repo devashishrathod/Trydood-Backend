@@ -4,12 +4,9 @@ const router = express.Router();
 const profileRouter = express.Router();
 
 const {
-  loginEmail,
-  registorUser,
+  loginWithEmailAndPassword,
   loginMobile,
   userProfile,
-  verifyVendorMobileNumber,
-  verifyOTPVendorMobile,
 } = require("../controller/user");
 
 const { userProfileComplete } = require("../controller/users/updateUser");
@@ -22,11 +19,8 @@ const {
   getAllUsers,
 } = require("../controller/users");
 
-router.post("/register", registorUser);
-router.post("/loginEmail", loginEmail);
+router.post("/loginEmail", loginWithEmailAndPassword);
 router.post("/loginMobile", loginMobile);
-router.post("/vendorMobileVerify", verifyVendorMobileNumber);
-router.post("/vendorOTPVerify", verifyOTPVendorMobile);
 
 // router.put("/logout", verifyToken, logout);
 router.put("/changeMobile", verifyToken, changeLoginMobileNumber);

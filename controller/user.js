@@ -1,12 +1,9 @@
-const { generateToken } = require("../middleware/authValidation");
-const User = require("../model/User");
-const { uploadToCloudinary } = require("../service/uploadImage");
 const bcrypt = require("bcryptjs");
-const { generateReferralCode } = require("../utils");
+const User = require("../model/User");
 const Location = require("../model/Location");
 const { calculateProfileCompletion } = require("../utils/utils");
-const { generateUniqueUserId } = require("../service/userServices");
-let salt = 10;
+const { generateToken } = require("../middleware/authValidation");
+const { ROLES } = require("../constants");
 
 exports.userProfile = async (req, res) => {
   const id = req.payload?._id;
@@ -36,72 +33,13 @@ exports.userProfile = async (req, res) => {
   }
 };
 
-exports.registorUser = async (req, res) => {
-  const name = req.body?.name;
-  const email = req.body?.email;
-  const mobile = req.body?.mobile;
-  const password = req.body?.password;
-  const role = req.body?.role;
-  const address = req.body?.address;
-  const image = req.files?.image;
+exports.loginWithEmailAndPassword = async (req, res) => {
+  let { email, password, role } = req.body;
+  role = role?.toLowerCase() || ROLES.ADMIN;
   try {
-    const checkUser = await User.findOne({ $or: [{ email }, { mobile }] });
-    if (checkUser) {
-      return res
-        .status(400)
-        .json({ success: false, msg: "Email or Mobile Number already exists" });
-    }
-    const hashedPass = await bcrypt.hash(password, parseInt(salt));
-    if (!hashedPass) {
-      return res
-        .status(400)
-        .json({ success: false, msg: "Failed to register!" });
-    }
-    const uniqueId = await generateUniqueUserId();
-    const user = new User({
-      name,
-      email,
-      mobile,
-      password: hashedPass,
-      role,
-      address,
-      uniqueId,
-      referCode: generateReferralCode(6),
-    });
-    if (image) {
-      let imageUrl = await uploadToCloudinary(image.tempFilePath);
-      user.image = imageUrl;
-    }
-    const result = await user.save();
-    if (result) {
-      const token = await generateToken(result);
-      return res.status(200).json({
-        success: true,
-        msg: `User registered successfully`,
-        result,
-        token,
-      });
-    }
-    return res.status(400).json({
-      error: "Failed to register user",
-      success: false,
-      msg: "Failed to register user",
-    });
-  } catch (error) {
-    console.log("error on registorUser: ", error);
-    return res
-      .status(500)
-      .json({ error: error, success: false, msg: error.message });
-  }
-};
-
-exports.loginEmail = async (req, res) => {
-  const email = req.body?.email;
-  const password = req.body?.password;
-  try {
-    const checkUser = await User.findOne({ email: email });
+    const checkUser = await User.findOne({ email, role });
     if (!checkUser) {
-      return res.status(401).json({
+      return res.status(404).json({
         error: "Invalid credentials",
         success: false,
         msg: "User not found",
@@ -126,10 +64,10 @@ exports.loginEmail = async (req, res) => {
 };
 
 exports.loginMobile = async (req, res) => {
-  const mobile = req.body?.mobile;
-  const password = req.body?.password;
+  let { mobile, password, role } = req.body;
+  role = role?.toLowerCase() || ROLES.ADMIN;
   try {
-    const checkUser = await User.findOne({ mobile: mobile });
+    const checkUser = await User.findOne({ mobile, role });
     if (!checkUser) {
       return res.status(401).json({
         error: "Invalid credentials",
@@ -236,65 +174,6 @@ exports.userProfileComplete = async (req, res) => {
     });
   } catch (error) {
     console.log("error on userProfileComplete: ", error);
-    return res
-      .status(500)
-      .json({ error: error, success: false, msg: error.message });
-  }
-};
-
-exports.verifyVendorMobileNumber = async (req, res) => {
-  const mobile = req.body?.mobile;
-
-  try {
-    const checkVendor = await User.findOne({ mobile });
-    if (checkVendor) {
-      return res
-        .status(400)
-        .json({ msg: "Mobile number already exists!", success: false });
-    }
-    const result = await User.create({
-      mobile,
-      role: "vendor",
-    });
-    if (result) {
-      return res
-        .status(200)
-        .json({ msg: "OTP sent to your whatsapp.", success: true });
-    }
-    return res
-      .status(400)
-      .json({ msg: "Failed to verify mobile number!", success: false });
-  } catch (error) {
-    console.log("error on verifyVendorMobileNumber: ", error);
-    return res
-      .status(500)
-      .json({ error: error, success: false, msg: error.message });
-  }
-};
-
-exports.verifyOTPVendorMobile = async (req, res) => {
-  const mobile = req.body?.mobile;
-  const otp = req.body?.otp;
-  try {
-    const checkUser = await User.findOne({ mobile });
-    if (!checkUser) {
-      return res.status({
-        msg: "No register mobile number found!",
-        success: false,
-      });
-    }
-    if (otp == "123456") {
-      checkUser.isMobileVerify = true;
-      await checkUser.save();
-      return res
-        .status(200)
-        .json({ msg: "Your OTP verify successfully.", success: true });
-    }
-    return res
-      .status(400)
-      .json({ msg: "Faild to verify OTP.", success: false });
-  } catch (error) {
-    console.log("error on verifyOTPVendorMobile: ", error);
     return res
       .status(500)
       .json({ error: error, success: false, msg: error.message });
